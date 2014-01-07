@@ -1,7 +1,7 @@
 import serial
 import time
 
-ser = serial.Serial('/dev/tty.usbmodem1411', 115200)
+ser = serial.Serial('COM4', 115200)
 
 def read():
     # print ser.read()
