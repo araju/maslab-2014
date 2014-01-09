@@ -2,6 +2,7 @@
 
 import cv2
 import numpy as np
+import time
 
 for i in range(10):
     cap = cv2.VideoCapture(1)
@@ -40,6 +41,8 @@ def drawBoxes(binary_img,img,color,layer): # i don't actually know what the last
 
 while(1):
 
+    start = time.clock()
+    
     # Take each frame
     _, frame = cap.read()
 
@@ -56,15 +59,21 @@ while(1):
     cleanedBlue = cv2.morphologyEx(maskBlue, cv2.MORPH_OPEN, clean_kernel)
     cleanedGreen = cv2.morphologyEx(maskGreen, cv2.MORPH_OPEN, clean_kernel)
 
+    # draw bounding boxes around different colors
+    boxes = np.zeros(frame.shape,np.uint8)
+    drawBoxes(cleanedRed,boxes,(0,0,255),1)
+    drawBoxes(cleanedGreen,boxes,(0,255,0),2)
+    drawBoxes(cleanedBlue,boxes,(255,0,0),3)
+
+    elapsed = (time.clock() - start)
+
+    print elapsed
+    
     cv2.imshow('frame',frame) # normal image
 ##    cv2.imshow('mask green',maskGreen) # binary image
     cv2.imshow('cleaned green',cleanedGreen)
     cv2.imshow('cleaned red',cleanedRed)
     cv2.imshow('cleaned blue',cleanedBlue)
-    boxes = np.zeros(frame.shape,np.uint8)
-    drawBoxes(cleanedRed,boxes,(0,0,255),1)
-    drawBoxes(cleanedGreen,boxes,(0,255,0),2)
-    drawBoxes(cleanedBlue,boxes,(255,0,0),3)
     cv2.imshow('boxes',boxes)
     #cv2.imshow('res',res) # this is the colorized version of mask
 
