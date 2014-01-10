@@ -98,8 +98,6 @@ class Maple:
             print hex(i), 
         print ''
         self.port.write(outBytes)
-def periodic_hook():
-    pass
 
 
     
