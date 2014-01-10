@@ -13,7 +13,7 @@ uint8 _serial_charBuf_head = 0;
 uint8 _serial_charBuf_len = 0;
 
 //Small queue implementation
-int8 queuePush(uint8 item){
+int8 queuePush(uint8 item) {
   if (_serial_charBuf_len <  SERIAL_CHARBUF_SIZE) {
     //Since we have space, let's find where to put the new item
     uint8 insertPos = _serial_charBuf_head + _serial_charBuf_len;
@@ -26,8 +26,8 @@ int8 queuePush(uint8 item){
   return -1;
 }
 
-int8 queuePeek(uint8 *item){
-  if (item == NULL){
+int8 queuePeek(uint8 *item) {
+  if (item == NULL) {
    return -2; 
   }
   
@@ -55,14 +55,14 @@ int8 queuePop(uint8 *item) {
   return -1;
 }
 
-int8 queueFlush(){
+int8 queueFlush() {
   _serial_charBuf_len = 0;
   _serial_charBuf_head = 0;
   return 0;
 }
 
-int8 queueSeek(uint8 idx, uint8 *item){
- if (idx < queueSize() && item != NULL){
+int8 queueSeek(uint8 idx, uint8 *item) {
+ if (idx < queueSize() && item != NULL) {
    //We'll translate from index from the head to index from 0
    idx = (_serial_charBuf_head + idx) % SERIAL_CHARBUF_SIZE;
    *item = _serial_charBuf[idx];
@@ -89,7 +89,7 @@ void queuePrint() {
   SerialUSB.print("\r\n");
 }
 
-int8 queueTest(){
+int8 queueTest() {
   queueFlush();
   //Let's fill the queue a few items into the queue
   for (uint8 i = 0; i < SERIAL_CHARBUF_SIZE; i++) {
@@ -114,50 +114,49 @@ int8 queueTest(){
   SerialUSB.println(item,HEX);
   
   //Next we'll test the wrapping around when popping
-  for (int i = 0; i < SERIAL_CHARBUF_SIZE - 1; i++){
+  for (int i = 0; i < SERIAL_CHARBUF_SIZE - 1; i++) {
    uint8 i;
    queuePop(&i);
   }
   queuePrint();
-  
 
-  
-  
   return 0;
 }
 
-int8 validMessageTest(){
-  //Let start by setting the following:
-  //Buffer = 0x11 0x22 0x33 0xAA with a checksum of 0xEF
-  //Length = 5, head = 0
-  //This should be correct
-  _serial_charBuf[0] = 0x11;
-  _serial_charBuf[1] = 0x22;
-  _serial_charBuf[2] = 0x33;
-  _serial_charBuf[3] = 0xAA;
-  _serial_charBuf[4] = 0xEF;
-  _serial_charBuf_len = 5;
-  _serial_charBuf_head = 0;
-  SerialUSB.print("ValidMessageTest1 ");
-  SerialUSB.println(_serial_validateMessage() == 0);
-  //Now let's try something that should fail
-  //Buffer = 0x11 0x22 0x33 0xAA with a checksum of 0xAA
-  //Length = 5, head = 0
-  _serial_charBuf[4] = 0xAA;
-  SerialUSB.print("ValidMessageTest2 ");
-  SerialUSB.println(_serial_validateMessage() == -1);  
-  
-}
+//int8 validMessageTest() {
+//  //Let start by setting the following:
+//  //Buffer = 0x11 0x22 0x33 0xAA with a checksum of 0xEF
+//  //Length = 5, head = 0
+//  //This should be correct
+//  _serial_charBuf[0] = 0x11;
+//  _serial_charBuf[1] = 0x22;
+//  _serial_charBuf[2] = 0x33;
+//  _serial_charBuf[3] = 0xAA;
+//  _serial_charBuf[4] = 0xEF;
+//  _serial_charBuf_len = 5;
+//  _serial_charBuf_head = 0;
+//  SerialUSB.print("ValidMessageTest1 ");
+//  SerialUSB.println(_serial_validateMessage() == 0);
+//  //Now let's try something that should fail
+//  //Buffer = 0x11 0x22 0x33 0xAA with a checksum of 0xAA
+//  //Length = 5, head = 0
+//  _serial_charBuf[4] = 0xAA;
+//  SerialUSB.print("ValidMessageTest2 ");
+//  SerialUSB.println(_serial_validateMessage() == -1);  
+//  
+//}
+
+
 
 int8 _serial_validateMessage() {
   uint8 sum = 0;
-  for (int i = 0; i < queueSize(); i++){
+  for (int i = 0; i < queueSize(); i++) {
     uint8 item = 0;
-    if (queueSeek(i, &item) == 0){
+    if (queueSeek(i, &item) == 0) {
       sum += item;
     }
   }
-  if (sum == 0xFF){
+  if (sum == 0xFF) {
     return 0;
   }
   return -1;
@@ -167,30 +166,64 @@ uint8 _serial_escaped = 0;
 uint8 _serial_inCmd = 0;
 
 void serial_periodic() {
+
   while (SerialUSB.available() > 0) {
     uint8 ch = SerialUSB.read();
-    if (_serial_escaped){
+    
+//    SerialUSB.print(ch);
+    if (_serial_escaped) {
       _serial_escaped = 0;
       queuePush(ch);
     }else{
-      if (ch == SERIAL_ESCAPE && _serial_inCmd){
+      if (ch == SERIAL_ESCAPE && _serial_inCmd) {
         _serial_escaped = 1;
       }else if (ch == SERIAL_START_FLAG) {
         queueFlush();
         _serial_inCmd = 1;
-      }else if (ch == SERIAL_END_FLAG && _serial_inCmd){
+      }else if (ch == SERIAL_END_FLAG && _serial_inCmd) {
         //Process what is in the queue
+//        toggleLED();
         _serial_inCmd = 0;
         uint8 i = 0;
-        if (_serial_validateMessage() && queuePeek(&i) == 0){
+        if (_serial_validateMessage() == 0 && queuePeek(&i) == 0) {
+          toggleLED();
           pCmdCallback foo = cmd_getCallback(i);
           foo(&(_serial_charBuf[1]));
         }
         
-        queuePrint();
-      }else if(_serial_inCmd){
+//        queuePrint(); 
+      }else if(_serial_inCmd) {
         queuePush(ch);
       }
     }
   }
+}
+
+
+
+//int8 serialTxTest() {
+//  uint8 test[] = "ABC!!123Z";
+//  serial_tx(test,7); 
+//  SerialUSB.println("");
+//}
+
+//This function will take in a buffer and length
+//It will spit out a byte stuffed string with the start and end flags
+int8 serial_tx(uint8 *buf, uint8 len) {
+  uint8 checksum = 0;
+  SerialUSB.write(SERIAL_START_FLAG);
+  for (uint8 i = 0; i < len; i++) {
+    if (buf[i] == SERIAL_START_FLAG || buf[i] == SERIAL_END_FLAG  || 
+        buf[i] == SERIAL_ESCAPE) {
+      SerialUSB.write(SERIAL_ESCAPE);
+    }
+    checksum += buf[i];
+    SerialUSB.write(buf[i]);
+  } 
+  
+  SerialUSB.write(~checksum);
+  
+  SerialUSB.write(SERIAL_END_FLAG);
+  
+  return 0;
 }

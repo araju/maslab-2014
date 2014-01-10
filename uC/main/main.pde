@@ -9,7 +9,7 @@
 #define FRAME_SIZE 4
 
 //We will run at a base loop rate of 1000/20 = 50 Hz
-#define LOOP_TIME 1000
+#define LOOP_TIME 100
 
 typedef enum {
   NOT_YET_RUN,
@@ -38,16 +38,24 @@ void setup() {
   //  digitalWrite(MOT_B_GND, LOW);
   //  setMotors(0, 0);
 
-  cmd_registerCallback((uint8)'A', &cbA);
-  cmd_registerCallback((uint8)'B', &cbB);
+  cmd_registerCallback(0x00, &cbA);
+  uint8 buf[] = {0x00, 0x02, 0x00, 0x00};
+  pinMode(BOARD_LED_PIN, OUTPUT);
+  pinMode(BOARD_BUTTON_PIN, INPUT);
+  delay(3000);
+  
+  serial_tx(buf, 4);
 }
 
 void cbA(uint8 *t){
-  SerialUSB.println("Callback A");
-}
+  //    uint8 len;
+  
+  uint8 length = t[0];
+  uint32 arg = t[1] | t[2] << 8;
+  arg++;
+  uint8 buf[] = {0x00, 0x02, arg & 0xFF, (arg >> 8) & 0xFF};
+  serial_tx(buf, 4);
 
-void cbB(uint8 *t){
-  SerialUSB.println("Callback B");
 }
 
 execute_t execute = NOT_YET_RUN;
@@ -64,10 +72,12 @@ void loop() {
   }
 
   if (execute == RUN){
+    if (isButtonPressed()){
+      uint8 buf[] = {0x02, 0x03, 0x00};
+      cbA(buf);
+    }
     //Here is where we list our tasks
     //Read Serial Stream and execute commands
-    validMessageTest();
-    queueTest();
     serial_periodic();
     //Set Left Motor
 
@@ -115,5 +125,6 @@ uint16 calcPwm(int8 inputVel) {
 boolean calcDir(int8 inputVel) {
   return (inputVel > 0);
 }
+
 
 
