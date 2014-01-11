@@ -17,6 +17,10 @@ void gyro_init() {
   digitalWrite(GYRO_CSPIN, HIGH); 
 }
 
+int32 gyro_getAngle(){
+  return _gyro_milliDegrees;
+}
+
 void gyro_periodic(){
   int32 reading = 0;
   //Send the Sensor data command
@@ -61,9 +65,7 @@ void gyro_periodic(){
   _gyro_milliDegrees +=  dAngle;
   
   if (isButtonPressed()){
-    SerialUSB.println("");
-    SerialUSB.println(reading);
-    SerialUSB.println(dAngle);
+    SerialUSB.print("Gyro: ");
     SerialUSB.println(_gyro_milliDegrees);
   }
 }

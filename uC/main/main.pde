@@ -1,12 +1,4 @@
 #include "cmd.h"
-#define MOT_A_DIR 2
-#define MOT_A_PWM 1
-#define MOT_A_GND 0
-#define MOT_B_DIR 7
-#define MOT_B_PWM 6
-#define MOT_B_GND 5
-
-#define FRAME_SIZE 4
 
 //We will run at a base loop rate of 1000/20 = 50 Hz
 #define LOOP_TIME 20
@@ -18,37 +10,23 @@ typedef enum {
 } 
 execute_t;
 
-void setMotors(int8 velA, int8 velB);
-uint16 calcPwm(int8 inputVel);
-boolean calcDir(int8 inputVel);
-
-unsigned int charCount = 0;
-char buf[FRAME_SIZE];
-
 void setup() {
-  //  pinMode(BOARD_LED_PIN, OUTPUT);
-  //  pinMode(MOT_A_DIR, OUTPUT);
-  //  pinMode(MOT_A_PWM, PWM);
-  //  pinMode(MOT_A_GND, OUTPUT);
-  //  pinMode(MOT_B_DIR, OUTPUT);
-  //  pinMode(MOT_B_PWM, PWM);
-  //  pinMode(MOT_B_GND, OUTPUT);
-  //
-  //  digitalWrite(MOT_A_GND, LOW);
-  //  digitalWrite(MOT_B_GND, LOW);
-  //  setMotors(0, 0);
-
-  gyro_init();
-//  pinMode(BOARD_LED_PIN, OUTPUT);
-  pinMode(BOARD_BUTTON_PIN, INPUT);
   
+  
+  gyro_init();
+  motor_init();
+  //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
+  pinMode(BOARD_BUTTON_PIN, INPUT);
+  pinMode(15, OUTPUT);
 }
+
+
 
 execute_t execute = NOT_YET_RUN;
 uint32 clear = 0;
 
 void loop() {
-  
+
   //This is used to make sure that we only run the body of our program once per time period
   uint32 currTime = millis() % LOOP_TIME;
   if (currTime == 0 && execute == NOT_YET_RUN) {
@@ -59,17 +37,21 @@ void loop() {
   }
 
   if (execute == RUN){
-    toggleLED();
-//    if (isButtonPressed()){
-//      SerialUSB.println(_gyro_milliDegrees);
-//    }
+    
+    if(millis() % 100){
+       driveSquare(); 
+    }
+    
+    //    if (isButtonPressed()){
+    //      SerialUSB.println(_gyro_milliDegrees);
+    //    }
     //Here is where we list our tasks
     //Read Serial Stream and execute commands
     serial_periodic();
     //Read Gyro
     gyro_periodic();
     //Set Left Motor
-
+    motor_periodic();
     //Set Right Motor
 
     //Send Left Motor Current
@@ -90,30 +72,17 @@ void loop() {
 
     //Set Ball Feeder
 
-    //Send Ball Feeder Current
 
+    //Update Heading and Postion Estimates
 
+    //Speed and Heading Loop
     execute = ALREADY_RAN;
   }
 
 }
 
-void setMotors(int8 velA, int8 velB) {
-  digitalWrite(MOT_A_DIR, calcDir(velA));
-  pwmWrite(MOT_A_PWM, calcPwm(velA));
-  digitalWrite(MOT_B_DIR, calcDir(velB));
-  pwmWrite(MOT_B_PWM, calcPwm(velB));
-}
 
-uint16 calcPwm(int8 inputVel) {
-  uint16 inputVelMag = inputVel > 0 ? inputVel : -inputVel;
-  uint16 pwm = (inputVelMag == 128) ? 65535 : inputVelMag << 9;
-  return pwm;
-}
 
-boolean calcDir(int8 inputVel) {
-  return (inputVel > 0);
-}
 
 
 
