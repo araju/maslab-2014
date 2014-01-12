@@ -97,7 +97,7 @@ int8 turnRight() {
   setMotors(turnSpeed, -turnSpeed);
   SerialUSB.println("Gyro Angle:");
   SerialUSB.println(angle);
-  if (angle > 80000){
+  if (angle > 84000){
    return 0; 
   }
   return 1;

@@ -1,3 +1,6 @@
+
+
+
 #include "cmd.h"
 
 //We will run at a base loop rate of 1000/20 = 50 Hz
@@ -11,10 +14,9 @@ typedef enum {
 execute_t;
 
 void setup() {
-  
-  
   gyro_init();
   motor_init();
+  color_init();
   //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
   pinMode(BOARD_BUTTON_PIN, INPUT);
   pinMode(15, OUTPUT);
@@ -39,7 +41,7 @@ void loop() {
   if (execute == RUN){
     
     if(millis() % 100){
-       driveSquare(); 
+//       driveSquare(); 
     }
     
     //    if (isButtonPressed()){
@@ -49,9 +51,9 @@ void loop() {
     //Read Serial Stream and execute commands
     serial_periodic();
     //Read Gyro
-    gyro_periodic();
+//    gyro_periodic();
     //Set Left Motor
-    motor_periodic();
+//    motor_periodic();
     //Set Right Motor
 
     //Send Left Motor Current
@@ -65,7 +67,7 @@ void loop() {
     //Control
 
     //Read Color Sensor
-
+    color_periodic();
     //Set Green Gate
 
     //Set Red Gate
