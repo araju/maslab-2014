@@ -7,10 +7,16 @@ from PIL import Image, ImageDraw
 
 SCALE_FACTOR = 100
 
-def main(fName):
+def importJsonFile(fName):
     mapPoints = ''
     with open(fName) as fileIn:
-        mapPoints = json.load(fileIn)['map']
+        mapPoints = json.load(fileIn)
+
+    return mapPoints
+
+
+def main(fName):
+    mapPoints = importJsonFile(fName)['map']
 
     maxX = 0
     maxY = 0
@@ -21,17 +27,16 @@ def main(fName):
                         mapPoints[i][1] * SCALE_FACTOR + 1)
         
         if mapPoints[i][0] > maxX:
-            maxX = mapPoints[i][0]
+            maxX = int(mapPoints[i][0])
 
         if mapPoints[i][1] > maxY:
-            maxY = mapPoints[i][1]
+            maxY = int(mapPoints[i][1])
 
     im = Image.new('RGB', (maxX, maxY), "white")
     imDraw = ImageDraw.Draw(im)
 
     for i in range(len(mapPoints)-1):
         imDraw.line([mapPoints[i], mapPoints[i+1]], fill = 'black')
-
 
     im.show()
 
