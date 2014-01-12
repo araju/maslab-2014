@@ -9,14 +9,27 @@
 import cv2
 import process_frame as pf
 
+def connectToCamera():
+    for i in range(10):
+        cap = cv2.VideoCapture(1)
+        if cap.isOpened():
+            print "opened"
+            break
+        else:
+            print "camera didn't open"
+            cap = None
+    return cap
+
 def main():
-	cap = connectToCamera()
-	while (1):
-		_, frame = cap.read()
-		blobs = pf.findBlobs(frame) # blobs is a map of colors to lists of tuples (center, area)
-		#balls,reactors = processBlobs(blobs)
-		#publish(balls,reactors)
-	
+    cap = connectToCamera()
+    while (1):
+        _, frame = cap.read()
+        blobs = pf.processFrame(frame) # blobs is a map of colors to lists of tuples (center, area)
+        #balls,reactors = processBlobs(blobs)
+        #publish(balls,reactors)
+    cv2.destroyAllWindows()
+        
+    
 
 if __name__ == '__main__':
-	main()
+    main()

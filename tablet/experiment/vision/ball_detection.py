@@ -67,7 +67,7 @@ while(1):
 
     elapsed = (time.clock() - start)
 
-    print elapsed
+    #print elapsed
     
     cv2.imshow('frame',frame) # normal image
 ##    cv2.imshow('mask green',maskGreen) # binary image

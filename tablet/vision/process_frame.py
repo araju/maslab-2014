@@ -23,7 +23,8 @@ contourAreaThresh = 50
 #
 # TODO: detect QR codes
 def processFrame(frame):
-	# Threshold the HSV image to get colors
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    # Threshold the HSV image to get colors
     maskRed = cv2.inRange(hsv, lower_red, upper_red)
     maskBlue = cv2.inRange(hsv, lower_blue, upper_blue)
     maskGreen = cv2.inRange(hsv, lower_green, upper_green)
@@ -41,13 +42,14 @@ def processFrame(frame):
     return blobs
 
 # returns list of blobs with (center, area)
- def findBlobs(binary_img):
- 	contours,heirarchy = cv2.findContours(binary_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+def findBlobs(binary_img):
+    contours,heirarchy = cv2.findContours(binary_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     ret = []
     for cnt in contours:
-        if cv2.contourArea(c) > contourAreaThresh:
-        	rx,ry,rw,rh = cv2.boundingRect(cnt)
-        	ret.append((rx + (rw / 2), ry + (rh / 2)), cv2.contourArea(cnt))
+        if cv2.contourArea(cnt) > contourAreaThresh:
+            rx,ry,rw,rh = cv2.boundingRect(cnt)
+            ret.append(((rx + (rw / 2), ry + (rh / 2)), cv2.contourArea(cnt)))
+    return ret
 
 
 
