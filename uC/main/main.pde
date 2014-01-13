@@ -1,10 +1,9 @@
 
-
-
 #include "cmd.h"
 
+
 //We will run at a base loop rate of 1000/20 = 50 Hz
-#define LOOP_TIME 20
+
 
 typedef enum {
   NOT_YET_RUN,
@@ -16,10 +15,14 @@ execute_t;
 void setup() {
   gyro_init();
   motor_init();
-  color_init();
+//  color_init();
   //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
   pinMode(BOARD_BUTTON_PIN, INPUT);
-  pinMode(15, OUTPUT);
+
+  delay(3000);
+  control_setX(100);
+  control_setY(0);
+  
 }
 
 
@@ -40,20 +43,26 @@ void loop() {
 
   if (execute == RUN){
     
-    if(millis() % 100){
-//       driveSquare(); 
+    if(millis() % 200 == 0){
+      SerialUSB.print("X: ");
+      SerialUSB.print(state_getX());
+      SerialUSB.print(" Y: ");
+      SerialUSB.print(state_getY());
+      SerialUSB.print(" Theta: ");
+      SerialUSB.print(state_getTheta());
+      SerialUSB.print(" Left: ");
+      SerialUSB.print(motor_getLeftThetaDot());
+      SerialUSB.print(" Right: ");
+      SerialUSB.println(motor_getRightThetaDot());      
     }
     
-    //    if (isButtonPressed()){
-    //      SerialUSB.println(_gyro_milliDegrees);
-    //    }
     //Here is where we list our tasks
     //Read Serial Stream and execute commands
     serial_periodic();
     //Read Gyro
-//    gyro_periodic();
+    gyro_periodic();
     //Set Left Motor
-//    motor_periodic();
+    motor_periodic();
     //Set Right Motor
 
     //Send Left Motor Current
@@ -67,17 +76,18 @@ void loop() {
     //Control
 
     //Read Color Sensor
-    color_periodic();
+//    color_periodic();
     //Set Green Gate
 
     //Set Red Gate
 
     //Set Ball Feeder
 
-
     //Update Heading and Postion Estimates
-
+    stateEstimation_periodic();
+    
     //Speed and Heading Loop
+//    control_periodic();
     execute = ALREADY_RAN;
   }
 

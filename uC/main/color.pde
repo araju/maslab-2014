@@ -79,9 +79,7 @@ void color_periodic() {
     colorI2C.endTransmission();
     
     uint8 bytesRx = colorI2C.requestFrom(COLOR_ADDR, 9);
-//    SerialUSB.print("Color: ");
-//    SerialUSB.print(bytesRx);
-//    SerialUSB.print(" ");
+
     uint16 bytes[4];
     if (colorI2C.receive() & COLOR_STATUS_VALID){
       
@@ -91,42 +89,18 @@ void color_periodic() {
       bytes[2] = colorI2C.receive() | colorI2C.receive() << 8;
       bytes[3] = colorI2C.receive() | colorI2C.receive() << 8;
       
-//      SerialUSB.print(bytes[0], HEX);
-//      SerialUSB.print(" ");
-//      SerialUSB.print(bytes[1], HEX);
-//      SerialUSB.print(" ");
-//      SerialUSB.print(bytes[2], HEX);     
-//      SerialUSB.print(" ");      
-//      SerialUSB.print(bytes[3], HEX);      
-//      SerialUSB.println(" ");  
-      
       _color_clear = bytes[0];
       _color_red = bytes[1];
       _color_green = bytes[2];
       _color_blue = bytes[3];
-//      
-//      SerialUSB.print("R: ");
-//      SerialUSB.print(_color_red);
-//      SerialUSB.print(" G: ");
-//      SerialUSB.println(_color_green);
-//      SerialUSB.print(" R/G: ");
-//      SerialUSB.println(_color_red/_color_green);
       
       if (_color_red > COLOR_RED_THRESHOLD && _color_red > _color_green){
-        SerialUSB.println("Red Ball");
-        SerialUSB.print("R: ");
-        SerialUSB.print(_color_red);
-        SerialUSB.print("G: ");
-        SerialUSB.println(_color_green);
+        //Red Ball Detected
         
       }
-//      
+      
       if (_color_green > COLOR_GREEN_THRESHOLD && _color_green > _color_red){
-        SerialUSB.println("Green Ball");
-        SerialUSB.print("R: ");
-        SerialUSB.print(_color_red);
-        SerialUSB.print("G: ");
-        SerialUSB.println(_color_green);
+        //Green Ball Detected
       }
     } else {
       bytes[0] = colorI2C.receive() | colorI2C.receive() << 8;
@@ -134,5 +108,4 @@ void color_periodic() {
       bytes[2] = colorI2C.receive() | colorI2C.receive() << 8;
       bytes[3] = colorI2C.receive() | colorI2C.receive() << 8;
     }
-  delay(100);
 }

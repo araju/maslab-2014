@@ -10,13 +10,17 @@
 #define MOTOR_R_TICK 35
 #define MOTOR_R_QUAD 36
 
-int32 _motor_leftTicks = 0;
-int32 _motor_leftTicksPerS = 0;
+#define TICKS_PER_REV (64 * 29.0)
+
+volatile int32 _motor_leftTicks = 0;
+int32 _motor_leftLastTicks = 0;
+float _motor_leftThetaDot = 0;
 int32 _motor_leftLastQuadState = 0;
 int8 _motor_leftEncDir = 0;
 
-int32 _motor_rightTicks = 0;
-int32 _motor_rightTicksPerS = 0;
+volatile int32 _motor_rightTicks = 0;
+int32 _motor_rightLastTicks = 0;
+float _motor_rightThetaDot = 0;
 int32 _motor_rightLastQuadState = 0;
 int8 _motor_rightEncDir = 0;
 
@@ -49,7 +53,6 @@ void motor_init() {
 }
 
 void motor_leftIRQ(){
-  digitalWrite(15, HIGH);
   uint8 tickState = digitalRead(MOTOR_L_TICK);
   uint8 quadState = digitalRead(MOTOR_L_QUAD);
   //Let's check to see if a transition happened on the quadrature pin
@@ -67,7 +70,6 @@ void motor_leftIRQ(){
 
   _motor_leftTicks += _motor_leftEncDir;
   _motor_leftLastQuadState = quadState;  
-  digitalWrite(15, LOW);
 }
 
 void motor_rightIRQ(){
@@ -92,12 +94,13 @@ void motor_rightIRQ(){
 
 
 void motor_periodic() {
-  if (isButtonPressed()){
-    SerialUSB.print("Motor Left: ");
-    SerialUSB.println(_motor_leftTicks);
-    SerialUSB.print("Motor Right: ");
-    SerialUSB.println(_motor_rightTicks);
-  }
+  _motor_leftThetaDot = (_motor_leftTicks - _motor_leftLastTicks) * 
+                        ONE_DT / TICKS_PER_REV * 360;
+  _motor_rightThetaDot = (_motor_rightTicks - _motor_rightLastTicks) * 
+                        ONE_DT / TICKS_PER_REV * 360; 
+  
+  _motor_leftLastTicks = _motor_leftTicks;
+  _motor_rightLastTicks = _motor_rightTicks;
 }
 
 void motor_clearTicks(){
@@ -107,24 +110,24 @@ void motor_clearTicks(){
 
 void setMotors(int32 dutyL, int32 dutyR) {
   digitalWrite(MOTOR_L_DIR, calcDir(dutyL));
-  pwmWrite(MOTOR_L_PWM, calcPwm(dutyL));
-  digitalWrite(MOTOR_R_DIR, calcDir(dutyR));
-  pwmWrite(MOTOR_R_PWM, calcPwm(dutyR));
+  pwmWrite(MOTOR_L_PWM, calcDuty(dutyL));
+  digitalWrite(MOTOR_R_DIR, calcDir(dutyL));
+  pwmWrite(MOTOR_R_PWM, calcDuty(dutyR));
 }
 
-uint8 calcDir(int32 duty) {
+float motor_getLeftThetaDot(){
+  return _motor_leftThetaDot;
+}
+
+float motor_getRightThetaDot(){
+  return _motor_rightThetaDot;
+}
+
+uint32 calcDir(int32 duty) {
   return duty < 0 ? 1 : 0;
 }
 
-uint16 calcPwm(int32 duty) {
+uint32 calcDuty(int32 duty) { 
   return duty < 0 ? -duty : duty;
-}
-
-int32 motor_getLeftTicks(){
-  return _motor_leftTicks;
-}
-
-int32 motor_getRightTicks(){
-  return _motor_rightTicks;
 }
 
