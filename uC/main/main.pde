@@ -22,7 +22,7 @@ void setup() {
   delay(3000);
   control_setX(100);
   control_setY(0);
-  
+  control_setTheta(-1);
 }
 
 
@@ -87,7 +87,7 @@ void loop() {
     stateEstimation_periodic();
     
     //Speed and Heading Loop
-//    control_periodic();
+    control_periodic();
     execute = ALREADY_RAN;
   }
 

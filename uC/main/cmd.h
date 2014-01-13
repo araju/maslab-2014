@@ -7,7 +7,8 @@
 #define LOOP_TIME 20
 #define ONE_DT 50
 #define DT 0.02
-
+#define pi 3.14159
+#define sign(x) (x < 0 ? -1:1)
 typedef void (*pCmdCallback)(uint8 *);
  
 #endif
