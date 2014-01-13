@@ -3,13 +3,13 @@
 #define CONTROL_GOTOTARGET_DIST_ERROR_THRESH 3
 #define CONTROL_TURNTOFINALHEADING_ANG_ERROR_THRESH 3
 
-#define CONTROL_STRAIGHT_KFF 0
-#define CONTROL_STRAIGHT_KP 100
-#define CONTROL_STRAIGHT_KI .1
+#define CONTROL_STRAIGHT_KFF 4000
+#define CONTROL_STRAIGHT_KP 200
+#define CONTROL_STRAIGHT_KI 50
 #define CONTROL_STRAIGHT_KD 0
 
-#define CONTROL_TURN_KFF 0
-#define CONTROL_TURN_KP 2500
+#define CONTROL_TURN_KFF 1000
+#define CONTROL_TURN_KP 500
 #define CONTROL_TURN_KI 1
 #define CONTROL_TURN_KD 0
 
@@ -31,6 +31,11 @@ controlState_t _control_state = DONE;
 
 float _control_driveController_turnIntegral = 0;
 float _control_driveController_driveIntegral = 0;
+
+void _control_resetIntegrals() {
+  _control_driveController_turnIntegral = 0;
+  _control_driveController_driveIntegral = 0;
+}
 
 void control_setX(float x) {
   _control_setPointX = x;
@@ -57,6 +62,13 @@ void _control_driveController(float distErr, float angleErr) {
   int32 leftMotorCommand = 0;
   int32 rightMotorCommand = 0;
   
+  if(getDebug()){
+    SerialUSB.print(" DistErr: ");
+    SerialUSB.print(distErr);
+    SerialUSB.print(" AngErr: ");
+    SerialUSB.print(angleErr);
+  }
+  
   //Drive Controller
   //If we're far, let's add a feed forward term
   if (distErr > 10){
@@ -73,6 +85,15 @@ void _control_driveController(float distErr, float angleErr) {
   rightMotorCommand += _control_driveController_driveIntegral * CONTROL_STRAIGHT_KI;
   
   
+  
+  if(getDebug()){
+    SerialUSB.print(" INT: ");
+    SerialUSB.print(_control_driveController_driveIntegral);
+    SerialUSB.print(" MC L: ");
+    SerialUSB.print(leftMotorCommand);
+    SerialUSB.print(" R: ");
+    SerialUSB.print(rightMotorCommand);
+  }
   //Angle Controller
   //If the distance error is really low, then we should add the turning feedforward
   //term.
@@ -81,8 +102,20 @@ void _control_driveController(float distErr, float angleErr) {
     rightMotorCommand += CONTROL_TURN_KFF * sign(angleErr);
   }
   
-  leftMotorCommand += angleErr * CONTROL_TURN_KP;
+  leftMotorCommand += angleErr * -CONTROL_TURN_KP;
   rightMotorCommand += angleErr * CONTROL_TURN_KP;
+  
+  _control_driveController_turnIntegral += angleErr * DT;
+  
+  leftMotorCommand += _control_driveController_turnIntegral * -CONTROL_TURN_KI;
+  rightMotorCommand += _control_driveController_turnIntegral * CONTROL_TURN_KI;
+  
+  if(getDebug()){
+    SerialUSB.print(" MC L: ");
+    SerialUSB.print(leftMotorCommand);
+    SerialUSB.print(" R: ");
+    SerialUSB.println(rightMotorCommand);
+  }
   
   setMotors(leftMotorCommand, rightMotorCommand);
 }
@@ -90,23 +123,21 @@ void _control_driveController(float distErr, float angleErr) {
 void _control_newTarget(float distErr, float angleErr) {
   if (angleErr > CONTROL_NEWTARGET_ANG_ERROR_THRESH || 
       angleErr < -CONTROL_NEWTARGET_ANG_ERROR_THRESH) {
-        
+    _control_resetIntegrals(); 
     _control_state = TURN_TO_TARGET;
   } else {
+    _control_resetIntegrals();
     _control_state = GO_TO_TARGET;
   }
 }
 
 void _control_turnToTarget(float distErr, float angleErr) {
-
+  _control_driveController(0, angleErr);
   
   if (angleErr < CONTROL_TURNTOTARGET_ANG_ERROR_THRESH && 
       angleErr > -CONTROL_TURNTOTARGET_ANG_ERROR_THRESH) {
-      
-      _control_driveController(0, angleErr);
-        
-//    _control_state = GO_TO_TARGET;
-      _control_state = DONE;
+    _control_resetIntegrals();
+    _control_state = GO_TO_TARGET;
   }
 }
 
@@ -114,16 +145,19 @@ void _control_goToTarget(float distErr, float angleErr) {
 
   _control_driveController(distErr, angleErr);
   
-  if (angleErr > CONTROL_TURNTOTARGET_ANG_ERROR_THRESH) {
-    _control_state = TURN_TO_TARGET;
-  }
+ 
   
   if (distErr < CONTROL_GOTOTARGET_DIST_ERROR_THRESH) {
     if (_control_setPointTheta < 0) {
+      _control_resetIntegrals();
       _control_state = DONE;
     }else {
+      _control_resetIntegrals();
       _control_state = TURN_TO_FINAL_HEADING;
     }
+  } else if (angleErr > CONTROL_NEWTARGET_ANG_ERROR_THRESH && distErr > 10) {
+    _control_resetIntegrals();
+    _control_state = TURN_TO_TARGET;
   }
   
 }
@@ -142,7 +176,7 @@ void _control_turnToFinalHeading(float distErr, float angleErr) {
   
   if (angleErr < CONTROL_TURNTOFINALHEADING_ANG_ERROR_THRESH &&
       angleErr > -CONTROL_TURNTOFINALHEADING_ANG_ERROR_THRESH) {
-  
+    _control_resetIntegrals();
     _control_state = DONE;
   }
   
@@ -165,6 +199,15 @@ void control_periodic() {
     angleErr -= 360;
   }else if (angleErr < -180) {
     angleErr += 360;
+  }
+  
+  if (angleErr > 90 || angleErr < -90) { 
+    distErr *= -1;
+  }
+  
+  if (getDebug()) {
+    SerialUSB.print("State: ");
+    SerialUSB.print(_control_state);
   }
 
   switch(_control_state) {

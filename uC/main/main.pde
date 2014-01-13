@@ -1,10 +1,6 @@
 
 #include "cmd.h"
 
-
-//We will run at a base loop rate of 1000/20 = 50 Hz
-
-
 typedef enum {
   NOT_YET_RUN,
   RUN,
@@ -30,6 +26,11 @@ void setup() {
 execute_t execute = NOT_YET_RUN;
 uint32 clear = 0;
 
+uint8 debug = 0;
+uint8 getDebug(){
+  return debug;
+}
+
 void loop() {
 
   //This is used to make sure that we only run the body of our program once per time period
@@ -43,17 +44,21 @@ void loop() {
 
   if (execute == RUN){
     
-    if(millis() % 200 == 0){
-      SerialUSB.print("X: ");
-      SerialUSB.print(state_getX());
-      SerialUSB.print(" Y: ");
-      SerialUSB.print(state_getY());
-      SerialUSB.print(" Theta: ");
-      SerialUSB.print(state_getTheta());
-      SerialUSB.print(" Left: ");
-      SerialUSB.print(motor_getLeftThetaDot());
-      SerialUSB.print(" Right: ");
-      SerialUSB.println(motor_getRightThetaDot());      
+    if (millis() % 100 == 0){
+//      debug = 1;
+//      SerialUSB.print("X: ");
+//      SerialUSB.print(state_getX());
+//      SerialUSB.print(" Y: ");
+//      SerialUSB.print(state_getY());
+//      SerialUSB.print(" Theta: ");
+//      SerialUSB.print(state_getTheta());
+//      SerialUSB.print(" Left: ");
+//      SerialUSB.print(motor_getLeftThetaDot());
+//      SerialUSB.print(" Right: ");
+//      SerialUSB.println(motor_getRightThetaDot());
+      
+    }else {
+      debug = 0;
     }
     
     //Here is where we list our tasks
