@@ -29,8 +29,8 @@ def generateSensorMeasurements(mapPoints, position, noiseLevel = 0):
         for wall in walls:
             intersection = findIntersection((position, endpoint), wall)
             if intersection is not None:
-                distToWalls.append(distance(position,intersection) + \
-                    random.gauss(0, noiseLevel))
+                distToWalls.append(abs(distance(position,intersection) + \
+                    random.gauss(0, noiseLevel)))
                 break
 
     return distToWalls
