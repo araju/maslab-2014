@@ -8,10 +8,11 @@
 
 import cv2
 import process_frame as pf
+import vis_publisher
 
-def connectToCamera():
+def connectToCamera(videoIn):
     for i in range(10):
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(videoIn)
         if cap.isOpened():
             print "opened"
             break
@@ -20,16 +21,18 @@ def connectToCamera():
             cap = None
     return cap
 
-def main():
-    cap = connectToCamera()
+def main(videoIn):
+    pub = VisPublisher(2300,12345)
+    cap = connectToCamera(videoIn)
     while (1):
         _, frame = cap.read()
         blobs = pf.processFrame(frame) # blobs is a map of colors to lists of tuples (center, area)
-        #balls,reactors = processBlobs(blobs)
-        #publish(balls,reactors)
+        balls,reactors = processBlobs(blobs) # TODO implement this
+        pub.publish(balls,reactors)
     cv2.destroyAllWindows()
         
     
 
 if __name__ == '__main__':
-    main()
+    videoIn = 1
+    main(videoIn)

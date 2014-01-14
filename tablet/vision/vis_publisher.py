@@ -1,4 +1,37 @@
 # vis_publisher.py
 # Publishes the vision info to some socket
-# Uses the same json protocol as BotClient:
+# Uses similar json protocol as BotClient:
 # {"token":<yourtokenhere>, <field_identifier>:[<somestring>,<somestring>]}done\n
+
+import socket
+import json
+
+class VisPublisher:
+	def __init__(self, port, token):
+		self.port = port
+		self.token = str(token)
+		self.pubSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.pubSocket.connect(('localhost',port))
+		self.pubSocket.setBlocking(0) # make it a non-blocking socket
+
+	'''
+	balls - list of tuples (color, direction, distance)
+	reactors - list of tuples (direction, distance)
+	
+	publishing json in the form:
+	{
+		"token": <ourtokenhere>
+		<ball_color>:[[<direction>,<distance>],...]
+		"reactor":[[<direction>,<distance>],...]
+	}
+	'''
+	def publish(self, balls, reactors):
+		ballMap = {"red":[],"green":[],"reactor":[]}
+		for ball in balls:
+			ballMap[ball[0]].append((ball[1],ball[2]))
+		ballMap["reactor"] = reactors
+		ballMap["token"] = self.token
+
+		data = json.dumps(ballMap)
+		self.pubSocket.send(data)
+
