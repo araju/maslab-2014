@@ -144,10 +144,10 @@ def main(fName):
     track = mapPoints['movement']
     points = mapPoints['map']
     mapPoints['measurements'] = []
-    noiseLevel = .25
+    noiseLevel = 0.1
     for point in track:
         mapPoints['measurements'].append( \
-            generateSensorMeasurements(points, point, noiseLevel = .25))
+            generateSensorMeasurements(points, point, noiseLevel = 0.1))
         
     with open(fName, 'w') as fileOut:
             json.dump(mapPoints, fileOut, indent=4)
