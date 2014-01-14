@@ -29,6 +29,7 @@ def main(videoIn):
         blobs = pf.processFrame(frame) # blobs is a map of colors to lists of tuples (center, area)
         balls,reactors = processBlobs(blobs) # TODO implement this
         pub.publish(balls,reactors)
+    pub.close()
     cv2.destroyAllWindows()
         
     

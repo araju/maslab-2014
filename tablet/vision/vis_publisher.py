@@ -35,3 +35,7 @@ class VisPublisher:
 		data = json.dumps(ballMap)
 		self.pubSocket.send(data)
 
+
+	def close():
+		self.pubSocket.close()
+
