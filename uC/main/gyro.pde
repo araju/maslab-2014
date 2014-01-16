@@ -8,6 +8,8 @@ HardwareSPI gyroSPI(1);
 
 #define GYRO_LSB_PER_DEG (.0125)
 
+#define GYRO_FILTER_ALFA 0.95
+
 int32 _gyro_lastReading = 0;
 float _gyro_degreesPerS = 0;
 
@@ -25,19 +27,19 @@ void gyro_periodic(){
   int32 reading = 0;
   //Send the Sensor data command
   digitalWrite(GYRO_CSPIN, LOW);
-  delayMicroseconds(10);
+  delayMicroseconds(15);
   reading |= gyroSPI.transfer(0x20) << 24;
 //  SerialUSB.println(reading, HEX);
-  delayMicroseconds(10);
+  delayMicroseconds(15);
   reading |= gyroSPI.transfer(0x00) << 16;
 //  SerialUSB.println(reading, HEX);
-  delayMicroseconds(10);
+  delayMicroseconds(15);
   reading |=  gyroSPI.transfer(0x00) << 8;
 //  SerialUSB.println(reading, HEX);
-  delayMicroseconds(10);
+  delayMicroseconds(15);
   reading |= gyroSPI.transfer(0x00);
 //  SerialUSB.println(reading, HEX);
-  delayMicroseconds(10);
+  delayMicroseconds(15);
   digitalWrite(GYRO_CSPIN, HIGH);
 //  SerialUSB.println("");
   //If the reading is okay
@@ -52,15 +54,22 @@ void gyro_periodic(){
     _gyro_lastReading = reading;
   }else {
     //Otherwise use the last reading
+    SerialUSB.println("Bad Gyro Reading");
     reading = _gyro_lastReading;
   }
   
   int16 signedReading = (int16) reading;
   
+
+  
   //This converts the angular rate from units in LSB to millidegrees
   //This works because the gain from LSB to milliDegrees is 12.5 
   //and the refresh rate is 50 hz. 12.5/50 = 1/4.  So converting to 
   //millidegrees works out to be a left shift of 2.
-  _gyro_degreesPerS = signedReading * GYRO_LSB_PER_DEG;
-  
+  _gyro_degreesPerS = -1 * signedReading * GYRO_LSB_PER_DEG;  
+  if (getDebug()) {
+//    SerialUSB.print(signedReading);
+//    SerialUSB.print(",");
+//    SerialUSB.println(_gyro_degreesPerS);
+  }
 }

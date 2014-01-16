@@ -14,15 +14,19 @@
 
 #define MOTOR_SPEEDFILTER_ALFA .95
 
-#define MOTOR_BASE_KP 30
-#define MOTOR_BASE_KI 130
-#define MOTOR_BASE_KD 0
+#define MOTOR_BASE_KP 50
+#define MOTOR_BASE_KI 15
+#define MOTOR_BASE_KD -.1
+#define MOTOR_BASE_K 1
 
-#define MOTOR_BIAS_KP 30
-#define MOTOR_BIAS_KI 130
-#define MOTOR_BIAS_KD 0
 
-#define TICKS_PER_REV (64 * 29.0)
+#define MOTOR_BIAS_KP 37.5
+#define MOTOR_BIAS_KI 15
+#define MOTOR_BIAS_KD -.1
+#define MOTOR_BIAS_K 1
+
+//#define TICKS_PER_REV (64 * 29.0)
+#define TICKS_PER_REV 1920
 
 volatile int32 _motor_leftTicks = 0;
 int32 _motor_leftLastTicks = 0;
@@ -37,10 +41,6 @@ float _motor_rightThetaDot = 0;
 int32 _motor_rightLastQuadState = 0;
 int8 _motor_rightEncDir = 0;
 float _motor_rightLastThetaDot = 0;
-
-
-
-
 
 void motor_init() {
  pinMode(MOTOR_L_DIR, OUTPUT);
@@ -159,24 +159,28 @@ void _motor_control() {
   int32 baseCommand = _motor_baseSpeedControl();
   int32 biasCommand = _motor_biasControl();
   
-  if (getDebug()){
-    SerialUSB.print("_motor_control");
-    SerialUSB.print(",");
-    SerialUSB.print(millis());
-    SerialUSB.print(",");
-    SerialUSB.print(_motor_baseSpeed);
-    SerialUSB.print(",");
-    SerialUSB.print(_motor_baseSpeedSetPoint);
-    SerialUSB.print(",");
-    SerialUSB.print(_motor_bias);
-    SerialUSB.print(",");
-    SerialUSB.println(_motor_biasSetPoint);  
-  }
-  
+//  if (getDebug()){
+//    SerialUSB.print("_motor_control");
+//    SerialUSB.print(",");
+//    SerialUSB.print(millis());
+//    SerialUSB.print(",");
+//    SerialUSB.print(_motor_baseSpeed);
+//    SerialUSB.print(",");
+//    SerialUSB.print(_motor_baseSpeedSetPoint);
+//    SerialUSB.print(",");
+//    SerialUSB.print(_motor_bias);
+//    SerialUSB.print(",");
+//    SerialUSB.println(_motor_biasSetPoint);  
+//  }
+//  
   
   setMotors(baseCommand, biasCommand);  
 }
 
+
+uint8 motor_willSaturate(float baseSpeed) {
+  return abs(baseSpeed) > MOTOR_MAXBASESPEED;
+}
 
 uint8 motor_setSpeed(float baseSpeed, float bias) {
   uint8 ret = 0;
@@ -185,20 +189,32 @@ uint8 motor_setSpeed(float baseSpeed, float bias) {
     ret = 1;
   }
   
-  _motor_baseSpeedSetPoint = baseSpeed;
-  _motor_biasSetPoint = bias;
+  if (abs(baseSpeed) < 15) {
+    _motor_baseSpeedIntErr = 0;
+    baseSpeed = 0;
+  }
+  
+  if (abs(bias) < 15) {
+    _motor_biasIntErr = 0;
+    bias = 0;
+  }
+  
+  _motor_baseSpeedSetPoint = baseSpeed * MOTOR_BASE_K;
+  _motor_biasSetPoint = bias * MOTOR_BIAS_K;
   
   return ret;
 }
 
-void motor_periodic() {
+void motor_periodic(uint8 drive) {
   _motor_leftLastThetaDot = _motor_leftThetaDot;
   _motor_rightLastThetaDot = _motor_rightThetaDot;
   
-  _motor_leftThetaDot = _motor_leftThetaDot * MOTOR_SPEEDFILTER_ALFA + 
-                        ((_motor_leftTicks - _motor_leftLastTicks) * 
-                        ONE_DT_FAST / TICKS_PER_REV * 360) * 
-                        (1 - MOTOR_SPEEDFILTER_ALFA);
+//  _motor_leftThetaDot = _motor_leftThetaDot * MOTOR_SPEEDFILTER_ALFA + 
+//                        ((_motor_leftTicks - _motor_leftLastTicks) * 
+//                        ONE_DT_FAST / TICKS_PER_REV * 360) * 
+//                        (1 - MOTOR_SPEEDFILTER_ALFA);
+  _motor_leftThetaDot = ((_motor_leftTicks - _motor_leftLastTicks) * 
+                        ONE_DT_FAST / TICKS_PER_REV * 360);
   _motor_rightThetaDot = _motor_rightThetaDot * MOTOR_SPEEDFILTER_ALFA +
                         ((_motor_rightTicks - _motor_rightLastTicks) * 
                         ONE_DT_FAST / TICKS_PER_REV * 360) *
@@ -207,7 +223,25 @@ void motor_periodic() {
   _motor_leftLastTicks = _motor_leftTicks;
   _motor_rightLastTicks = _motor_rightTicks;
   
-  _motor_control();  
+  if (getDebug()) {
+    SerialUSB.print("Ticks,");
+    SerialUSB.print(_motor_leftTicks);
+    SerialUSB.print(",");
+    SerialUSB.print(_motor_leftLastTicks);
+    SerialUSB.print(",");
+    SerialUSB.println(_motor_rightTicks);  
+    SerialUSB.print(",");
+    SerialUSB.print(_motor_rightLastTicks);
+    SerialUSB.print(",");
+    SerialUSB.print(_motor_leftThetaDot); 
+    SerialUSB.print(",");
+    SerialUSB.println(_motor_rightThetaDot);   
+  }
+  
+  if (drive) {
+    _motor_control();      
+  }
+
 }
 
 void motor_clearTicks(){

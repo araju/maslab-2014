@@ -79,7 +79,7 @@ void color_periodic() {
     colorI2C.endTransmission();
     
     uint8 bytesRx = colorI2C.requestFrom(COLOR_ADDR, 9);
-
+    (void) bytesRx;
     uint16 bytes[4];
     if (colorI2C.receive() & COLOR_STATUS_VALID){
       

@@ -1,189 +1,207 @@
-#define CONTROL_NEWTARGET_ANG_ERROR_THRESH 15
-#define CONTROL_TURNTOTARGET_ANG_ERROR_THRESH 5
-#define CONTROL_GOTOTARGET_DIST_ERROR_THRESH 3
-#define CONTROL_TURNTOFINALHEADING_ANG_ERROR_THRESH 3
+#define CONTROL_INVALID_DATA_THRESH -1000
+#define CONTROL_TURNTOTARGET_EXIT_ANGTHRESH 4
+#define CONTROL_TURNTOTARGET_EXIT_SPEEDTHRESH 180
 
-#define CONTROL_STRAIGHT_KFF 4000
-#define CONTROL_STRAIGHT_KP 200
-#define CONTROL_STRAIGHT_KI 50
-#define CONTROL_STRAIGHT_KD 0
+#define CONTROL_NEWTARGET_TURNTHRESHOLD 15
+#define CONTROL_GOTOTARGET_ANGLETHRESH 30
+#define CONTROL_GOTOTARGET_DONETHRESH 10
 
-#define CONTROL_TURN_KFF 1000
-#define CONTROL_TURN_KP 500
-#define CONTROL_TURN_KI 1
-#define CONTROL_TURN_KD 0
+#define CONTROL_FASTTURN_KP 10
+#define CONTROL_FASTTURN_KI .5
+#define CONTROL_FASTTURN_KD -2
 
+#define CONTROL_SLOWTURN_KP 50
+#define CONTROL_SLOWTURN_KI .5
+#define CONTROL_SLOWTURN_KD -.2
+
+#define CONTROL_DRIVE_KP 6
+#define CONTROL_DRIVE_KI 3
+#define CONTROL_DRIVE_KD -2
 
 typedef enum {
   NEW_TARGET,
   TURN_TO_TARGET,
   GO_TO_TARGET,
-  TURN_TO_FINAL_HEADING,
   DONE
 } controlState_t;
 
-
-
-float _control_setPointX = 0;
-float _control_setPointY = 0;
-float _control_setPointTheta = 0;
 controlState_t _control_state = DONE;
 
-float _control_driveController_turnIntegral = 0;
-float _control_driveController_driveIntegral = 0;
+float _control_xSetPoint = 0;
+float _control_ySetPoint = 0;
+float _control_thetaSetPoint = 0;
 
-void _control_resetIntegrals() {
-  _control_driveController_turnIntegral = 0;
-  _control_driveController_driveIntegral = 0;
+float _control_angleErrInt = 0;
+float _control_driveErrInt = 0;
+
+float _control_driveDot = 0;
+
+uint8 control_getState() {
+  return _control_state;
 }
 
-void control_setX(float x) {
-  _control_setPointX = x;
+uint8 _control_validPos() {
+  return _control_xSetPoint > CONTROL_INVALID_DATA_THRESH && 
+         _control_ySetPoint > CONTROL_INVALID_DATA_THRESH;
+}
+
+uint8 _control_validTheta() {
+  return _control_thetaSetPoint && CONTROL_INVALID_DATA_THRESH;
+}
+
+
+
+void control_setPos(float x, float y) {
+  _control_xSetPoint = x;
+  _control_ySetPoint = y;
+  _control_thetaSetPoint = -10000;
   _control_state = NEW_TARGET;
-  _control_driveController_turnIntegral = 0;
-  _control_driveController_driveIntegral = 0;
-}
-
-void control_setY(float y) {
-  _control_setPointY = y;
-  _control_state = NEW_TARGET;  
-  _control_driveController_turnIntegral = 0;
-  _control_driveController_driveIntegral = 0;
+  _control_angleErrInt = 0;
+  _control_driveErrInt = 0;
 }
 
 void control_setTheta(float theta) {
-  _control_setPointTheta = theta;
-  _control_state = NEW_TARGET;
-  _control_driveController_turnIntegral = 0;
-  _control_driveController_driveIntegral = 0;
+  _control_thetaSetPoint = theta;
+  _control_xSetPoint = -10000;
+  _control_ySetPoint = -10000;
+  _control_state = TURN_TO_TARGET;
+  _control_angleErrInt = 0;
 }
 
-void _control_driveController(float distErr, float angleErr) {
-  int32 leftMotorCommand = 0;
-  int32 rightMotorCommand = 0;
+
+
+float _control_driveController(float distErr, float angleErr) {
+  float baseSpeed = 0;
+  _control_driveDot = sqrt(pow(state_getXDot(),2) + pow(state_getYDot(),2));
   
-  if(getDebug()){
-    SerialUSB.print(" DistErr: ");
-    SerialUSB.print(distErr);
-    SerialUSB.print(" AngErr: ");
-    SerialUSB.print(angleErr);
+  baseSpeed += distErr * CONTROL_DRIVE_KP;
+  baseSpeed += _control_driveErrInt * CONTROL_DRIVE_KI;
+  baseSpeed += _control_driveDot * CONTROL_DRIVE_KD;
+  
+  if (!motor_willSaturate(baseSpeed)){
+    _control_driveErrInt += distErr * DT_SLOW;
   }
   
-  //Drive Controller
-  //If we're far, let's add a feed forward term
-  if (distErr > 10){
-    leftMotorCommand += CONTROL_STRAIGHT_KFF;
-    rightMotorCommand += CONTROL_STRAIGHT_KFF;    
-  }
-  
-  leftMotorCommand += distErr * CONTROL_STRAIGHT_KP;
-  rightMotorCommand += distErr * CONTROL_STRAIGHT_KP;
-  
-  _control_driveController_driveIntegral += distErr * DT;
-  
-  leftMotorCommand += _control_driveController_driveIntegral * CONTROL_STRAIGHT_KI;
-  rightMotorCommand += _control_driveController_driveIntegral * CONTROL_STRAIGHT_KI;
-  
-  
-  
-  if(getDebug()){
-    SerialUSB.print(" INT: ");
-    SerialUSB.print(_control_driveController_driveIntegral);
-    SerialUSB.print(" MC L: ");
-    SerialUSB.print(leftMotorCommand);
-    SerialUSB.print(" R: ");
-    SerialUSB.print(rightMotorCommand);
-  }
-  //Angle Controller
-  //If the distance error is really low, then we should add the turning feedforward
-  //term.
-  if (distErr < .1) {
-    leftMotorCommand += CONTROL_TURN_KFF * -1 * sign(angleErr);
-    rightMotorCommand += CONTROL_TURN_KFF * sign(angleErr);
-  }
-  
-  leftMotorCommand += angleErr * -CONTROL_TURN_KP;
-  rightMotorCommand += angleErr * CONTROL_TURN_KP;
-  
-  _control_driveController_turnIntegral += angleErr * DT;
-  
-  leftMotorCommand += _control_driveController_turnIntegral * -CONTROL_TURN_KI;
-  rightMotorCommand += _control_driveController_turnIntegral * CONTROL_TURN_KI;
-  
-  if(getDebug()){
-    SerialUSB.print(" MC L: ");
-    SerialUSB.print(leftMotorCommand);
-    SerialUSB.print(" R: ");
-    SerialUSB.println(rightMotorCommand);
-  }
-  
-  setMotors(leftMotorCommand, rightMotorCommand);
+  return baseSpeed;
 }
+
+
+
+float _control_fastTurn(float distErr, float angleErr) {
+  (void)distErr;
+  float biasCommand = 0;
+  
+  _control_angleErrInt += angleErr * DT_SLOW;  
+  
+  if (abs(_control_angleErrInt) > 200) {
+    _control_angleErrInt = sign(_control_angleErrInt) * 200;
+  }
+  
+  biasCommand += angleErr * CONTROL_FASTTURN_KP;
+  biasCommand += _control_angleErrInt * CONTROL_FASTTURN_KI;
+  biasCommand += state_getThetaDot() * CONTROL_FASTTURN_KD;
+  
+  return biasCommand;
+}
+
+float _control_slowTurn(float distErr, float angleErr) {
+  (void)distErr;
+  float biasCommand = 0;
+  
+  _control_angleErrInt += angleErr * DT_SLOW;  
+  
+  biasCommand += angleErr * CONTROL_SLOWTURN_KP;
+  biasCommand += _control_angleErrInt * CONTROL_SLOWTURN_KI;
+  biasCommand += state_getThetaDot() * CONTROL_SLOWTURN_KD;
+  return biasCommand;
+  
+}
+
 
 void _control_newTarget(float distErr, float angleErr) {
-  if (angleErr > CONTROL_NEWTARGET_ANG_ERROR_THRESH || 
-      angleErr < -CONTROL_NEWTARGET_ANG_ERROR_THRESH) {
-    _control_resetIntegrals(); 
+  if (abs(angleErr) > CONTROL_NEWTARGET_TURNTHRESHOLD) {
     _control_state = TURN_TO_TARGET;
-  } else {
-    _control_resetIntegrals();
+  }else {
     _control_state = GO_TO_TARGET;
   }
 }
 
 void _control_turnToTarget(float distErr, float angleErr) {
-  _control_driveController(0, angleErr);
+  float bias = _control_fastTurn(distErr, angleErr);
   
-  if (angleErr < CONTROL_TURNTOTARGET_ANG_ERROR_THRESH && 
-      angleErr > -CONTROL_TURNTOTARGET_ANG_ERROR_THRESH) {
-    _control_resetIntegrals();
-    _control_state = GO_TO_TARGET;
+  motor_setSpeed(0, bias);
+  
+//  if (getDebug()) {
+//    SerialUSB.print("_control_turnToTarget");
+//    SerialUSB.print(",");
+//    SerialUSB.print(millis());
+//    SerialUSB.print(",");
+//    SerialUSB.print(state_getTheta());
+//    SerialUSB.print(",");
+//    SerialUSB.print(angleErr);
+//    SerialUSB.print(",");
+//    SerialUSB.print(_control_angleErrInt);
+//    SerialUSB.print(",");    
+//    SerialUSB.println(bias);
+//  }
+  
+  if (abs(angleErr) < CONTROL_TURNTOTARGET_EXIT_ANGTHRESH && 
+      abs(motor_getLeftThetaDot()) < CONTROL_TURNTOTARGET_EXIT_SPEEDTHRESH && 
+      abs(motor_getRightThetaDot()) < CONTROL_TURNTOTARGET_EXIT_SPEEDTHRESH) {
+    if (_control_validPos()) {
+      _control_state = GO_TO_TARGET;
+      _control_angleErrInt = 0;
+      _control_driveErrInt = 0;
+      
+    }else {
+      _control_state = DONE;      
+    }
   }
 }
 
 void _control_goToTarget(float distErr, float angleErr) {
-
-  _control_driveController(distErr, angleErr);
+  float baseCommand = _control_driveController(distErr, angleErr);
   
- 
+  float biasCommand = 0;
   
-  if (distErr < CONTROL_GOTOTARGET_DIST_ERROR_THRESH) {
-    if (_control_setPointTheta < 0) {
-      _control_resetIntegrals();
-      _control_state = DONE;
-    }else {
-      _control_resetIntegrals();
-      _control_state = TURN_TO_FINAL_HEADING;
-    }
-  } else if (angleErr > CONTROL_NEWTARGET_ANG_ERROR_THRESH && distErr > 10) {
-    _control_resetIntegrals();
-    _control_state = TURN_TO_TARGET;
+  if (distErr > 25) {
+    biasCommand = _control_slowTurn(distErr, angleErr);    
   }
-  
-}
 
-void _control_turnToFinalHeading(float distErr, float angleErr) {
-  //Need to recalculate the angleErr to use the setPointTheta
-  angleErr = _control_setPointTheta - state_getTheta();
-  if (angleErr > 180) {
-    angleErr -= 360;
-  }else if (angleErr < -180) {
-    angleErr += 360;
-  }
   
-
-  _control_driveController(0, angleErr);
+//  if (getDebug()) {
+//    SerialUSB.print("_control_goToTarget");
+//    SerialUSB.print(",");
+//    SerialUSB.print(millis());
+//    SerialUSB.print(",");    
+//    SerialUSB.print(distErr);
+//    SerialUSB.print(",");
+//    SerialUSB.print(angleErr);
+//    SerialUSB.print(","); 
+//    SerialUSB.print(_control_angleErrInt);
+//    SerialUSB.print(","); 
+//    SerialUSB.print(baseCommand);
+//    SerialUSB.print(",");    
+//    SerialUSB.println(biasCommand);
+//  }
+//  
+  motor_setSpeed(baseCommand, biasCommand);
   
-  if (angleErr < CONTROL_TURNTOFINALHEADING_ANG_ERROR_THRESH &&
-      angleErr > -CONTROL_TURNTOFINALHEADING_ANG_ERROR_THRESH) {
-    _control_resetIntegrals();
+  if (abs(distErr) < CONTROL_GOTOTARGET_DONETHRESH && 
+      abs(motor_getLeftThetaDot()) < CONTROL_TURNTOTARGET_EXIT_SPEEDTHRESH && 
+      abs(motor_getLeftThetaDot()) < CONTROL_TURNTOTARGET_EXIT_SPEEDTHRESH) {
     _control_state = DONE;
+  } else if (abs(angleErr) > CONTROL_GOTOTARGET_ANGLETHRESH) {
+    _control_state = TURN_TO_TARGET;
+    _control_angleErrInt = 0;
+    _control_driveErrInt = 0;
   }
-  
 }
 
 void _control_done() {
-  _control_driveController(0,0);
+  _control_driveErrInt = 0;
+  _control_angleErrInt = 0;
+  motor_setSpeed(0,0); 
 }
 
 void control_periodic() {
@@ -191,24 +209,58 @@ void control_periodic() {
   float currY = state_getY();
   float currTheta = state_getTheta();
   
+  float distErr = 0;
+  float angleErr = 0;
+  float setAngle = 0;
   //Calculate Errors
-  float distErr = sqrt(pow(_control_setPointX - currX, 2) + pow(_control_setPointY-currY,2));
-  float angleErr = radToDeg(atan2(_control_setPointY - currY, _control_setPointX-currX)) - currTheta;
   
+  if ((_control_xSetPoint < CONTROL_INVALID_DATA_THRESH || 
+      _control_ySetPoint < CONTROL_INVALID_DATA_THRESH) && 
+      _control_thetaSetPoint >= 0) {
+    setAngle = _control_thetaSetPoint;
+    angleErr = _control_thetaSetPoint - currTheta;
+    
+  }else if (_control_thetaSetPoint < CONTROL_INVALID_DATA_THRESH && 
+           _control_xSetPoint > CONTROL_INVALID_DATA_THRESH &&
+           _control_ySetPoint > CONTROL_INVALID_DATA_THRESH) {
+    
+    distErr = sqrt(pow(_control_xSetPoint - currX, 2) + pow(_control_ySetPoint-currY,2));
+    setAngle = radToDeg(atan2(_control_ySetPoint - currY, _control_xSetPoint-currX));
+    
+    if (setAngle < 0) {
+      setAngle += 360;
+    }
+    angleErr = setAngle - currTheta;   
+  }
+ 
   if (angleErr > 180) {
     angleErr -= 360;
   }else if (angleErr < -180) {
     angleErr += 360;
   }
   
-  if (angleErr > 90 || angleErr < -90) { 
+  if (abs(angleErr) > 90) { 
     distErr *= -1;
   }
-  
-  if (getDebug()) {
-    SerialUSB.print("State: ");
-    SerialUSB.print(_control_state);
-  }
+
+//  if (getDebug()) {
+//    SerialUSB.print("control_periodic,");
+//    SerialUSB.print(millis());
+//    SerialUSB.print(",");
+//    SerialUSB.print(currX);
+//    SerialUSB.print(",");
+//    SerialUSB.print(currY);
+//    SerialUSB.print(",");
+//    SerialUSB.print(currTheta);
+//    SerialUSB.print(",");
+//    SerialUSB.print(distErr);
+//    SerialUSB.print(",");
+//    SerialUSB.print(setAngle);
+//    SerialUSB.print(",");
+//    SerialUSB.print(angleErr);
+//    SerialUSB.print(",");
+//    SerialUSB.println(_control_state);
+//  }
 
   switch(_control_state) {
     case NEW_TARGET:
@@ -223,10 +275,6 @@ void control_periodic() {
       _control_goToTarget(distErr, angleErr);
       break;
       
-    case TURN_TO_FINAL_HEADING:
-      _control_turnToFinalHeading(distErr, angleErr);
-      break;
-    
     case DONE:
       _control_done();
       break;

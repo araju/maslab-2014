@@ -1,73 +1,60 @@
-#define straightSpeed 12000
-#define turnSpeed 6000
-#define straight_ki 5
+#define squareSize 50 
 typedef enum {
   start,
   str1,
-  right1,
   str2,
-  right2,
   str3,
-  right3,
   str4,
-  right4,
   done
 }driveSquareState;
 
 driveSquareState state = start;
+
+uint8 getDriveSquareState() {
+  return state;
+}
+
+
 void driveSquare() {
-  if (state == start){
+  if (state == start) {
     state = str1;
-  }else if (state == str1) {
-    if (driveStraight() == 0) {
-      state = right1;
+//    motor_setSpeed(540, 0);
+    control_setPos(squareSize, 0);
+//    control_setTheta(90);
+  } else if (state == str1) {
+
+    if (control_getState() == 3) {
+//    if (millis() > 10000) {
+//      motor_setSpeed(0,0);
+//      state = done;
+//      control_setTheta(180);
+      control_setPos(squareSize, squareSize);
+      state = str2;
+    }
+   
+    
+  } else if (state == str2) {
+    
+    if (control_getState() == 3) {
+//      control_setTheta(270);
+      state = str3;
+//      state = done;
+      control_setPos(0, squareSize);      
     }
     
-  }else if (state == right1) {
-    if (turnRight() == 0){
-       state = str2;
+  } else if (state == str3) {
+    if (control_getState() == 3) {
+//      control_setTheta(0);
+      control_setPos(0, 0);
+      state = str4;
     }
     
-  }else if (state == str2) {
-    if (driveStraight() == 0) {
-          state = right2;
-    }
-  }else if (state == right2) {
-    if (turnRight() == 0){
-       state = str3;
-    }
+  } else if (state == str4) {
     
-  }else if (state == str3) {
-    if (driveStraight() == 0) {
-          state = right3;
+    if (control_getState() == 3){
+//      control_setTheta(180);
+      state = done;
     }
-  }else if (state == right3) {
-    if (turnRight() == 0){
-       state = str4;
-    }
-    
-  }else if (state == str4) {
-    if (driveStraight() == 0) {
-          state = right4;
-    }
-  }else if (state == right4) {
-    if (turnRight() == 0){
-       state = done;
-    }
-    
-  }else if (state == done) {
-    setMotors(0, 0);
+  } else if (state == done) {
   }
-}
-
-int8 driveStraight() { 
-
-  
-  
-  return 1;
-}
-
-int8 turnRight() {
-
-  return 1;
 }
