@@ -24,11 +24,15 @@ def connectToCamera(videoIn):
 def main(videoIn):
     pub = VisPublisher(2300,12345)
     cap = connectToCamera(videoIn)
+    
+    # TODO: find reactors with QR code!!!!!
+
     while (1):
         _, frame = cap.read()
         blobs = pf.processFrame(frame) # blobs is a map of colors to lists of tuples (center, area)
-        balls,reactors = processBlobs(blobs) # TODO implement this
+        balls,reactors = processBlobs(blobs)
         pub.publish(balls,reactors)
+    
     pub.close()
     cv2.destroyAllWindows()
         
