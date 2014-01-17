@@ -65,13 +65,13 @@ void main() {
 	}
 	
 	//init some variables
-	float dTheta = 0.049087385; // 2pi / 128. the rotation theta for the vectors
+	float dTheta = 0.09817477; // 2pi / 64. the rotation theta for the vectors
 	mat2 rotMat = mat2(cos(dTheta), sin(dTheta), -sin(dTheta), cos(dTheta));
 	
 	vec2 vectors[4] = initVectors();
 	float bestConfidence = 0.0;
 	float bestOrientation = 0.0; // in radians
-	for (int i = 0; i < 128; i++) {
+	for (int i = 11; i < 12; i++) {
 		// calculate the confidence for this orientation
 		float conf = getConfidence(vectors);
 		if (conf > bestConfidence) {

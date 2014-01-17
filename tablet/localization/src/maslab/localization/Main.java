@@ -28,7 +28,7 @@ public class Main {
 		
 		
 		try {
-			final BufferedImage image = ImageIO.read(new File("C:\\Users\\akhil\\Documents\\MASLAB\\shadercl\\ShaderCL\\ShaderCL Examples\\images\\map_dt.png"));
+			final BufferedImage image = ImageIO.read(new File("C:\\Users\\akhil\\Documents\\MASLAB\\shadercl\\ShaderCL\\ShaderCL Examples\\images\\map_dt2.png"));
 			Thread t = new Thread() {
 				public void run() {
 					Localizer localizer = new Localizer(image);
@@ -52,13 +52,13 @@ public class Main {
 			BufferedReader in = new BufferedReader(
 					new InputStreamReader(cock.getInputStream()));
 			
-			out.println("{\"measurements\":[\"0.654100135084239\",\"0.7140298455195194\",\"0.6556403936212141\",\"0.5585515641826985\"]}"); // 0.5,0.5,45
+//			out.println("{\"measurements\":[\"0.7081397145966423\",\"0.7094861012963988\",\"0.7021630416732194\",\"0.7004442691083548\"]}"); // 0.5,0.5,45
+//			System.out.println(in.readLine());
+			out.println("{\"measurements\":[\"0.7196930784229848\",\"0.5821820280118326\",\"0.5769988321789806\",\"0.7957202438799321\"]}"); // 0.5,0.5,60
 			System.out.println(in.readLine());
-			out.println("{\"measurements\":[\"0.7050573081244242\",\"0.44009522252057026\",\"0.4868010409981124\",\"0.8857089060876848\"]}"); // 0.5,0.5,60
-			System.out.println(in.readLine());
-			out.println("{\"measurements\":[\"0.8269265314931968\",\"0.57764893460754\",\"0.5625262498947508\",\"1.100190533600091\"]}"); // 0.5,0.5,75
-			System.out.println(in.readLine());
-//			out.println("{\"measurements\":[\"0.4909850483700776\",\"0.5894288578031636\",\"0.5034472231493763\",\"1.498484935652294\"]}"); // 0.5,0.5,90
+//			out.println("{\"measurements\":[\"0.8269265314931968\",\"0.57764893460754\",\"0.5625262498947508\",\"1.100190533600091\"]}"); // 0.5,0.5,75
+//			System.out.println(in.readLine());
+////			out.println("{\"measurements\":[\"0.4909850483700776\",\"0.5894288578031636\",\"0.5034472231493763\",\"1.498484935652294\"]}"); // 0.5,0.5,90
 //			System.out.println(in.readLine());
 			out.println("exit");
 			cock.close();

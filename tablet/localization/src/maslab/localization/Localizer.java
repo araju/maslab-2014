@@ -14,7 +14,7 @@ import Core.FilterOp;
 
 public class Localizer {
 
-	public static final int confidenceThresh = 250; // only points above this in the green channel
+	public static final int confidenceThresh = 245; // only points above this in the green channel
 													// are considered confident
 	
 	private BufferedImage currentImage; // keeps track of the most recent filtered image
@@ -39,6 +39,10 @@ public class Localizer {
 		this.currentImage = img;
 		if (img != null)
 			Engine.initGL(img.getWidth(),img.getHeight());
+	}
+	
+	public BufferedImage getImage() {
+		return this.currentImage;
 	}
 	
 	
@@ -132,18 +136,31 @@ public class Localizer {
 		//time it
 		BufferedImage image = null;
 		try {
-			image = ImageIO.read(new File("C:\\Users\\akhil\\Documents\\MASLAB\\shadercl\\ShaderCL\\ShaderCL Examples\\images\\rainbow.png"));
+			image = ImageIO.read(new File("C:\\Users\\akhil\\Documents\\MASLAB\\shadercl\\ShaderCL\\ShaderCL Examples\\images\\map_dt2.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		Localizer local = new Localizer(image);
 		float start = System.currentTimeMillis();
+		local.processSensorMeasurements(new float[] {
+				(float)0.7196930784229848,
+				(float)0.5821820280118326,
+				(float)0.5769988321789806,
+				(float)0.7957202438799321
+		});
 		List<List<Float>> pts = local.getConfidentPoints();
 		float end = System.currentTimeMillis();
 		
 		System.out.println((end - start) + "\n\n");
 		
 		System.out.println("Number of pts: " + pts.size());
+		
+		try {
+		    File outputfile = new File("filtered_dt.png");
+		    ImageIO.write(local.getImage(), "png", outputfile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 //		for (float[] arr : pts) {
 //			System.out.println(arr[0] + " " + arr[1] + " " + arr[2]);
 //		}
