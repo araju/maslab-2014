@@ -10,8 +10,6 @@
 #define MOTOR_R_TICK 35
 #define MOTOR_R_QUAD 36
 
-#define TICKS_PER_REV (64 * 29.0)
-
 volatile int32 _motor_leftTicks = 0;
 int32 _motor_leftLastTicks = 0;
 float _motor_leftThetaDot = 0;
@@ -51,6 +49,8 @@ void motor_init() {
  interrupts();
  
 }
+
+
 
 void motor_leftIRQ(){
   uint8 tickState = digitalRead(MOTOR_L_TICK);
@@ -92,17 +92,6 @@ void motor_rightIRQ(){
   _motor_rightLastQuadState = quadState; 
 }
 
-
-void motor_periodic() {
-  _motor_leftThetaDot = (_motor_leftTicks - _motor_leftLastTicks) * 
-                        ONE_DT / TICKS_PER_REV * 360;
-  _motor_rightThetaDot = (_motor_rightTicks - _motor_rightLastTicks) * 
-                        ONE_DT / TICKS_PER_REV * 360; 
-  
-  _motor_leftLastTicks = _motor_leftTicks;
-  _motor_rightLastTicks = _motor_rightTicks;
-}
-
 void motor_clearTicks(){
  _motor_leftTicks = 0;
  _motor_rightTicks = 0; 
@@ -111,16 +100,8 @@ void motor_clearTicks(){
 void setMotors(int32 dutyL, int32 dutyR) {
   digitalWrite(MOTOR_L_DIR, calcDir(dutyL));
   pwmWrite(MOTOR_L_PWM, calcDuty(dutyL));
-  digitalWrite(MOTOR_R_DIR, calcDir(dutyL));
+  digitalWrite(MOTOR_R_DIR, calcDir(dutyR));
   pwmWrite(MOTOR_R_PWM, calcDuty(dutyR));
-}
-
-float motor_getLeftThetaDot(){
-  return _motor_leftThetaDot;
-}
-
-float motor_getRightThetaDot(){
-  return _motor_rightThetaDot;
 }
 
 uint32 calcDir(int32 duty) {
@@ -131,3 +112,11 @@ uint32 calcDuty(int32 duty) {
   return duty < 0 ? -duty : duty;
 }
 
+
+int32 motor_getLeftTicks() {
+  return _motor_leftTicks;
+}
+
+int32 motor_getRightTicks() {
+  return _motor_rightTicks;
+}
