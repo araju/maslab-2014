@@ -1,5 +1,6 @@
 package maslab.localization;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,11 @@ public class Localizer {
 	private BufferedImage currentImage; // keeps track of the most recent filtered image
 										// lets us have frame to frame memory
 	
+	
+	
+	private boolean firstTime = true;  // "like a virgin..."
+	private int maxConf = 0;
+	
 	public Localizer() {
 		this.currentImage = null;
 	}
@@ -37,16 +43,33 @@ public class Localizer {
 	
 	
 	public List<List<Float>> processSensorMeasurements(float[] sensorMeasurements) {
+		
 		FilterOp localizer = new FilterOp("localizer");
-		
 		localizer.setFloatArray("distances", sensorMeasurements);
-		localizer.apply(this.currentImage);
-		BufferedImage filtered = FilterOp.getImage(); // R - orientation , G - confidence , B - distance to edge(wall)
 		
-		// TODO: change the current image to reflect the changes in what we know
-		//  maybe that includes blurring or dilating the confidence or something
+		if (!firstTime) {
+			localizer.setInt("firstTime", 0);
+			// rescale confidence channel
+			FilterOp rescaler = new FilterOp("rescaleConfidence");
+			FilterOp dilater = new FilterOp("dilate");
+			if (maxConf != 0) {
+				rescaler.setFloat("rescaleFactor", (float) (255.0 / maxConf));
+			} else {
+				rescaler.setFloat("rescaleFactor", (float)1.0);
+			}
+			rescaler.apply(currentImage);
+			// dilate confidence channel
+			dilater.apply();
+			localizer.apply();
+		} else {
+			localizer.setInt("firstTime", 1);
+			localizer.apply(this.currentImage);
+			firstTime = false;
+		}
 		
-		return getConfidentPoints(filtered);
+		this.currentImage = FilterOp.getImage(); // R - orientation , G - confidence , B - distance to edge(wall)
+		
+		return getConfidentPoints();
 	}
 	
 	
@@ -55,31 +78,52 @@ public class Localizer {
 	 * For now returns points in IMG COORDINATES!!!!
 	 * For x,y, thats 0,0 at top left and heading of 0 points down x-axis  
 	 * 
+	 * Also finds max confidence value and re-scales all confident points 
+	 * to full confidence 
+	 * 
 	 * @param img - filtered image
 	 * @return list of [x,y,heading] in image coordinates
 	 */
-	public List<List<Float>> getConfidentPoints(BufferedImage img) {
+	public List<List<Float>> getConfidentPoints() {
 		List<List<Float>> confidentPts = new ArrayList<List<Float>>();
-		int w = img.getWidth();
-	    int h = img.getHeight();
+		int w = currentImage.getWidth();
+	    int h = currentImage.getHeight();
 
-	    int[] data = img.getRGB(0, 0, w, h, null, 0, w);
+	    int[] data = currentImage.getRGB(0, 0, w, h, null, 0, w);
+	    
+	    maxConf = 0;
 	    
 	    for (int i = 0; i < data.length; i++) {
 	    	int red = (data[i] >> 16) & 0xFF;
 	    	int green = (data[i] >> 8) & 0xFF;
+	    	int blue = (data[i]) & 0xFF;
+	    	int alpha = (data[i] >> 24) & 0xFF;
 	    	
-	    	if (green > confidenceThresh) {
+	    	if (green > maxConf) {
+	    		maxConf = green;
+	    	}
+	    	
+	    	if (green >= confidenceThresh) {
+	    		int x = i % w;
+	    		int y = i / w;
 	    		ArrayList<Float> arr = new ArrayList<Float>();
-	    		arr.add((float) (i % w)); // x
-	    		arr.add((float) (i / w)); // y
+	    		arr.add((float)x);
+	    		arr.add((float)y);
 	    		arr.add((float) (red  / 255.0 * 360)); // theta
 	    		confidentPts.add(arr);
+	    		
+	    		// set to max confidence to get ready for next iteration.
+	    		currentImage.setRGB(x, y, new Color(red,255,blue,alpha).getRGB());
 	    	}
 	    }
 	    return confidentPts;
 		
 	}
+	
+	
+	
+	
+	
 	
 	/**
 	 * main method only for testing
@@ -94,7 +138,7 @@ public class Localizer {
 		}
 		Localizer local = new Localizer(image);
 		float start = System.currentTimeMillis();
-		List<List<Float>> pts = local.getConfidentPoints(image);
+		List<List<Float>> pts = local.getConfidentPoints();
 		float end = System.currentTimeMillis();
 		
 		System.out.println((end - start) + "\n\n");

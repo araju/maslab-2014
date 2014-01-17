@@ -3,6 +3,7 @@ varying float y;
 uniform float width;
 uniform float height;
 uniform float distances[4];
+uniform int firstTime; // to denote the first time this is run. TODO: make this obsolete
 uniform sampler2D txtr;
 
 
@@ -82,8 +83,11 @@ void main() {
 			vectors[i] = rotMat * vectors[i];
 		}
 	}
+	
 	//take into account prior confidence
-	//bestConfidence = bestConfidence * texture(txtr,vec2(x,y),0.0).y;
+	if (firstTime != 1) {
+		bestConfidence = bestConfidence * texture(txtr,vec2(x,y),0.0).y; //the prev conf
+	}
 	
 	gl_FragColor = vec4(dt,bestConfidence,bestOrientation / 6.2832,1); // divide by 2*pi to normalize orientation 
 	//gl_FragColor = vec4(vectors[3].x,vectors[3].x,vectors[3].x,1);
