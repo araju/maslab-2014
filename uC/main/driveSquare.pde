@@ -18,7 +18,7 @@ driveSquareState state = start;
 void driveSquare() {
   if (state == start){
     state = str1;
-    sc_drive(200);
+    sc_drive(100);
 //    setMotors(5000, 5000);
   }else if (state == str1) {
     if (millis() > 20000) {

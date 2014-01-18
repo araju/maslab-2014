@@ -58,7 +58,7 @@ void motor_leftIRQ(){
   //Let's check to see if a transition happened on the quadrature pin
   if (quadState != _motor_leftLastQuadState){
     //If it did we can determine if it is leading or lagging
-    if (tickState == HIGH) {
+    if (tickState == LOW) {
       _motor_leftEncDir = -1;
     }else {
       _motor_leftEncDir = 1; 
@@ -78,7 +78,7 @@ void motor_rightIRQ(){
   //Let's check to see if a transition happened on the quadrature pin
   if (quadState != _motor_rightLastQuadState){
     //If it did we can determine if it is leading or lagging
-    if (tickState == HIGH) {
+    if (tickState == LOW) {
       _motor_rightEncDir = -1;
     }else {
       _motor_rightEncDir = 1; 

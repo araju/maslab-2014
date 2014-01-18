@@ -12,6 +12,7 @@ void setup() {
   gyro_init();
   motor_init();
 //  color_init();
+  sonar_init();
   //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
   pinMode(BOARD_BUTTON_PIN, INPUT);
 
@@ -56,6 +57,8 @@ void loop() {
     sc_periodic();
 
     driveSquare();
+    
+    sonar_periodic();
 
     //Read Color Sensor
 //    color_periodic();

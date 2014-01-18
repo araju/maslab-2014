@@ -76,7 +76,7 @@ void gyro_periodic(){
   }
 
   
-  if (getDebug()) {
-    SerialUSB.println(_gyro_angle);
-  }
+//  if (getDebug()) {
+//    SerialUSB.println(_gyro_angle);
+//  }
 }

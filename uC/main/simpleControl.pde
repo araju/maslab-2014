@@ -41,6 +41,13 @@ void _sc_turn() {
     _sc_state = stop;
   }
   
+  if (getDebug()) {
+    SerialUSB.print("Turn,");
+    SerialUSB.print(gyro_getAngle());
+    SerialUSB.print(",");
+    SerialUSB.println(_sc_angleSetPoint - gyro_getAngle());
+  }
+  
 }
 
 void _sc_drive() {
@@ -60,6 +67,15 @@ void _sc_drive() {
     base = sign(distErr) * SC_STRAIGHTSPEED;
   }else {
     base = (distErr / 1500.0) * (SC_STRAIGHTSPEED - 3000) + 3000;
+  }
+  
+  if (getDebug()) {
+    SerialUSB.print("Drive,");
+    SerialUSB.print(motor_getLeftTicks());
+    SerialUSB.print(",");    
+    SerialUSB.print(motor_getRightTicks());
+    SerialUSB.print(",");    
+    SerialUSB.println(distErr);
   }
   
   setMotors(base - bias, base + bias);
@@ -83,8 +99,21 @@ void sc_turn(float degree) {
   _sc_angleSetPoint = degree;
 }
 
+void sc_drive_cmd(uint8 *buf){
+  if (buf[0] == 1) { 
+    sc_drive(buf[1] * 1.0);
+  }
+}
+
+void sc_turn_cmd(uint8 *buf) {
+  if (buf[0] == 1) {
+    sc_drive(buf[1] * 1.0);
+  }
+}
+
 void sc_init() {
-  
+  cmd_registerCallback(0x12, sc_drive_cmd);
+  cmd_registerCallback(0x13, sc_turn_cmd);
 }
 
 void sc_periodic() {
