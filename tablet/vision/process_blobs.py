@@ -21,8 +21,14 @@ def processBlobs(blobs):
 	return balls, [] # TODO : find reactors!!!
 
 def calcDirection(x):
-	theta = math.degrees(math.atan(abs(x - 320) / 340))
+	theta = math.degrees(math.atan(abs(x - 320.0) / 340.0))
 	return theta
 
 def calcDistance(x,y):
-	zDist = 3500 / (y - 255)
+	if (y > 255.0):
+		zDist = 3500.0 / (y - 255.0)
+	else:
+		zDist = 1000.0  # TODO figure out a better solution for this stuff
+	xDist = zDist * x / 340.0
+	dist = math.sqrt(math.pow(xDist,2) + math.pow(zDist,2))
+	return dist

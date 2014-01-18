@@ -8,7 +8,8 @@
 
 import cv2
 import process_frame as pf
-import vis_publisher
+import process_blobs as pb
+import vis_publisher as vp
 
 def connectToCamera(videoIn):
     for i in range(10):
@@ -22,7 +23,7 @@ def connectToCamera(videoIn):
     return cap
 
 def main(videoIn):
-    pub = VisPublisher(2300,12345)
+    pub = vp.VisPublisher(2300,12345)
     cap = connectToCamera(videoIn)
     
     # TODO: find reactors with QR code!!!!!
@@ -30,7 +31,7 @@ def main(videoIn):
     while (1):
         _, frame = cap.read()
         blobs = pf.processFrame(frame) # blobs is a map of colors to lists of tuples (center, area)
-        balls,reactors = processBlobs(blobs)
+        balls,reactors = pb.processBlobs(blobs)
         pub.publish(balls,reactors)
     
     pub.close()

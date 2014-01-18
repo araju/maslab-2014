@@ -12,7 +12,7 @@ class VisPublisher:
 		self.token = str(token)
 		self.pubSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.pubSocket.connect(('localhost',port))
-		self.pubSocket.setBlocking(0) # make it a non-blocking socket
+		self.pubSocket.setblocking(0) # make it a non-blocking socket
 
 	'''
 	## OLD - balls - list of tuples (color, direction, distance)
@@ -26,16 +26,31 @@ class VisPublisher:
 		"reactor":[[<direction>,<distance>],...]
 	}
 	'''
+	# TODO: change to only sending the closest ball
 	def publish(self, balls, reactors):
-		ballMap = {"red":[],"green":[],"reactor":[]}
-		for ball in balls:
-			if ball[0] in ballMap.keys():
-				ballMap[ball[0]].append((ball[1],ball[2]))
-		ballMap["reactor"] = reactors
-		ballMap["token"] = self.token
+		# ballMap = {"red":[],"green":[],"reactor":[]}
+		# for ball in balls:
+		# 	if ball[0] in ballMap.keys():
+		# 		ballMap[ball[0]].append((ball[1],ball[2]))
+		# ballMap["reactor"] = reactors
+		# ballMap["token"] = self.token
 
-		data = json.dumps(ballMap)
-		self.pubSocket.send(data)
+		sendMap = {}
+		for color in balls.keys():
+			if (len(balls[color]) > 0):
+				sendMap[color] = balls[color][0]
+			else:
+				sendMap[color] = []
+
+		if (len(reactors) > 0):
+			sendMap["reactor"] = reactors[0]
+		else:
+			sendMap["reactor"] = []
+		if 
+		sendMap["token"] = self.token
+
+		data = json.dumps(sendMap)
+		self.pubSocket.send(data + "\n")
 
 
 	def close():
