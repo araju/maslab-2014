@@ -4,8 +4,8 @@ from mapleIf import Maple
 
 class MotorDriver:
 
-	def __init__(self):
-		self.maple = Maple()
+	def __init__(self, m=Maple()):
+		self.maple = m
 
 	def stopMotors():
 		turnMotors(0)
