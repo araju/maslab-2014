@@ -62,7 +62,7 @@ public class BlobProcessor {
 
 
 	public static double calculateDirection(double x) {
-		return Math.toDegrees(Math.atan(Math.abs(x - 320.0) / 340.0));
+		return Math.toDegrees(Math.atan((x - 320.0) / 340.0));
 	}
 
 
