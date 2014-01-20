@@ -9,14 +9,16 @@ typedef enum {
 execute_t;
 
 void setup() {
-  gyro_init();
-  motor_init();
-//  color_init();
-  sonar_init();
+  delay(5000);
+//  gyro_init();
+//  motor_init();
+  color_init();
+//  sonar_init();
+  servo_init();
   //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
   pinMode(BOARD_BUTTON_PIN, INPUT);
 
-  delay(5000);
+
 }
 
 
@@ -52,16 +54,19 @@ void loop() {
     //Read Serial Stream and execute commands
     serial_periodic();
     //Read Gyro
-    gyro_periodic();
+//    gyro_periodic(); 
 
-    sc_periodic();
+//    sc_periodic();
 
-    driveSquare();
+//    driveSquare();
     
-    sonar_periodic();
+//    sonar_periodic();
+
+      servo_periodic();
+
 
     //Read Color Sensor
-//    color_periodic();
+    color_periodic();
     execute = ALREADY_RAN;
   }
 

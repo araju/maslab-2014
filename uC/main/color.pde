@@ -33,10 +33,13 @@
 
 #define COLOR_RED_THRESHOLD 0x400
 #define COLOR_GREEN_THRESHOLD 0x380
+#define COLOR_BLUE_THRESHOLD 0x800
 
 HardWire colorI2C(2, I2C_FAST_MODE);
 
 void color_init() {  
+  SerialUSB.println("Color Init");
+  
   //Set the integration time
   colorI2C.beginTransmission(COLOR_ADDR);
   colorI2C.send(COLOR_COMMAND_CMD | COLOR_ATIME);
@@ -64,7 +67,7 @@ void color_init() {
   colorI2C.endTransmission();
   delay(10);
   
-  
+  SerialUSB.println("Color End");
 }
 
 uint32 _color_clear = 0;
@@ -72,6 +75,21 @@ uint32 _color_red = 0;
 uint32 _color_green = 0;
 uint32 _color_blue = 0;
 
+uint8 _color_redPresent = 0;
+uint8 _color_greenPresent = 0;
+uint8 _color_bluePresent = 0;
+
+uint8 color_isRedBallPresent() {
+  return _color_redPresent;
+}
+
+uint8 color_isGreenBallPresent() {
+  return _color_greenPresent;
+}
+
+uint8 color_isBluePresent() {
+  return _color_bluePresent;
+}
 void color_periodic() {
     //Read Colors
     colorI2C.beginTransmission(COLOR_ADDR);
@@ -94,18 +112,48 @@ void color_periodic() {
       _color_green = bytes[2];
       _color_blue = bytes[3];
       
-      if (_color_red > COLOR_RED_THRESHOLD && _color_red > _color_green){
+      if (_color_red > COLOR_RED_THRESHOLD && _color_red > _color_green && _color_red > _color_blue){
         //Red Ball Detected
-        
+        _color_redPresent = 1;
+      } else {
+        _color_redPresent = 0;        
       }
       
-      if (_color_green > COLOR_GREEN_THRESHOLD && _color_green > _color_red){
+      if (_color_blue > COLOR_BLUE_THRESHOLD && _color_blue > _color_green && _color_blue > _color_red) {
+        _color_bluePresent = 1;
+      }else {
+        _color_bluePresent = 0;
+      }
+      
+      if (_color_green > COLOR_GREEN_THRESHOLD && _color_green > _color_red && _color_green > _color_blue){
         //Green Ball Detected
+        _color_greenPresent = 1;
+      } else {
+        _color_greenPresent = 0;
       }
     } else {
       bytes[0] = colorI2C.receive() | colorI2C.receive() << 8;
       bytes[1] = colorI2C.receive() | colorI2C.receive() << 8;
       bytes[2] = colorI2C.receive() | colorI2C.receive() << 8;
       bytes[3] = colorI2C.receive() | colorI2C.receive() << 8;
+    }
+    
+    
+    
+    if (getDebug()) {
+//      SerialUSB.print("R: ");
+//      SerialUSB.print(_color_red);
+//      SerialUSB.print(" G: ");
+//      SerialUSB.print(_color_green);
+//      SerialUSB.print(" B: ");
+//      SerialUSB.println(_color_blue);
+      
+//      if (_color_greenPresent) {
+//        SerialUSB.println("Green Ball Present");
+//      }
+//      
+//      if (_color_redPresent) {
+//        SerialUSB.println("Red Ball Present");
+//      }
     }
 }
