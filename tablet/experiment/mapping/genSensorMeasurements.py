@@ -29,8 +29,8 @@ def generateSensorMeasurements(mapPoints, position, noiseLevel = 0):
         for wall in walls:
             intersection = findIntersection((position, endpoint), wall)
             if intersection is not None:
-                distToWalls.append(distance(position,intersection) + \
-                    random.gauss(0, noiseLevel))
+                distToWalls.append(abs(distance(position,intersection) + \
+                    random.gauss(0, noiseLevel)))
                 break
 
     return distToWalls
@@ -144,10 +144,10 @@ def main(fName):
     track = mapPoints['movement']
     points = mapPoints['map']
     mapPoints['measurements'] = []
-    noiseLevel = .25
+    noiseLevel = 0.1
     for point in track:
         mapPoints['measurements'].append( \
-            generateSensorMeasurements(points, point, noiseLevel = .25))
+            generateSensorMeasurements(points, point, noiseLevel = 0.1))
         
     with open(fName, 'w') as fileOut:
             json.dump(mapPoints, fileOut, indent=4)

@@ -62,8 +62,8 @@ while(1):
     # draw bounding boxes around different colors
     boxes = np.zeros(frame.shape,np.uint8)
     drawBoxes(cleanedRed,boxes,(0,0,255),1)
-    drawBoxes(cleanedGreen,boxes,(0,255,0),2)
-    drawBoxes(cleanedBlue,boxes,(255,0,0),3)
+    # drawBoxes(cleanedGreen,boxes,(0,255,0),2)
+    # drawBoxes(cleanedBlue,boxes,(255,0,0),3)
 
     elapsed = (time.clock() - start)
 
