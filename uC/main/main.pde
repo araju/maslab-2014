@@ -11,21 +11,23 @@ typedef enum {
 execute_t;
 
 void setup() {
-  pinMode(FET_GATE, OUTPUT);
-  digitalWrite(FET_GATE, HIGH);
-  
-  
-  delay(5000);
-//  gyro_init();
-//  motor_init();
+    Serial1.begin(115200);
+//  pinMode(FET_GATE, OUTPUT);
+//  digitalWrite(FET_GATE, HIGH);
+//  
+//  
+  delay(3000);
+  gyro_init();
+  motor_init();
 //  color_init();
 //  sonar_init();
 //  servo_init();
+  sc_init();
   range_init();
 
   //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
   pinMode(BOARD_BUTTON_PIN, INPUT);
-  Serial1.begin(115200);
+
 
 }
 
@@ -51,7 +53,6 @@ void loop() {
   }
 
   if (execute == RUN){
-    
     if (millis() % 100 == 0){
       debug = 1;
 
@@ -63,9 +64,9 @@ void loop() {
     //Read Serial Stream and execute commands
     serial_periodic();
     //Read Gyro
-//    gyro_periodic(); 
+    gyro_periodic(); 
 
-//    sc_periodic();
+    sc_periodic();
 
 //    driveSquare();
     
