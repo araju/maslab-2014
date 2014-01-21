@@ -181,12 +181,14 @@ void serial_periodic() {
         queueFlush();
         _serial_inCmd = 1;
       }else if (ch == SERIAL_END_FLAG && _serial_inCmd) {
+        
         //Process what is in the queue
 //        toggleLED();
         _serial_inCmd = 0;
         uint8 i = 0;
         if (_serial_validateMessage() == 0 && queuePeek(&i) == 0) {
-          toggleLED();
+          Serial1.print("Received Command:");
+          Serial1.println(i);
           pCmdCallback foo = cmd_getCallback(i);
           foo(&(_serial_charBuf[1]));
         }

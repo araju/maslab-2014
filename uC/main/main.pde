@@ -25,7 +25,7 @@ void setup() {
 
   //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
   pinMode(BOARD_BUTTON_PIN, INPUT);
-
+  Serial1.begin(115200);
 
 }
 
@@ -53,11 +53,8 @@ void loop() {
   if (execute == RUN){
     
     if (millis() % 100 == 0){
-<<<<<<< HEAD
       debug = 1;
-=======
-      debug = 1;      
->>>>>>> SimpleControl
+
     }else {
       debug = 0;
     }

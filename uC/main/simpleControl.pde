@@ -107,6 +107,8 @@ void sc_drive_cmd(uint8 *buf){
 
 void sc_turn_cmd(uint8 *buf) {
   if (buf[0] == 1) {
+    Serial1.print("Serial Turn: ");
+    Serial1.println(buf[1]);
     sc_drive(buf[1] * 1.0);
   }
 }
