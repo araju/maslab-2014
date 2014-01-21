@@ -8,40 +8,41 @@ import time
 import traceback
 
 
+
+def turnLeft(driver):
+        driver.turnMotors(2)
+        time.sleep(0.01)
+        driver.driveMotors(2)
+        time.sleep(0.05)
+
+def turnRight(driver):
+        driver.turnMotors(-2)
+        time.sleep(0.01)
+        driver.driveMotors(2)
+        time.sleep(0.05)
+
+def driveStraight(driver):
+        driver.driveMotors(2)
+
 maple = None
 try:
         maple = Maple()
         driver = MotorDriver(maple)
         sensors = BumpSensors(2,maple)
-
+        front = sensors.bumped[0]
+        back = sensors.bumped[1]
         while 1:
                 if (front and not back):
-                        turnLeft()
+                        turnLeft(driver)
                 elif not front and back:
-                        turnRight()
+                        turnRight(driver)
                 elif not front and not back:
-                        turnRight()
+                        turnRight(driver)
                 else:
-                        driveStraight()
+                        driveStraight(driver)
                 time.sleep(0.1)
 except:
         traceback.print_exc()
 finally:
         if maple != None:
                 maple.close()
-
-                
-def turnLeft():
-	driver.turnMotors(2)
-	time.sleep(0.01)
-	driver.driveMotors(2)
-	time.sleep(0.05)
-
-def turnRight():
-	driver.turnMotors(-2)
-	time.sleep(0.01)
-	driver.driveMotors(2)
-	time.sleep(0.05)
-
-def driveStraight():
-	driver.driveMotors(2)
