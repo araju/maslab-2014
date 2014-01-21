@@ -5,10 +5,12 @@ class BumpSensors():
 		self.numOfSensors = num
 		self.bumped = [False for i in range(num)]
 		self.maple = maple
-		# arg_list = [sensor id, bumped? (0 or 1, 0 = bumped)]
+		# arg_list = [bumped bit then id bits]
 		def updateValue(arg_list):
-			self.bumped[arg_list[0]] = (arg_list[1] == 0)
+			idx = arg_list[1] & 0x7F
+			value = arg_list[1] & 0x80
+			self.bumped[idx] = (value >> 7 == 1)
 
-		maple.registerCb(0x14, updateValue)
+		maple.registerCb(0x16, updateValue)
 
 	
