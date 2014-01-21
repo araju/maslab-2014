@@ -15,21 +15,29 @@ import org.opencv.imgproc.Imgproc;
 
 public class FrameProcessor {
 
-	private static final Scalar lowerBlue = new Scalar(90, 100, 50);
-	private static final Scalar upperBlue = new Scalar(115, 255, 255);
+//	private static final Scalar lowerBlue = new Scalar(90, 100, 50);
+//	private static final Scalar upperBlue = new Scalar(115, 255, 255);
 	
-	private static final Scalar lowerGreen = new Scalar(55, 80, 10);
-	private static final Scalar upperGreen = new Scalar(90, 255, 255);
+//	private static final Scalar lowerGreen = new Scalar(55, 80, 10);
+//	private static final Scalar upperGreen = new Scalar(90, 255, 255);
 	
-	private static final Scalar lowerRed = new Scalar(0, 100, 10);
-	private static final Scalar upperRed = new Scalar(15, 255, 255);
+//	private static final Scalar lowerRed = new Scalar(0, 100, 10);
+//	private static final Scalar upperRed = new Scalar(15, 255, 255);
+	
+	private static final Scalar lowerRed = new Scalar(110, 100, 10);
+	private static final Scalar upperRed = new Scalar(140, 255, 255);
+	
+	private static final Scalar lowerGreen = new Scalar(30, 80, 10);
+	private static final Scalar upperGreen = new Scalar(60, 255, 255);
+	
+	private static final Scalar lowerBlue = new Scalar(0, 100, 50);
+	private static final Scalar upperBlue = new Scalar(20, 255, 255);
 	
 	private static final int contourAreaThresh = 50;
 	private static final int cleanKernelSize = 5;
 	private static final int numBuffers = 7; //0: HSV, 1: Red Thresh, 2: Green, 3: Blue
 											 // 4,5,6: cleaned Red, Green, Blue
 	
-	//TODO: add QR detection
 	//TODO: do not detect above the lowest blue
 	
 	private List<Mat> buffers = null;
@@ -49,8 +57,16 @@ public class FrameProcessor {
 	}
 
 	
+	public Mat testThresh(Mat frame) {
+		Mat ret = new Mat();
+		Mat temp = new Mat();
+		Imgproc.cvtColor(frame, temp, Imgproc.COLOR_BGR2HSV);
+		Core.inRange(temp, lowerBlue, upperBlue, ret);
+		return ret;
+	}
+	
 	// returns map of color to list of blobs
-	public Map<String,List<double[]>> processFrame(Mat frame) {
+	public Map<String,List<double[]>> processFrame(Mat frame, Mat processedFrame) {
 		//first convert to hsv, store it in the first buffer
 		Imgproc.cvtColor(frame, buffers.get(0), Imgproc.COLOR_BGR2HSV);
 		Core.inRange(buffers.get(0), lowerRed, upperRed, buffers.get(1));
@@ -58,8 +74,10 @@ public class FrameProcessor {
 		Core.inRange(buffers.get(0), lowerBlue, upperBlue, buffers.get(3));
 		
 		//clean thresholded images
-		for (int i = 1; i <= 3; i++)
-			Imgproc.morphologyEx(buffers.get(i), buffers.get(i+3), Imgproc.MORPH_OPEN, cleanKernel);
+		Imgproc.morphologyEx(buffers.get(1), processedFrame, Imgproc.MORPH_OPEN, cleanKernel);
+		Imgproc.morphologyEx(buffers.get(2), buffers.get(5), Imgproc.MORPH_OPEN, cleanKernel);
+		Imgproc.morphologyEx(buffers.get(3), buffers.get(6), Imgproc.MORPH_OPEN, cleanKernel);
+		buffers.set(4, processedFrame);
 		
 		Map<String,List<double[]>> blobs = new HashMap<String, List<double[]>>();
 		blobs.put("red", findBlobs(buffers.get(4)));
@@ -73,7 +91,7 @@ public class FrameProcessor {
 	//returns list of blobs' centers (x,y)
 	public List<double[]> findBlobs(Mat binaryImg) {
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		Imgproc.findContours(binaryImg, contours, null, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(binaryImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		List<double[]> blobs = new ArrayList<double[]>();
 		for (MatOfPoint cnt : contours) {
 			if (Imgproc.contourArea(cnt) > contourAreaThresh) {
