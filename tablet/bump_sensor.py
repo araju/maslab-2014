@@ -1,10 +1,16 @@
-class BumpSensors(Sensor):
+# represents the short range IRs
+
+class BumpSensors():
 	def __init__(self, num, maple):
 		self.numOfSensors = num
 		self.bumped = [False for i in range(num)]
 		self.maple = maple
-		maple.registerCb(0x14, updateValue)
+		# arg_list = [bumped bit then id bits]
+		def updateValue(arg_list):
+			idx = arg_list[1] & 0x7F
+			value = arg_list[1] & 0x80
+			self.bumped[idx] = (value >> 7 == 1)
 
-	# arg_list = [sensor id, bumped? (0 or 1)]
-	def updateValue(self, arg_list):
-		self.bumped[arg_list[0]] = (arg_list[1] == 1)
+		maple.registerCb(0x16, updateValue)
+
+	
