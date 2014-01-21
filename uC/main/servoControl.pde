@@ -13,8 +13,6 @@
 #define SERVO_GREEN_PIN 7
 #define SERVO_RED_PIN 8
 
-
-
 Servo sortServo;
 Servo greenServo;
 
@@ -28,14 +26,23 @@ sortServoState _servo_sortState = sortIdle;
 uint32 _servo_sortStartTime = 0;
 
 void servo_init() {
+<<<<<<< HEAD
   greenServo.attach(SERVO_GREEN_PIN);
   sortServo.attach(SERVO_SORT_PIN);
+=======
+  greenServo.attach(7);
+  sortServo.attach(8);
+>>>>>>> SimpleControl
   greenServo.write(110);
 }
 
 void _servo_sort_periodic() {
   if (_servo_sortState == sortIdle) {
+<<<<<<< HEAD
     sortServo.write(SERVO_SORT_DEFAULT);
+=======
+    sortServo.write(90);
+>>>>>>> SimpleControl
     if(color_isGreenBallPresent()) {
       _servo_sortStartTime = millis();
       _servo_sortState = sortGreen;
@@ -47,14 +54,22 @@ void _servo_sort_periodic() {
     if (_servo_sortStartTime + SERVO_SORT_TIMETHRESH < millis()) {
       _servo_sortState = sortIdle; 
     }else if (_servo_sortStartTime + SERVO_SORT_DELAY < millis()){
+<<<<<<< HEAD
       sortServo.write(SERVO_SORT_GREEN);      
+=======
+      sortServo.write(0);      
+>>>>>>> SimpleControl
     }
   } else if (_servo_sortState == sortRed) {
 
     if (_servo_sortStartTime + SERVO_SORT_TIMETHRESH < millis()) {
       _servo_sortState = sortIdle;      
     }else if (_servo_sortStartTime + SERVO_SORT_DELAY < millis()){
+<<<<<<< HEAD
       sortServo.write(SERVO_SORT_RED);      
+=======
+      sortServo.write(1800);      
+>>>>>>> SimpleControl
     }
 
   }
@@ -76,6 +91,10 @@ uint32 dispenseGreenStart = 0;
 void _servo_dispense_green(){
   if (greenState == greenIdle) {
     if (color_isBluePresent()) {
+<<<<<<< HEAD
+=======
+      SerialUSB.println("Dispense Green");
+>>>>>>> SimpleControl
       greenState = greenDispense;
       dispenseGreenStart = millis();
     }
@@ -88,6 +107,10 @@ void _servo_dispense_green(){
     
     
     if (!color_isBluePresent() && millis() > dispenseGreenStart + SERVO_DISPENSE_TIMETHRESH) {
+<<<<<<< HEAD
+=======
+      SerialUSB.println("Go Back");
+>>>>>>> SimpleControl
       greenState = greenIdle;
     }
     

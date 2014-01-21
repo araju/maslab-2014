@@ -18,14 +18,18 @@ driveSquareState state = start;
 void driveSquare() {
   if (state == start){
     state = str1;
+    sc_drive(100);
+//    setMotors(5000, 5000);
   }else if (state == str1) {
-    if (driveStraight() == 0) {
+    if (millis() > 20000) {
       state = right1;
+      sc_turn(90); 
     }
     
   }else if (state == right1) {
-    if (turnRight() == 0){
+    if (millis() > 30000){
        state = str2;
+       sc_drive(100);
     }
     
   }else if (state == str2) {

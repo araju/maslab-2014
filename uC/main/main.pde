@@ -22,6 +22,7 @@ void setup() {
 //  sonar_init();
 //  servo_init();
   range_init();
+
   //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
   pinMode(BOARD_BUTTON_PIN, INPUT);
 
@@ -52,7 +53,11 @@ void loop() {
   if (execute == RUN){
     
     if (millis() % 100 == 0){
+<<<<<<< HEAD
       debug = 1;
+=======
+      debug = 1;      
+>>>>>>> SimpleControl
     }else {
       debug = 0;
     }
@@ -74,6 +79,7 @@ void loop() {
 
     //Read Color Sensor
 //    color_periodic();
+
     execute = ALREADY_RAN;
   }
 
