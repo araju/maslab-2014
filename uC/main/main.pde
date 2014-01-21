@@ -1,5 +1,7 @@
 
 #include "cmd.h"
+#include <stdio.h>
+#define FET_GATE 4
 
 typedef enum {
   NOT_YET_RUN,
@@ -9,16 +11,21 @@ typedef enum {
 execute_t;
 
 void setup() {
-  gyro_init();
-  motor_init();
+  pinMode(FET_GATE, OUTPUT);
+  digitalWrite(FET_GATE, HIGH);
+  
+  
+  delay(5000);
+//  gyro_init();
+//  motor_init();
 //  color_init();
+//  sonar_init();
+//  servo_init();
+  range_init();
   //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
   pinMode(BOARD_BUTTON_PIN, INPUT);
 
-  delay(3000);
-  control_setX(100);
-  control_setY(0);
-  control_setTheta(-1);
+
 }
 
 
@@ -45,18 +52,7 @@ void loop() {
   if (execute == RUN){
     
     if (millis() % 100 == 0){
-//      debug = 1;
-//      SerialUSB.print("X: ");
-//      SerialUSB.print(state_getX());
-//      SerialUSB.print(" Y: ");
-//      SerialUSB.print(state_getY());
-//      SerialUSB.print(" Theta: ");
-//      SerialUSB.print(state_getTheta());
-//      SerialUSB.print(" Left: ");
-//      SerialUSB.print(motor_getLeftThetaDot());
-//      SerialUSB.print(" Right: ");
-//      SerialUSB.println(motor_getRightThetaDot());
-      
+      debug = 1;
     }else {
       debug = 0;
     }
@@ -65,34 +61,19 @@ void loop() {
     //Read Serial Stream and execute commands
     serial_periodic();
     //Read Gyro
-    gyro_periodic();
-    //Set Left Motor
-    motor_periodic();
-    //Set Right Motor
+//    gyro_periodic(); 
 
-    //Send Left Motor Current
+//    sc_periodic();
 
-    //Send Right Motor Current
+//    driveSquare();
+    
+//    sonar_periodic();
 
-    //Set Cork Screw Drive
-
-    //Send Cork Screw Drive Feedback
-
-    //Control
+//      servo_periodic();
+      range_periodic();
 
     //Read Color Sensor
 //    color_periodic();
-    //Set Green Gate
-
-    //Set Red Gate
-
-    //Set Ball Feeder
-
-    //Update Heading and Postion Estimates
-    stateEstimation_periodic();
-    
-    //Speed and Heading Loop
-    control_periodic();
     execute = ALREADY_RAN;
   }
 

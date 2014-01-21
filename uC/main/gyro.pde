@@ -10,6 +10,7 @@ HardwareSPI gyroSPI(1);
 
 int32 _gyro_lastReading = 0;
 float _gyro_degreesPerS = 0;
+float _gyro_angle = 0;
 
 void gyro_init() {
   gyroSPI.begin(SPI_1_125MHZ, MSBFIRST, SPI_MODE_0);
@@ -19,6 +20,14 @@ void gyro_init() {
 
 int32 gyro_getAngularRate(){
   return _gyro_degreesPerS;
+}
+
+int32 gyro_getAngle() {
+  return _gyro_angle;
+}
+
+void gyro_resetAngle() {
+  _gyro_angle = 0;
 }
 
 void gyro_periodic(){
@@ -61,6 +70,13 @@ void gyro_periodic(){
   //This works because the gain from LSB to milliDegrees is 12.5 
   //and the refresh rate is 50 hz. 12.5/50 = 1/4.  So converting to 
   //millidegrees works out to be a left shift of 2.
-  _gyro_degreesPerS = signedReading * GYRO_LSB_PER_DEG;
+  _gyro_degreesPerS = -1 * signedReading * GYRO_LSB_PER_DEG;
+  if (abs(_gyro_degreesPerS) > 1) {
+    _gyro_angle += _gyro_degreesPerS * DT;    
+  }
+
   
+  if (getDebug()) {
+    SerialUSB.println(_gyro_angle);
+  }
 }

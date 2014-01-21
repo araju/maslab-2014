@@ -10,11 +10,6 @@ int8 cmd_registerCallback(uint8 cmd, pCmdCallback cb){
   return 0; 
 }
 
-//int8 cmd_sendCommand(uint8 cmd, uint8 args) {
-//  
-//}
-
-
 pCmdCallback cmd_getCallback(uint8 cmd){
   return _cmd_cbList[cmd];
 }
