@@ -42,10 +42,10 @@ void _sc_turn() {
   }
   
   if (getDebug()) {
-    SerialUSB.print("Turn,");
-    SerialUSB.print(gyro_getAngle());
-    SerialUSB.print(",");
-    SerialUSB.println(_sc_angleSetPoint - gyro_getAngle());
+//    Serial1.print("Turn,");
+//    Serial1.print(gyro_getAngle());
+//    Serial1.print(",");
+//    Serial1.println(_sc_angleSetPoint - gyro_getAngle());
   }
   
 }
@@ -66,16 +66,16 @@ void _sc_drive() {
   if (abs(distErr) > 1500) {
     base = sign(distErr) * SC_STRAIGHTSPEED;
   }else {
-    base = (distErr / 1500.0) * (SC_STRAIGHTSPEED - 3000) + 3000;
+    base = (distErr / 1500.0) * (SC_STRAIGHTSPEED - 3000) + sign(distErr) * 3000;
   }
   
   if (getDebug()) {
-    SerialUSB.print("Drive,");
-    SerialUSB.print(motor_getLeftTicks());
-    SerialUSB.print(",");    
-    SerialUSB.print(motor_getRightTicks());
-    SerialUSB.print(",");    
-    SerialUSB.println(distErr);
+//    Serial1.print("Drive,");
+//    Serial1.print(motor_getLeftTicks());
+//    Serial1.print(",");    
+//    Serial1.print(motor_getRightTicks());
+//    Serial1.print(",");    
+//    Serial1.println(distErr);
   }
   
   setMotors(base - bias, base + bias);
@@ -91,25 +91,27 @@ void sc_drive(float distance) {
   motor_clearTicks();
   _sc_distSetPoint = distance / WHEEL_PERIMETER * TICKS_PER_REV;
   _sc_state = drive;
+  _sc_angleErrInt = 0;
 }
 
 void sc_turn(float degree) {
   gyro_resetAngle();
   _sc_state = turn;
   _sc_angleSetPoint = degree;
+  _sc_angleErrInt = 0;
 }
 
 void sc_drive_cmd(uint8 *buf){
   if (buf[0] == 1) { 
-    sc_drive(buf[1] * 1.0);
+    sc_drive(((int8)buf[1]) * 1.0);
   }
 }
 
 void sc_turn_cmd(uint8 *buf) {
   if (buf[0] == 1) {
-    Serial1.print("Serial Turn: ");
-    Serial1.println(buf[1]);
-    sc_drive(buf[1] * 1.0);
+//    Serial1.print("Serial Turn: ");
+//    Serial1.println((int8)buf[1]);
+    sc_turn(((int8)buf[1]) * 1.0);
   }
 }
 
@@ -119,6 +121,21 @@ void sc_init() {
 }
 
 void sc_periodic() {
+  int32 heading = gyro_getAngle() * 100;
+  uint8 msg[] = {0x14, 0x02,heading & 0xFF, (heading >> 8) & 0xFF};
+  serial_tx(msg, 4);
+  
+  if (getDebug()) {
+    float avgTicks = (motor_getLeftTicks() + motor_getRightTicks())/2;
+    avgTicks = avgTicks/TICKS_PER_REV * WHEEL_PERIMETER;
+    int32 dist = (int32) avgTicks * 10;
+    msg[0] = 0x14;
+    msg[2] = dist & 0xFF;
+    msg[3] = (dist >> 8) & 0xFF;
+    serial_tx(msg, 4);
+  }
+
+  
   if (_sc_state == stop) {
     setMotors(0,0);
   } else if (_sc_state == turn) {
