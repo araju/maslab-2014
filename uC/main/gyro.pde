@@ -72,7 +72,12 @@ void gyro_periodic(){
   //millidegrees works out to be a left shift of 2.
   _gyro_degreesPerS = -1 * signedReading * GYRO_LSB_PER_DEG;
   if (abs(_gyro_degreesPerS) > 1) {
-    _gyro_angle += _gyro_degreesPerS * DT;    
+    _gyro_angle += _gyro_degreesPerS * DT;
+    if (_gyro_angle > 360) {
+      _gyro_angle -= 360;
+    }else if (_gyro_angle < 0) {
+      _gyro_angle += 360;
+    }
   }
 
 //  if (getDebug()) {

@@ -3,12 +3,12 @@
 #define SC_TURN_KI 0 
 #define SC_TURN_KD 0 
 
-#define SC_STRAIGHTBIAS_KP 400
-#define SC_STRAIGHTBIAS_KI 50
+#define SC_STRAIGHTBIAS_KP 200
+#define SC_STRAIGHTBIAS_KI 25
 #define SC_STRAIGHTBIAS_KD 0
 
-#define SC_STRAIGHTSPEED 12000
-#define SC_TURNSPEED 6000
+#define SC_STRAIGHTSPEED 6000
+#define SC_TURNSPEED 4000
 
 #define WHEEL_PERIMETER 30.5221
 #define TICKS_PER_REV (64 * 29.0)
@@ -24,7 +24,7 @@ controlState _sc_state;
 float _sc_angleSetPoint = 0;
 float _sc_distSetPoint = 0;
 float _sc_angleErrInt = 0;
-
+float _motor_straightBias = 0;
 void _sc_stop() {
   _sc_angleErrInt = 0;
   setMotors(0,0);
@@ -54,12 +54,12 @@ void _sc_drive() {
   
   int32 avgTicks = (motor_getLeftTicks() + motor_getRightTicks())/2;
   int32 distErr = _sc_distSetPoint - avgTicks;
-  float angleErr = -1 * gyro_getAngle();
+  float angleErr = -1 * gyro_getAngle() - _motor_straightBias;
 
   _sc_angleErrInt += angleErr * DT;
 
   int32 bias = angleErr * SC_STRAIGHTBIAS_KP;
-  bias = _sc_angleErrInt * SC_STRAIGHTBIAS_KI;
+  bias += _sc_angleErrInt * SC_STRAIGHTBIAS_KI;
   
   int32 base = 0;
   
@@ -78,6 +78,15 @@ void _sc_drive() {
 //    Serial1.println(distErr);
   }
   
+  uint8 buf[]= {0x17, 0x03, (base-bias) & 0x80 | 0, abs(base-bias) & 0xFF, (abs(base-bias) >> 8) & 0xFF}; 
+  serial_tx(buf,5);
+
+  buf[2] = (base+bias) & 0x80 | 1 ;
+  buf[3] = abs(base+bias) & 0xFF;
+  buf[4] = (abs(base+bias) >> 8) & 0xFF; 
+  serial_tx(buf,5);
+  
+  
   setMotors(base - bias, base + bias);
 
   if (abs(distErr) < 50) {
@@ -86,10 +95,11 @@ void _sc_drive() {
   
 }
 
-void sc_drive(float distance) {
+void sc_drive(float distance, float angleBias) {
   gyro_resetAngle();
   motor_clearTicks();
   _sc_distSetPoint = distance / WHEEL_PERIMETER * TICKS_PER_REV;
+  _motor_straightBias = angleBias;
   _sc_state = drive;
   _sc_angleErrInt = 0;
 }
@@ -102,8 +112,8 @@ void sc_turn(float degree) {
 }
 
 void sc_drive_cmd(uint8 *buf){
-  if (buf[0] == 1) { 
-    sc_drive(((int8)buf[1]) * 1.0);
+  if (buf[0] == 2) { 
+    sc_drive(((int8)buf[1]) * 1.0, (int8)buf[2] * 1.0); 
   }
 }
 
@@ -112,6 +122,7 @@ void sc_turn_cmd(uint8 *buf) {
 //    Serial1.print("Serial Turn: ");
 //    Serial1.println((int8)buf[1]);
     sc_turn(((int8)buf[1]) * 1.0);
+    
   }
 }
 
@@ -121,15 +132,17 @@ void sc_init() {
 }
 
 void sc_periodic() {
-  int32 heading = gyro_getAngle() * 100;
-  uint8 msg[] = {0x14, 0x02,heading & 0xFF, (heading >> 8) & 0xFF};
-  serial_tx(msg, 4);
+
   
   if (getDebug()) {
+    int32 heading = gyro_getAngle() * 100;
+    uint8 msg[] = {0x14, 0x02,heading & 0xFF, (heading >> 8) & 0xFF};
+    serial_tx(msg, 4);
+    
     float avgTicks = (motor_getLeftTicks() + motor_getRightTicks())/2;
     avgTicks = avgTicks/TICKS_PER_REV * WHEEL_PERIMETER;
     int32 dist = (int32) avgTicks * 10;
-    msg[0] = 0x14;
+    msg[0] = 0x15;
     msg[2] = dist & 0xFF;
     msg[3] = (dist >> 8) & 0xFF;
     serial_tx(msg, 4);

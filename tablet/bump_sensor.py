@@ -7,8 +7,11 @@ class BumpSensors():
 		self.maple = maple
 		# arg_list = [bumped bit then id bits]
 		def updateValue(arg_list):
+
 			idx = arg_list[1] & 0x7F
 			value = arg_list[1] & 0x80
+
+			# print idx, value
 			self.bumped[idx] = (value >> 7 == 1)
 
 		maple.registerCb(0x16, updateValue)

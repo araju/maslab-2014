@@ -31,11 +31,11 @@ class Maple:
                 return port[0]
 
     def periodic_task(self):
-        printCr = False
+        # printCr = False
         while self.port.inWaiting():
-            printCr = True
+            # printCr = True
             ch = ord(self.port.read())
-            print chr(ch),
+            # print chr(ch),
             if self.isEscaped:
                 self.isEscaped = False
                 self.buffer.append(ch)
@@ -48,16 +48,17 @@ class Maple:
                         #if this is a valid message, the first entry will be 
                         # the key for a call back function.  We call the
                         #callback function with the arguments for that command.
-                        cb = self.cbList[self.buffer[0]]
-                        cb(self.buffer[1:-1])
+                        if self.buffer[0] in self.cbList.keys():
+                            cb = self.cbList[self.buffer[0]]
+                            cb(self.buffer[1:-1])
                 elif ch == self.ESCAPE:
                     self.isEscaped = True
                 else:
 
                     self.buffer.append(ch)
 
-        if printCr:
-            print ''
+        # if printCr:
+        #     print ''
     def _validMessage(self):
         checksum = 0
         for ch in self.buffer:
@@ -93,10 +94,10 @@ class Maple:
         outBytes.append((~checksum) & 0xFF)
         outBytes.append(self.END_FLAG)
 
-        print 'Sending: ',
-        for i in outBytes:
-            print hex(i), 
-        print ''
+        # print 'Sending: ',
+        # for i in outBytes:
+        #     print hex(i), 
+        # print ''
         self.port.write(outBytes)
 
 
