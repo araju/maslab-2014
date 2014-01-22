@@ -2,12 +2,17 @@
 
 from motor_controller import MotorDriver
 import time
+from mapleIf import Maple
 
-driver = MotorDriver()
+maple = Maple()
+driver = MotorDriver(maple)
 
-driver.turnMotors(90)
-time.sleep(3)
-driver.stopMotors()
+
+driver.driveBiasMotors(50,-1)
+
+# driver.turnMotors(90)
+# time.sleep(3)
+# driver.stopMotors()
 ##driver.close()
 ##time.sleep(3)
 ##driver.driveMotors(50) # in cm

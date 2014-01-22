@@ -9,8 +9,11 @@ import time
 import traceback
 from threading import Thread
 import pwmSense
+from distance_sensor import DistanceSensors
+import msvcrt
+
 class WallFollow:
-    turnTo, goAway, straight = range(3)
+    turnTo, goAway, straight, start = ("turnTo", "goAway", "straight", "start")
 
 
 def turnLeft(driver):
@@ -35,28 +38,39 @@ def driveStraight(driver):
 def readMaple(maple):
     while 1:
         maple.periodic_task()
-        time.sleep(0.05)
+        time.sleep(0.01)
 
 maple = None
 driver = None
 try:
     maple = Maple()
     driver = MotorDriver(maple)
-    sensors = BumpSensors(4,maple)
+    bumps = BumpSensors(4,maple)
     odo = Odo(maple)
     pwm = pwmSense.PWMSense(maple)
-
+    sonars = DistanceSensors(4,maple)
     count = 0
+
+    BIAS_K = 2.0
+    DIST_OFF = 10.0
+    DIST_K = 1.0
+
     thread = Thread(target = readMaple, args = (maple,))
     thread.start()
-    wfState = WallFollow.straight
-    while 1:
-        front = sensors.bumped[3]
-        back = sensors.bumped[2]
-
-        newState = wfState
-
-        print front, back, wfState, odo.distance, pwm.pwmChannels
+    time.sleep(0.1) # just let the thread get started
+    wfState = WallFollow.start
+    prevDist = sonars.distances[3]
+    while not msvcrt.kbhit():
+        front = bumps.bumped[3]
+        back = bumps.bumped[2]
+        dist = sonars.distances[3]
+        
+        # print dist
+        dDist = dist - prevDist
+        biasOffset = dDist * BIAS_K
+        distOffset = dist * DIST_K
+        
+        # print front, back, wfState, 
         if front and not back:
             newState = WallFollow.goAway
         if not front and back:
@@ -66,14 +80,22 @@ try:
         if front and back:
             newState = WallFollow.straight
 
-        if newState != wfState or odo.distance > 10:            
+        print front, back, newState, biasOffset, odo.distance
+
+        if newState != wfState or odo.distance > 10:
+            if biasOffset < -15:
+                biasOffset = -15
+            elif biasOffset > 15:
+                biasOffset = 15
             wfState = newState
             if wfState == WallFollow.straight:
-                driver.driveMotors(15)
+                driver.driveBiasMotors(15,-biasOffset)
             elif wfState == WallFollow.goAway:
-                driver.driveBiasMotors(15, 0)
+                driver.driveBiasMotors(15, 2 + biasOffset )
             elif wfState == WallFollow.turnTo:
-                driver.driveBiasMotors(15, 0)
+                driver.driveBiasMotors(15, -10 - biasOffset)
+
+        prevDist = dist
 
         # front = sensors.bumped[3]
         # back = sensors.bumped[2]
@@ -92,6 +114,7 @@ try:
         #         driveStraight(driver)
         time.sleep(0.1)
         count += 1
+    thread.stop()
 except:
     traceback.print_exc()
 finally:

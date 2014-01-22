@@ -91,7 +91,10 @@ class Maple:
                 outBytes.append(b)
             outBytes.append(b)
             checksum += b
-        outBytes.append((~checksum) & 0xFF)
+        c = (~checksum) & 0xFF
+        if c in [self.START_FLAG, self.END_FLAG, self.ESCAPE]:
+            outBytes.append(self.ESCAPE)
+        outBytes.append(c)
         outBytes.append(self.END_FLAG)
 
         # print 'Sending: ',

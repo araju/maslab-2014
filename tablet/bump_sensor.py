@@ -13,6 +13,7 @@ class BumpSensors():
 
 			# print idx, value
 			self.bumped[idx] = (value >> 7 == 1)
+			# print self.bumped
 
 		maple.registerCb(0x16, updateValue)
 
