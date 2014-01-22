@@ -17,7 +17,8 @@ class VisionConsumer:
 		self.svrSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.svrSock.bind(('localhost', 2300))
 		self.svrSock.listen(5)
-		this.goal = () # direction, distance of goal
+		self.goal = () # direction, distance of goal
+		self.ballMap = {"red" : [], "green" : [], "reactor" : []}
 		thread = Thread(target = self.startServer)
 		thread.start()
 
@@ -26,19 +27,19 @@ class VisionConsumer:
 		while True:
 			clisock, (remhost, remport) = srvsock.accept()
 	  		json = clisock.recv(4096)
-	  		ballMap = json.loads(json)
-	  		green = ballMap["green"]
-	  		red = ballMap["red"]
+	  		self.ballMap = json.loads(json)
+	  		green = self.ballMap["green"]
+	  		red = self.ballMap["red"]
 	  		if len(red) == 0 and len(green) == 0:
-	  			this.goal = ()
+	  			self.goal = ()
 	  		elif len(red) > len(green):
-	  			this.goal = red
+	  			self.goal = red
 	  		elif len(green) > len(red):
-	  			this.goal = green
+	  			self.goal = green
 	  		elif (red[1] < green[1]):
-	  			this.goal = red
+	  			self.goal = red
 	  		else:
-	  			this.goal = green
+	  			self.goal = green
 
 
 
