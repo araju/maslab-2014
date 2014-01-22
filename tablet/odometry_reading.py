@@ -9,8 +9,10 @@ class Odometry:
 		self.direction = 0  # cm
 		self.maple = maple
 		def updateAngle(arg_list):
-			self.direction = (arg_list[0] | (arg_list[1] << 8)) / 100.0
+			self.direction = (arg_list[1] | (arg_list[2] << 8)) / 100.0
+			# print self.direction
 		def updateDistance(arg_list):
-			self.distance = (arg_list[0] | (arg_list[1] << 8)) / 10.0 
+			self.distance = (arg_list[1] | (arg_list[2] << 8)) / 10.0 
+			# print self.distance
 		maple.registerCb(0x14, updateAngle)
 		maple.registerCb(0x15, updateDistance)

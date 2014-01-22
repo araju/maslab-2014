@@ -4,8 +4,8 @@ from mapleIf import Maple
 
 class MotorDriver:
 
-	def __init__(self,m):
-		self.maple = m
+    def __init__(self,m):
+        self.maple = m
 
         def read(self):
                 def testCb(args):
@@ -13,25 +13,43 @@ class MotorDriver:
                 
                         
 
-	def stopMotors(self):
-		self.turnMotors(0)
-		self.driveMotors(0)
+    def stopMotors(self):
+        self.turnMotors(0)
+        self.driveMotors(0)
 
-	# only handles angles from -127 to 127.
-	def turnMotors(self,theta):
-		if theta < -127:
-			theta = -127
-		if theta > 127:
-			theta = 127
-		buf = [0x13,0x01,theta & 0xFF]
-		self.maple.send(buf)
+    # only handles angles from -127 to 127.
+    def turnMotors(self,theta):
+        if theta < -127:
+            theta = -127
+        if theta > 127:
+            theta = 127
+        buf = [0x13,0x01,int(theta) & 0xFF]
+        self.maple.send(buf)
 
-	def driveMotors(self,dist):
-		if (dist > 255):
-			dist = 255
-		buf = [0x12,0x01,dist & 0xFF]
-		self.maple.send(buf)
+    def driveBiasMotors(self,dist, bias):
+        if (dist > 127):
+            dist = 127
+        elif (dist < -127):
+            dist = -127
 
-	def close(self):
+        if (bias > 127):
+            dist = 127
+        elif (bias < -127):
+            bias = -127
+
+
+        buf = [0x12,0x02,int(dist) & 0xFF, int(bias) & 0xFF]
+        self.maple.send(buf)
+
+    def driveMotors(self,dist):
+        if (dist > 127):
+            dist = 127
+        elif (dist < -127):
+            dist = -127
+            
+        buf = [0x12,0x02,int(dist) & 0xFF, 0]
+        self.maple.send(buf)
+
+    def close(self):
                 if (self.maple != None):
                         self.maple.close()
