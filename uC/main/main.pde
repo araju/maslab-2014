@@ -11,7 +11,7 @@ typedef enum {
 execute_t;
 
 void setup() {
-    Serial1.begin(115200);
+    Serial1.begin(230400);
 //  pinMode(FET_GATE, OUTPUT);
 //  digitalWrite(FET_GATE, HIGH);
 //  
@@ -20,7 +20,7 @@ void setup() {
   gyro_init();
   motor_init();
 //  color_init();
-//  sonar_init();
+  sonar_init();
 //  servo_init();
   sc_init();
   range_init();
@@ -52,13 +52,15 @@ void loop() {
     execute = NOT_YET_RUN;
   }
 
-  if (execute == RUN){
-    if (millis() % 100 == 0){
+  if (millis() % 100 == 0){
       debug = 1;
 
-    }else {
+  }else {
       debug = 0;
-    }
+  }
+
+  if (execute == RUN){
+    
     
     //Here is where we list our tasks
     //Read Serial Stream and execute commands
@@ -70,7 +72,7 @@ void loop() {
 
 //    driveSquare();
     
-//    sonar_periodic();
+    sonar_periodic();
 
 //      servo_periodic();
       range_periodic();

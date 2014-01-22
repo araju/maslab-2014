@@ -10,6 +10,8 @@ class Odometry:
 		self.maple = maple
 		def updateAngle(arg_list):
 			self.direction = (arg_list[1] | (arg_list[2] << 8)) / 100.0
+			if self.direction > 180:
+				self.direction -= 360
 			# print self.direction
 		def updateDistance(arg_list):
 			self.distance = (arg_list[1] | (arg_list[2] << 8)) / 10.0 

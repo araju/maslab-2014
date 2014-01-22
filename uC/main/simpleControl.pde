@@ -54,7 +54,13 @@ void _sc_drive() {
   
   int32 avgTicks = (motor_getLeftTicks() + motor_getRightTicks())/2;
   int32 distErr = _sc_distSetPoint - avgTicks;
-  float angleErr = -1 * gyro_getAngle() - _motor_straightBias;
+  float angleErr = -1 * gyro_getAngle() + _motor_straightBias;
+  
+  if (angleErr > 180) {
+    angleErr -= 360;
+  }else if (angleErr < -180) {
+    angleErr += 360;
+  }
 
   _sc_angleErrInt += angleErr * DT;
 
@@ -69,14 +75,20 @@ void _sc_drive() {
     base = (distErr / 1500.0) * (SC_STRAIGHTSPEED - 3000) + sign(distErr) * 3000;
   }
   
-  if (getDebug()) {
-//    Serial1.print("Drive,");
-//    Serial1.print(motor_getLeftTicks());
-//    Serial1.print(",");    
-//    Serial1.print(motor_getRightTicks());
-//    Serial1.print(",");    
-//    Serial1.println(distErr);
-  }
+//  if (getDebug()) {
+    Serial1.print("Drive,");
+    Serial1.print(motor_getLeftTicks());
+    Serial1.print(",");    
+    Serial1.print(motor_getRightTicks());
+    Serial1.print(",");    
+    Serial1.print(distErr);
+    Serial1.print(",");
+    Serial1.print(angleErr);
+    Serial1.print(",");
+    Serial1.print(bias);
+    Serial1.print(",");
+    Serial1.println(base);
+//  }
   
   uint8 buf[]= {0x17, 0x03, (base-bias) & 0x80 | 0, abs(base-bias) & 0xFF, (abs(base-bias) >> 8) & 0xFF}; 
   serial_tx(buf,5);
@@ -134,7 +146,7 @@ void sc_init() {
 void sc_periodic() {
 
   
-  if (getDebug()) {
+//  if (getDebug()) {
     int32 heading = gyro_getAngle() * 100;
     uint8 msg[] = {0x14, 0x02,heading & 0xFF, (heading >> 8) & 0xFF};
     serial_tx(msg, 4);
@@ -146,7 +158,7 @@ void sc_periodic() {
     msg[2] = dist & 0xFF;
     msg[3] = (dist >> 8) & 0xFF;
     serial_tx(msg, 4);
-  }
+//  }
 
   
   if (_sc_state == stop) {

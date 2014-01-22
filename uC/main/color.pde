@@ -97,7 +97,7 @@ void color_periodic() {
     colorI2C.endTransmission();
     
     uint8 bytesRx = colorI2C.requestFrom(COLOR_ADDR, 9);
-
+    (void) bytesRx;
     uint16 bytes[4];
     if (colorI2C.receive() & COLOR_STATUS_VALID){
       
@@ -111,6 +111,8 @@ void color_periodic() {
       _color_red = bytes[1];
       _color_green = bytes[2];
       _color_blue = bytes[3];
+      
+      (void) _color_clear;
       
       if (_color_red > COLOR_RED_THRESHOLD && _color_red > _color_green && _color_red > _color_blue){
         //Red Ball Detected
