@@ -4,7 +4,8 @@
 
 IDLE = "IDLE"
 EXPLORE = "EXPLORE"
-GO_TO_OBJ = "GO_TO_OBJ"
+GO_TO_BALL = "GO_TO_BALL"
+GO_TO_REACTOR = "GO_TO_REACTOR"
 WALL_FOLLOW = "WALL_FOLLOW"
 RETURN_TO_WALL = "RETURN_TO_WALL"
 DROP_RED = "DROP_RED"
@@ -15,7 +16,8 @@ STUCK = "STUCK"
 stateActions = {
 	IDLE : idle,
 	EXPLORE : explore,
-	GO_TO_OBJ : goToObj,
+	GO_TO_BALL : goToBall,
+	GO_TO_REACTOR : goToReactor,
 	WALL_FOLLOW : wallFollow,
 	RETURN_TO_WALL : retToWall,
 	DROP_RED : dropRed,
@@ -27,13 +29,16 @@ def getStateActions():
 	return stateActions
 
 def idle(sensors):
-	print "unimplemented method: idle"
+	pass # don't need to do anything in idle
 
 def explore(sensors):
 	print "unimplemented method: explore"
 
-def goToObj(sensors):
-	print "unimplemented method: goToObj"
+def goToBall(sensors):
+	print "unimplemented method: goToBall"
+
+def goToReactor(sensors):
+	print "unimplemented method: goToReactor"
 
 def wallFollow(sensors):
 	print "unimplemented method: wallFollow"
