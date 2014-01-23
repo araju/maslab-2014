@@ -28,11 +28,13 @@ public class VisionPublisher {
 	
 	public VisionPublisher(int port) {
 		this.port = port;
-		try {
-			this.socket = new Socket(HOST, this.port);
-			outputWriter = new PrintWriter(this.socket.getOutputStream(), true);
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
+		while (this.socket == null) {
+			try {
+				this.socket = new Socket(HOST, this.port);
+				outputWriter = new PrintWriter(this.socket.getOutputStream(), true);
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
 		}
 	}
 	

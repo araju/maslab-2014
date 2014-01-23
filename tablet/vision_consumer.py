@@ -4,44 +4,67 @@
 import json
 import socket
 from threading import Thread
+import traceback 
 
 
 class VisionConsumer:
 
-	# following denote the closest ball/reactor. given as a [direction, distance]
-	closestGreen = []
-	closestRed = []
-	closestReactor = []
+    def __init__(self, port):
+        self.svrSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.svrSock.bind(('localhost', port))
+        self.svrSock.listen(5)
+        self.goalBall = [] # direction, distance of goal
+        self.goalReactor = []
+        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactor" : []}
+        self.run = True
 
-	def __init__(self, port):
-		self.svrSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.svrSock.bind(('localhost', 2300))
-		self.svrSock.listen(5)
-		self.goal = () # direction, distance of goal
-		self.ballMap = {"red" : [], "green" : [], "reactor" : []}
-		thread = Thread(target = self.startServer)
-		thread.start()
+    
+    def startServer(self):
+        def runServer():
+            clisock, (remhost, remport) = self.svrSock.accept()
+            while self.run:
+                jsonStr = clisock.recv(4096)
+                self.ballMap = json.loads(jsonStr)
+                
+                green = self.ballMap["green"]
+                red = self.ballMap["red"]
+                if len(red) == 0 and len(green) == 0:
+                    self.goalBall = []
+                elif len(red) > len(green):
+                    self.goalBall = red
+                elif len(green) > len(red):
+                    self.goalBall = green
+                elif (red[1] < green[1]):
+                    self.goalBall = red
+                else:
+                    self.goalBall = green
 
-	# TODO: handle the reactors!!!!
-	def startServer(self):
-		while True:
-			clisock, (remhost, remport) = srvsock.accept()
-	  		json = clisock.recv(4096)
-	  		self.ballMap = json.loads(json)
-	  		green = self.ballMap["green"]
-	  		red = self.ballMap["red"]
-	  		if len(red) == 0 and len(green) == 0:
-	  			self.goal = ()
-	  		elif len(red) > len(green):
-	  			self.goal = red
-	  		elif len(green) > len(red):
-	  			self.goal = green
-	  		elif (red[1] < green[1]):
-	  			self.goal = red
-	  		else:
-	  			self.goal = green
+                self.goalReactor = self.ballMap["reactor"]
+                
+
+        thread = Thread(target = runServer)
+        thread.start()
+        print "started thread"
+
+    def seeGreenBall(self):
+        return len(self.ballMap["green"]) > 0
+
+    def seeRedBall(self):
+        return len(self.ballMap["red"]) > 0
+
+    def seeReactor(self):
+        return len(self.goalReactor) > 0
 
 
+if __name__ == '__main__':
+    vc = None
+    try:
+        vc = VisionConsumer(2300)
+        vc.startServer()
+    except:
+        traceback.print_exc()
+        if vc != None:
+            vc.run = False
 
 
 
