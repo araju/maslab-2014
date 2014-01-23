@@ -26,10 +26,12 @@ public class BlobProcessor {
 			for (double[] point : blobs.get(color)) {
 				ArrayList<Double> b = new ArrayList<Double>();
 				double direction = calculateDirection(point[0]);
-				double distance = calculateDistance(point[0],point[1]);
-				b.add(direction);
-				b.add(distance);
-				balls.get(color).add(b);
+				double distance = color.equals("blue") ? calculateDistance(point[0],point[1]) : calculateDistance(point[0],point[1]);
+				if (distance > 0) {
+					b.add(direction);
+					b.add(distance);
+					balls.get(color).add(b);
+				}
 			}
 			Collections.sort(balls.get(color), new Comparator<List<Double>>() {
 
@@ -54,10 +56,16 @@ public class BlobProcessor {
 		if (y > 255.0)
 			zDist = 3500.0 / (y - 255.0);
 		else
-			zDist = 1000.0;  // TODO figure out a better solution for this stuff
+			return -1;  // TODO figure out a better solution for this stuff. right now, if too far, don't consider it a valid ball.
 		double xDist = zDist * x / 340.0;
 		double dist = Math.sqrt(Math.pow(xDist,2) + Math.pow(zDist,2));
 		return dist;
+	}
+	
+	
+	// for walls, we cannot use our ground assumption we used for calculate distance
+	public static double calculateWallDistance(double x, double y) {
+		return 0.0;
 	}
 
 

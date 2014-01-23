@@ -65,7 +65,7 @@ public class FrameProcessor {
 		return ret;
 	}
 	
-	// returns map of color to list of blobs
+	// returns map of color to list of blobs' centers, (x,y) in img coordinates. colors: red, green, blue
 	public Map<String,List<double[]>> processFrame(Mat frame, Mat processedFrame) {
 		//first convert to hsv, store it in the first buffer
 		Imgproc.cvtColor(frame, buffers.get(0), Imgproc.COLOR_BGR2HSV);
@@ -82,7 +82,7 @@ public class FrameProcessor {
 		Map<String,List<double[]>> blobs = new HashMap<String, List<double[]>>();
 		blobs.put("red", findBlobs(buffers.get(4)));
 		blobs.put("green", findBlobs(buffers.get(5)));
-		blobs.put("blue", findBlobs(buffers.get(6)));
+		blobs.put("blue", findWalls(buffers.get(6)));
 		
 		return blobs;
 	}
@@ -97,6 +97,20 @@ public class FrameProcessor {
 			if (Imgproc.contourArea(cnt) > contourAreaThresh) {
 				Rect bound = Imgproc.boundingRect(cnt);
 				blobs.add(new double[] {bound.x + (bound.width / 2.0), bound.y + (bound.height / 2.0)});
+			}
+		}
+		return blobs;
+	}
+	
+	// this is specifically for the blue walls. instead of returning the center, return the lower edge y
+	public List<double[]> findWalls(Mat binaryImg) {
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+		Imgproc.findContours(binaryImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		List<double[]> blobs = new ArrayList<double[]>();
+		for (MatOfPoint cnt : contours) {
+			if (Imgproc.contourArea(cnt) > contourAreaThresh) {
+				Rect bound = Imgproc.boundingRect(cnt);
+				blobs.add(new double[] {bound.x + (bound.width / 2.0), bound.y + bound.height});
 			}
 		}
 		return blobs;
