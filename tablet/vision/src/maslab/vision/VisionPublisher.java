@@ -66,6 +66,7 @@ public class VisionPublisher {
 		}
 		
 		String json = JSONValue.toJSONString(sendMap);
+		System.out.println(json);
 		outputWriter.println(json);
 	}
 	

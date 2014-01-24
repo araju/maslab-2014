@@ -27,16 +27,19 @@ public class FrameProcessor {
 	private static final Scalar lowerRed = new Scalar(110, 100, 10);
 	private static final Scalar upperRed = new Scalar(140, 255, 255);
 	
-	private static final Scalar lowerGreen = new Scalar(30, 80, 10);
+	private static final Scalar lowerGreen = new Scalar(35, 80, 10);
 	private static final Scalar upperGreen = new Scalar(60, 255, 255);
 	
 	private static final Scalar lowerBlue = new Scalar(0, 100, 50);
 	private static final Scalar upperBlue = new Scalar(20, 255, 255);
 	
+	private static final Scalar lowerTeal = new Scalar(20, 100, 50);
+	private static final Scalar upperTeal = new Scalar(33, 255, 255);
+	
 	private static final int contourAreaThresh = 50;
 	private static final int cleanKernelSize = 5;
-	private static final int numBuffers = 7; //0: HSV, 1: Red Thresh, 2: Green, 3: Blue
-											 // 4,5,6: cleaned Red, Green, Blue
+	private static final int numBuffers = 9; //0: HSV, 1: Red Thresh, 2: Green, 3: Blue, 4: Teal
+											 // 5,6,7,8: cleaned Red, Green, Blue, Teal
 	
 	//TODO: do not detect above the lowest blue
 	
@@ -72,17 +75,19 @@ public class FrameProcessor {
 		Core.inRange(buffers.get(0), lowerRed, upperRed, buffers.get(1));
 		Core.inRange(buffers.get(0), lowerGreen, upperGreen, buffers.get(2));
 		Core.inRange(buffers.get(0), lowerBlue, upperBlue, buffers.get(3));
+		Core.inRange(buffers.get(0), lowerTeal, upperTeal, buffers.get(4));
 		
 		//clean thresholded images
-		Imgproc.morphologyEx(buffers.get(1), buffers.get(4), Imgproc.MORPH_OPEN, cleanKernel);
-		Imgproc.morphologyEx(buffers.get(2), buffers.get(5), Imgproc.MORPH_OPEN, cleanKernel);
-		Imgproc.morphologyEx(buffers.get(3), processedFrame, Imgproc.MORPH_OPEN, cleanKernel);
+		Imgproc.morphologyEx(buffers.get(1), buffers.get(5), Imgproc.MORPH_OPEN, cleanKernel);
+		Imgproc.morphologyEx(buffers.get(2), processedFrame, Imgproc.MORPH_OPEN, cleanKernel);
+		Imgproc.morphologyEx(buffers.get(3), buffers.get(7), Imgproc.MORPH_OPEN, cleanKernel);
+		Imgproc.morphologyEx(buffers.get(4), buffers.get(8), Imgproc.MORPH_OPEN, cleanKernel);
 		buffers.set(6, processedFrame);
 		
 		Map<String,List<double[]>> blobs = new HashMap<String, List<double[]>>();
-		blobs.put("red", findBlobs(buffers.get(4)));
-		blobs.put("green", findBlobs(buffers.get(5)));
-		blobs.put("blue", findWalls(buffers.get(6).submat(0, 470, 280, 360))); // USING FIXED NUMBERS!!!
+		blobs.put("red", findBlobs(buffers.get(5)));
+		blobs.put("green", findBlobs(buffers.get(6)));
+		blobs.put("blue", findWalls(buffers.get(7).submat(0, 470, 280, 360))); // USING FIXED NUMBERS!!!
 		
 		return blobs;
 	}

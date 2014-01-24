@@ -24,7 +24,7 @@ class VisionConsumer:
             clisock, (remhost, remport) = self.svrSock.accept()
             while self.run:
                 jsonStr = clisock.recv(4096)
-                print jsonStr
+                # print jsonStr
                 self.ballMap = json.loads(jsonStr)
                 
                 green = self.ballMap["green"]

@@ -58,7 +58,7 @@ public class Main {
 		// Create GUI windows to display camera output and OpenCV output
 		int width = (int) (camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH));
 		int height = (int) (camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
-//		JLabel cameraPane = createWindow("Camera output", width, height);
+		JLabel cameraPane = createWindow("Camera output", width, height);
 //		JLabel opencvPane = createWindow("OpenCV output", width, height);
 
 		// Set up structures for processing images
@@ -71,6 +71,7 @@ public class Main {
 		try {
 			while (true) {
 				// Wait until the camera has a new frame
+				long start = System.currentTimeMillis();
 				while (!camera.read(rawImage)) {
 	//				if (!cameraPane.isShowing() || !opencvPane.isShowing()) {
 	//					break;
@@ -81,7 +82,7 @@ public class Main {
 						e.printStackTrace();
 					}
 				}
-	//			updateWindow(cameraPane, rawImage, rawImageConverter);
+				updateWindow(cameraPane, rawImage, rawImageConverter);
 	//			processedImage = fp.testThresh(rawImage);
 				Map<String, List<double[]>> blobs = fp.processFrame(rawImage, processedImage);
 				List<List<Double>> reactors = ReactorFinder.findReactors(rawImage);
@@ -90,7 +91,7 @@ public class Main {
 				
 				// Update the GUI windows
 				
-	//			updateWindow(opencvPane, processedImage, processedImageConverter);
+//				updateWindow(opencvPane, processedImage, processedImageConverter);
 				
 				try {
 					Thread.sleep(10);
@@ -98,6 +99,7 @@ public class Main {
 	//			if (!cameraPane.isShowing() || !opencvPane.isShowing()) {
 	//				break;
 	//			}
+				System.out.println("Time: " + (System.currentTimeMillis() - start));
 			}
 		} finally {
 			vp.close();

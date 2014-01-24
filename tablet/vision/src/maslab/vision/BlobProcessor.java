@@ -56,7 +56,7 @@ public class BlobProcessor {
 	
 	public static double calculateDistance(double x, double y) {
 		double zDist;
-		if (y > 255.0)
+		if (y > 80.0)
 			zDist = 3500.0 / (y - 255.0);
 		else
 			return -1;  // TODO figure out a better solution for this stuff. right now, if too far, don't consider it a valid ball.
