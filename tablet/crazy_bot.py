@@ -151,7 +151,7 @@ class CrazyBot:
             #     self.state = self.turnToDir()
             #     if time.time() - self.stateStartTime > 15:
             #         self.state = self.moveForwardSetup()
-            # time.sleep(.05)
+            time.sleep(.05)
 
 
 
