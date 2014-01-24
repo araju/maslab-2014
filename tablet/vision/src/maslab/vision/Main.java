@@ -58,8 +58,8 @@ public class Main {
 		// Create GUI windows to display camera output and OpenCV output
 		int width = (int) (camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH));
 		int height = (int) (camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
-		JLabel cameraPane = createWindow("Camera output", width, height);
-		JLabel opencvPane = createWindow("OpenCV output", width, height);
+//		JLabel cameraPane = createWindow("Camera output", width, height);
+//		JLabel opencvPane = createWindow("OpenCV output", width, height);
 
 		// Set up structures for processing images
 		Mat rawImage = new Mat();
@@ -68,40 +68,42 @@ public class Main {
 		Mat processedImage = new Mat();
 		Mat2Image rawImageConverter = new Mat2Image(BufferedImage.TYPE_3BYTE_BGR);
 		Mat2Image processedImageConverter = new Mat2Image(BufferedImage.TYPE_BYTE_BINARY);
-		
-		while (true) {
-			// Wait until the camera has a new frame
-			while (!camera.read(rawImage)) {
-				if (!cameraPane.isShowing() || !opencvPane.isShowing()) {
-					break;
+		try {
+			while (true) {
+				// Wait until the camera has a new frame
+				while (!camera.read(rawImage)) {
+	//				if (!cameraPane.isShowing() || !opencvPane.isShowing()) {
+	//					break;
+	//				}
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
+	//			updateWindow(cameraPane, rawImage, rawImageConverter);
+	//			processedImage = fp.testThresh(rawImage);
+				Map<String, List<double[]>> blobs = fp.processFrame(rawImage, processedImage);
+				List<List<Double>> reactors = ReactorFinder.findReactors(rawImage);
+				Map<String, List<List<Double>>> balls = BlobProcessor.processBlobs(blobs);
+				vp.publish(balls, reactors);
+				
+				// Update the GUI windows
+				
+	//			updateWindow(opencvPane, processedImage, processedImageConverter);
+				
 				try {
-					Thread.sleep(1);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+					Thread.sleep(10);
+				} catch (InterruptedException e) { }
+	//			if (!cameraPane.isShowing() || !opencvPane.isShowing()) {
+	//				break;
+	//			}
 			}
-			updateWindow(cameraPane, rawImage, rawImageConverter);
-//			processedImage = fp.testThresh(rawImage);
-			Map<String, List<double[]>> blobs = fp.processFrame(rawImage, processedImage);
-			List<List<Double>> reactors = ReactorFinder.findReactors(rawImage);
-			Map<String, List<List<Double>>> balls = BlobProcessor.processBlobs(blobs);
-			vp.publish(balls, reactors);
-			
-			// Update the GUI windows
-			
-			updateWindow(opencvPane, processedImage, processedImageConverter);
-			
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) { }
-			if (!cameraPane.isShowing() || !opencvPane.isShowing()) {
-				break;
-			}
+		} finally {
+			vp.close();
+			camera.release();
+			System.out.println("Camera released");
 		}
-//		vp.close();
-		camera.release();
-		System.out.println("Camera released");
 	}
 	
     private static JLabel createWindow(String name, int width, int height) {    
