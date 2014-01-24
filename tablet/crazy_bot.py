@@ -10,6 +10,7 @@ from odometry_reading import Odometry
 from motor_controller import MotorDriver
 import traceback
 import math
+from music import playMusic
 
 class CrazyBot:
     MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR = ("moveForward", "backup", "search", "turnToDir")
@@ -29,6 +30,7 @@ class CrazyBot:
         self.t.start()
         self.distances = [-1 for i in range(36)]
         self.halfFlag = 0
+        playMusic.play()
 
 
     def readMaple(self):
