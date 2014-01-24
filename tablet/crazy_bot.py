@@ -10,7 +10,7 @@ from odometry_reading import Odometry
 from motor_controller import MotorDriver
 import traceback
 import math
-
+import random
 class CrazyBot:
     MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR = ("moveForward", "backup", "search", "turnToDir")
 
@@ -57,14 +57,14 @@ class CrazyBot:
     def backUpSetup(self):
         self.stateStartTime = time.time()
         self.odo.distance = 0
-        self.driver.driveMotors(-20)
+        self.driver.driveMotors(-35)
         return self.BACK_UP
 
     def backUp(self):
 
         print self.odo.distance
 
-        if self.odo.distance < -15:
+        if self.odo.distance < -30:
 
             self.driver.driveMotors(0)
             return self.searchDirectionSetup()
@@ -104,7 +104,10 @@ class CrazyBot:
         maxIdx = self.distances.index(maxVal)
         self.maxDir = maxIdx * 10
 
+        self.maxDir = random.randint(0, 359)
+
         self.driver.turnMotors(self.maxDir)
+
         self.odo.direction = 0
 
         print 'Max distance Angle:', self.maxDir
