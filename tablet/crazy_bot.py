@@ -31,7 +31,7 @@ class CrazyBot:
         self.t.start()
         self.distances = [-1 for i in range(36)]
         self.halfFlag = 0
-        playMusic.play()
+        # playMusic.play()
 
 
     def readMaple(self):
