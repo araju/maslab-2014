@@ -74,15 +74,15 @@ public class FrameProcessor {
 		Core.inRange(buffers.get(0), lowerBlue, upperBlue, buffers.get(3));
 		
 		//clean thresholded images
-		Imgproc.morphologyEx(buffers.get(1), processedFrame, Imgproc.MORPH_OPEN, cleanKernel);
+		Imgproc.morphologyEx(buffers.get(1), buffers.get(4), Imgproc.MORPH_OPEN, cleanKernel);
 		Imgproc.morphologyEx(buffers.get(2), buffers.get(5), Imgproc.MORPH_OPEN, cleanKernel);
-		Imgproc.morphologyEx(buffers.get(3), buffers.get(6), Imgproc.MORPH_OPEN, cleanKernel);
-		buffers.set(4, processedFrame);
+		Imgproc.morphologyEx(buffers.get(3), processedFrame, Imgproc.MORPH_OPEN, cleanKernel);
+		buffers.set(6, processedFrame);
 		
 		Map<String,List<double[]>> blobs = new HashMap<String, List<double[]>>();
 		blobs.put("red", findBlobs(buffers.get(4)));
 		blobs.put("green", findBlobs(buffers.get(5)));
-		blobs.put("blue", findWalls(buffers.get(6)));
+		blobs.put("blue", findWalls(buffers.get(6).submat(0, 470, 280, 360))); // USING FIXED NUMBERS!!!
 		
 		return blobs;
 	}
@@ -108,7 +108,7 @@ public class FrameProcessor {
 		Imgproc.findContours(binaryImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		List<double[]> blobs = new ArrayList<double[]>();
 		for (MatOfPoint cnt : contours) {
-			if (Imgproc.contourArea(cnt) > contourAreaThresh) {
+			if (Imgproc.contourArea(cnt) > contourAreaThresh*2) {
 				Rect bound = Imgproc.boundingRect(cnt);
 				blobs.add(new double[] {bound.x + (bound.width / 2.0), bound.y + bound.height});
 			}

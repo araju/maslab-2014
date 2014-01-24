@@ -15,7 +15,7 @@ class VisionConsumer:
         self.svrSock.listen(5)
         self.goalBall = [] # direction, distance of goal
         self.goalReactor = []
-        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactor" : []}
+        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactors" : []}
         self.run = True
 
     
@@ -24,6 +24,7 @@ class VisionConsumer:
             clisock, (remhost, remport) = self.svrSock.accept()
             while self.run:
                 jsonStr = clisock.recv(4096)
+                print jsonStr
                 self.ballMap = json.loads(jsonStr)
                 
                 green = self.ballMap["green"]
@@ -39,7 +40,7 @@ class VisionConsumer:
                 else:
                     self.goalBall = green
 
-                self.goalReactor = self.ballMap["reactor"]
+                self.goalReactor = self.ballMap["reactors"]
                 
 
         thread = Thread(target = runServer)
@@ -54,6 +55,12 @@ class VisionConsumer:
 
     def seeReactor(self):
         return len(self.goalReactor) > 0
+
+    def getWallY(self):
+        if len(self.ballMap["blue"]) > 0:
+            return self.ballMap["blue"][1]
+        else:
+            return 0
 
 
 if __name__ == '__main__':
