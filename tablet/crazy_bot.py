@@ -135,22 +135,22 @@ class CrazyBot:
     def mainLoop(self):
         while True:
             
-            # if self.state == self.MOVE_FORWARD:
-            #     self.state = self.moveForward()
-            #     if time.time() - self.stateStartTime > 15:
-            #         self.state = self.backUpSetup()
-            # elif self.state == self.BACK_UP:
-            #     self.state = self.backUp()
-            #     if time.time() - self.stateStartTime > 15:
-            #         self.state = self.searchDirectionSetup()
-            # elif self.state == self.SEARCH_DIRECTION:
-            #     self.state = self.searchDirection()
-            #     if time.time() - self.stateStartTime > 15:
-            #         self.state = self.turnToDirSetup()
-            # elif self.state == self.TURN_TO_DIR:
-            #     self.state = self.turnToDir()
-            #     if time.time() - self.stateStartTime > 15:
-            #         self.state = self.moveForwardSetup()
+            if self.state == self.MOVE_FORWARD:
+                self.state = self.moveForward()
+                if time.time() - self.stateStartTime > 15:
+                    self.state = self.backUpSetup()
+            elif self.state == self.BACK_UP:
+                self.state = self.backUp()
+                if time.time() - self.stateStartTime > 15:
+                    self.state = self.searchDirectionSetup()
+            elif self.state == self.SEARCH_DIRECTION:
+                self.state = self.searchDirection()
+                if time.time() - self.stateStartTime > 15:
+                    self.state = self.turnToDirSetup()
+            elif self.state == self.TURN_TO_DIR:
+                self.state = self.turnToDir()
+                if time.time() - self.stateStartTime > 15:
+                    self.state = self.moveForwardSetup()
             time.sleep(.05)
 
 
