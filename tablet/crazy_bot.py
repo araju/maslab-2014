@@ -17,7 +17,7 @@ class CrazyBot:
     MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR = ("moveForward", "backup", "search", "turnToDir")
 
     def __init__(self):
-        self.state = self.SEARCH_DIRECTION
+        self.state = self.MOVE_FORWARD
         # self.state = self.BACK_UP
         self.stateStartTime = time.time();
         self.maple = Maple()
@@ -78,7 +78,8 @@ class CrazyBot:
         self.stateStartTime = time.time()
         self.halfFlag = 0
         self.distances = [-1 for i in range(36)]
-        return self.SEARCH_DIRECTION
+        # return self.SEARCH_DIRECTION
+        return self.turnToDirSetup()
 
     def searchDirection(self):
         if (time.time() - self.stateStartTime < .125 and self.halfFlag == 0) or (self.halfFlag == 1 and self.odo.direction > 175):
@@ -108,6 +109,7 @@ class CrazyBot:
         self.maxDir = maxIdx * 10
 
         self.maxDir = random.randint(0, 359)
+        print self.maxDir
 
         self.driver.turnMotors(self.maxDir)
 
