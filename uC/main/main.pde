@@ -64,7 +64,7 @@ void loop() {
     
     //Here is where we list our tasks
     //Read Serial Stream and execute commands
-//    serial_periodic();
+    serial_periodic();
     //Read Gyro
     gyro_periodic(); 
 
