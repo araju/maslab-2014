@@ -63,7 +63,7 @@ void range_periodic() {
     _range_br_count = 0;
   }
 
-//  if (getDebug()) {
+  if (getDebug()) {
     uint8 msg[] = {0x16, 0x01, _range_fl<<7 | 0x00};
     serial_tx(msg,3);
     msg[2] = _range_bl << 7 | 0x01;  
@@ -72,7 +72,8 @@ void range_periodic() {
     serial_tx(msg,3);
     msg[2] = _range_fr << 7 | 0x03;  
     serial_tx(msg,3); 
-  
+     
+  }
 //    Serial1.print("FL: ");
 //    Serial1.print(_range_fl);
 //    Serial1.print(" FR: ");

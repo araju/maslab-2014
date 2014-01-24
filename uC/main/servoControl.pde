@@ -10,8 +10,8 @@
 
 
 #define SERVO_SORT_PIN 6
-#define SERVO_GREEN_PIN 7
-#define SERVO_RED_PIN 8
+#define SERVO_GREEN_PIN 27
+#define SERVO_RED_PIN 28
 
 Servo sortServo;
 Servo greenServo;

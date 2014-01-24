@@ -8,7 +8,7 @@
 #define SC_STRAIGHTBIAS_KD 0
 
 #define SC_STRAIGHTSPEED 6000
-#define SC_TURNSPEED 4000
+#define SC_TURNSPEED 6000
 
 #define WHEEL_PERIMETER 30.5221
 #define TICKS_PER_REV (64 * 29.0)
@@ -41,12 +41,12 @@ void _sc_turn() {
     _sc_state = stop;
   }
   
-  if (getDebug()) {
+//  if (getDebug()) {
 //    Serial1.print("Turn,");
 //    Serial1.print(gyro_getAngle());
 //    Serial1.print(",");
-//    Serial1.println(_sc_angleSetPoint - gyro_getAngle());
-  }
+//    Serial1.println(_sc_angleSetPoint);
+//  }
   
 }
 
@@ -117,6 +117,8 @@ void sc_drive(float distance, float angleBias) {
 }
 
 void sc_turn(float degree) {
+  Serial1.print("SC_TURN,");
+  Serial1.println(degree); 
   gyro_resetAngle();
   _sc_state = turn;
   _sc_angleSetPoint = degree;
@@ -130,10 +132,12 @@ void sc_drive_cmd(uint8 *buf){
 }
 
 void sc_turn_cmd(uint8 *buf) {
-  if (buf[0] == 1) {
-//    Serial1.print("Serial Turn: ");
-//    Serial1.println((int8)buf[1]);
-    sc_turn(((int8)buf[1]) * 1.0);
+  if (buf[0] == 2) {
+    Serial1.print("Serial Turn: ");
+    Serial1.println((uint8)buf[1] | ((int8)buf[2] << 8));
+    float angle = (((uint8)buf[1]) | ((int8)buf[2]) << 8) * 1.0;
+    Serial1.println(angle);
+    sc_turn(angle);
     
   }
 }
@@ -146,7 +150,11 @@ void sc_init() {
 void sc_periodic() {
 
   
-//  if (getDebug()) {
+  if (getDebug()) {
+//    SerialUSB.print("L: ");
+//    SerialUSB.println(motor_getLeftTicks());
+//    SerialUSB.print("R: ");    
+//    SerialUSB.println(motor_getRightTicks());
     int32 heading = gyro_getAngle() * 100;
     uint8 msg[] = {0x14, 0x02,heading & 0xFF, (heading >> 8) & 0xFF};
     serial_tx(msg, 4);
@@ -158,7 +166,7 @@ void sc_periodic() {
     msg[2] = dist & 0xFF;
     msg[3] = (dist >> 8) & 0xFF;
     serial_tx(msg, 4);
-//  }
+  }
 
   
   if (_sc_state == stop) {

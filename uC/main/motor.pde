@@ -99,7 +99,7 @@ void setMotors(int32 dutyL, int32 dutyR) {
 //  Serial1.print("Set Motors,");
 //  Serial1.print(dutyL);
 //  Serial1.print(",");
-//  Serial1.println(dutyR);  
+//  Serial1.println(dutyR); 
   digitalWrite(MOTOR_L_DIR, calcDir(dutyL));
   pwmWrite(MOTOR_L_PWM, calcDuty(dutyL));
   digitalWrite(MOTOR_R_DIR, calcDir(dutyR));

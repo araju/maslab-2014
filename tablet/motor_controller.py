@@ -19,11 +19,11 @@ class MotorDriver:
 
     # only handles angles from -127 to 127.
     def turnMotors(self,theta):
-        if theta < -127:
-            theta = -127
-        if theta > 127:
-            theta = 127
-        buf = [0x13,0x01,int(theta) & 0xFF]
+        # if theta < -127:
+        #     theta = -127
+        # if theta > 127:
+        #     theta = 127
+        buf = [0x13,0x02,int(theta) & 0xFF, (int(theta) >> 8) & 0xFF ]
         self.maple.send(buf)
 
     def driveBiasMotors(self,dist, bias):

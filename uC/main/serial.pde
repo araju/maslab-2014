@@ -187,8 +187,8 @@ void serial_periodic() {
         _serial_inCmd = 0;
         uint8 i = 0;
         if (_serial_validateMessage() == 0 && queuePeek(&i) == 0) {
-//          Serial1.print("Received Command:");
-//          Serial1.println(i);
+          Serial1.print("Received Command:");
+          Serial1.println(i);
           pCmdCallback foo = cmd_getCallback(i);
           foo(&(_serial_charBuf[1]));
         }

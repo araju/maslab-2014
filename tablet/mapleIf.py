@@ -51,6 +51,7 @@ class Maple:
                         if self.buffer[0] in self.cbList.keys():
                             cb = self.cbList[self.buffer[0]]
                             cb(self.buffer[1:-1])
+                            # print self.buffer
                 elif ch == self.ESCAPE:
                     self.isEscaped = True
                 else:
@@ -97,10 +98,10 @@ class Maple:
         outBytes.append(c)
         outBytes.append(self.END_FLAG)
 
-        # print 'Sending: ',
-        # for i in outBytes:
-        #     print hex(i), 
-        # print ''
+        print 'Sending: ',
+        for i in outBytes:
+            print hex(i), 
+        print ''
         self.port.write(outBytes)
 
 
