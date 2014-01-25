@@ -7,10 +7,10 @@
 #define SC_STRAIGHTBIAS_KI 25
 #define SC_STRAIGHTBIAS_KD 0
 
-//#define SC_STRAIGHTSPEED 16000
-#define SC_STRAIGHTSPEED 6000
-//#define SC_TURNSPEED 16000
-#define SC_TURNSPEED 6000
+#define SC_STRAIGHTSPEED 14000
+//#define SC_STRAIGHTSPEED 6000
+#define SC_TURNSPEED 14000
+//#define SC_TURNSPEED 6000
 
 #define WHEEL_PERIMETER 30.5221
 #define TICKS_PER_REV (64 * 29.0)
@@ -18,7 +18,8 @@
 typedef enum {
   stop,
   turn,
-  drive
+  drive,
+  customControl
 } controlState;
 
 controlState _sc_state;
@@ -144,9 +145,25 @@ void sc_turn_cmd(uint8 *buf) {
   }
 }
 
+void sc_custom(int8 leftMotor, int8 rightMotor) {
+  _sc_state = customControl;
+  int32 leftCustom = leftMotor * SC_STRAIGHTSPEED / 127;
+  int32 rightCustom = rightMotor * SC_STRAIGHTSPEED / 127;
+  
+  setMotors(leftCustom, rightCustom);
+}
+
+void sc_custom_cmd(uint8 *buf) {
+  if (buf[0] == 2) {
+    sc_turn(buf[1], buf[2]);
+    
+  }
+}
+
 void sc_init() {
   cmd_registerCallback(0x12, sc_drive_cmd);
   cmd_registerCallback(0x13, sc_turn_cmd);
+  cmd_registerCallback(0x18, sc_custom_cmd);
 }
 
 void sc_periodic() {
@@ -177,5 +194,7 @@ void sc_periodic() {
     _sc_turn();    
   } else if (_sc_state == drive) {
     _sc_drive();
+  } else if (_sc_state == customControl) {
+    // The motor command gets set in the init phase, don't need to have an update command.
   }
 }
