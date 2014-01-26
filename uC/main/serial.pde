@@ -222,9 +222,9 @@ int8 serial_tx(uint8 *buf, uint8 len) {
     checksum += buf[i];
     SerialUSB.write(buf[i]);
   }
-  
-  if (~checksum == SERIAL_START_FLAG || ~checksum == SERIAL_END_FLAG ||
-      ~checksum == SERIAL_ESCAPE) {
+  checksum = ~checksum;
+  if (checksum == SERIAL_START_FLAG || checksum == SERIAL_END_FLAG ||
+      checksum == SERIAL_ESCAPE) {
     SerialUSB.write(SERIAL_ESCAPE);
   }
   SerialUSB.write(~checksum);

@@ -3,7 +3,7 @@
 #define RANGE_BL 36
 #define RANGE_BR 35
 
-#define RANGE_DEB_THRESH 10
+#define RANGE_DEB_THRESH 50
 
 uint8 _range_fl = 0;
 uint8 _range_fr = 0;
@@ -53,27 +53,30 @@ void range_periodic() {
     _range_bl_count = 0;
   }
   
-  if (_range_br != !digitalRead(RANGE_BR)) {
-    _range_br_count++;
-    
-    if (_range_br_count > RANGE_DEB_THRESH) {
-      _range_br = !digitalRead(RANGE_BR);
-    }
-  } else {
+  if (digitalRead(RANGE_BR) == LOW) {
+    _range_br = 1;
     _range_br_count = 0;
+  } else {
+    if (_range_br_count < RANGE_DEB_THRESH){
+      _range_br_count++;
+    }else {
+      _range_br = 0;
+    }
   }
 
   if (getDebug()) {
-    uint8 msg[] = {0x16, 0x01, _range_fl<<7 | 0x00};
-    serial_tx(msg,3);
-    msg[2] = _range_bl << 7 | 0x01;  
-    serial_tx(msg,3);
-    msg[2] = _range_br << 7 | 0x02;  
-    serial_tx(msg,3);
-    msg[2] = _range_fr << 7 | 0x03;  
-    serial_tx(msg,3); 
-     
-  }
+    SerialUSB.print("SRIR: ");
+    SerialUSB.println(_range_br);
+    
+//    uint8 msg[] = {0x16, 0x01, _range_fl<<7 | 0x00};
+//    serial_tx(msg,3);
+//    msg[2] = _range_bl << 7 | 0x01;  
+//    serial_tx(msg,3);
+//    msg[2] = _range_br << 7 | 0x02;
+//    serial_tx(msg,3);
+//    msg[2] = _range_fr << 7 | 0x03;  
+//    serial_tx(msg,3); 
+
 //    Serial1.print("FL: ");
 //    Serial1.print(_range_fl);
 //    Serial1.print(" FR: ");
@@ -82,5 +85,5 @@ void range_periodic() {
 //    Serial1.print(_range_bl);    
 //    Serial1.print(" BR: ");    
 //    Serial1.println(_range_br);    
-//  }
+  }
 }

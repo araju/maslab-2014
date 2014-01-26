@@ -1,7 +1,6 @@
 
 #include "cmd.h"
 #include <stdio.h>
-#define FET_GATE 4
 
 typedef enum {
   NOT_YET_RUN,
@@ -20,9 +19,10 @@ void setup() {
   gyro_init();
   motor_init();
 //  color_init();
-  sonar_init();
+//  sonar_init();
 //  servo_init();
   sc_init();
+  lrir_init();
   range_init();
 
   //  pinMode(BOARD_LED_PIN, OUTPUT); // This pin is used for SPI, so it can't be used
@@ -71,8 +71,8 @@ void loop() {
     sc_periodic();
 
 //    driveSquare();
-    
-    sonar_periodic();
+    lrir_periodic();
+//    sonar_periodic();
 
 //      servo_periodic();
     range_periodic();
