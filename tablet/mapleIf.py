@@ -98,10 +98,10 @@ class Maple:
         outBytes.append(c)
         outBytes.append(self.END_FLAG)
 
-        print 'Sending: ',
-        for i in outBytes:
-            print hex(i), 
-        print ''
+        # print 'Sending: ',
+        # for i in outBytes:
+        #     print hex(i), 
+        # print ''
         self.port.write(outBytes)
 
 

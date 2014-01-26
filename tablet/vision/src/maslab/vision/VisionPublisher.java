@@ -53,17 +53,25 @@ public class VisionPublisher {
 		Map<String, List<Double>> sendMap = new HashMap<String, List<Double>>();
 		for (String color : balls.keySet()) {
 			if (balls.get(color).size() > 0) {
-				sendMap.put(color, balls.get(color).get(0));
+				if (color.equals("teal")) {
+					sendMap.put("reactors", balls.get(color).get(0));
+				} else {
+					sendMap.put(color, balls.get(color).get(0));
+				}
 			} else {
-				sendMap.put(color, new ArrayList<Double>());
+				if (color.equals("teal")) {
+					sendMap.put("reactors", new ArrayList<Double>());
+				} else {
+					sendMap.put(color, new ArrayList<Double>());
+				}
 			}
 		}
 		
-		if (reactors != null && reactors.size() > 0) {
-			sendMap.put("reactors", reactors.get(0));
-		} else {
-			sendMap.put("reactors", new ArrayList<Double>());
-		}
+//		if (reactors != null && reactors.size() > 0) {
+//			sendMap.put("reactors", reactors.get(0));
+//		} else {
+//			sendMap.put("reactors", new ArrayList<Double>());
+//		}
 		
 		String json = JSONValue.toJSONString(sendMap);
 		System.out.println(json);

@@ -85,9 +85,9 @@ public class Main {
 				updateWindow(cameraPane, rawImage, rawImageConverter);
 	//			processedImage = fp.testThresh(rawImage);
 				Map<String, List<double[]>> blobs = fp.processFrame(rawImage, processedImage);
-				List<List<Double>> reactors = ReactorFinder.findReactors(rawImage);
+				List<List<Double>> reactors = null; //ReactorFinder.findReactors(rawImage);
 				Map<String, List<List<Double>>> balls = BlobProcessor.processBlobs(blobs);
-				vp.publish(balls, reactors);
+				vp.publish(balls, reactors); //right now ignores the reactors list
 				
 				// Update the GUI windows
 				

@@ -24,6 +24,9 @@ public class FrameProcessor {
 //	private static final Scalar lowerRed = new Scalar(0, 100, 10);
 //	private static final Scalar upperRed = new Scalar(15, 255, 255);
 	
+	private static final int IMG_HEIGHT = 480;
+	private static final int IMG_WIDTH = 640;
+	
 	private static final Scalar lowerRed = new Scalar(110, 100, 10);
 	private static final Scalar upperRed = new Scalar(140, 255, 255);
 	
@@ -85,23 +88,42 @@ public class FrameProcessor {
 		buffers.set(6, processedFrame);
 		
 		Map<String,List<double[]>> blobs = new HashMap<String, List<double[]>>();
-		blobs.put("red", findBlobs(buffers.get(5)));
-		blobs.put("green", findBlobs(buffers.get(6)));
-		blobs.put("blue", findWalls(buffers.get(7).submat(0, 470, 280, 360))); // USING FIXED NUMBERS!!!
+		List<double[]> wall = findWalls(buffers.get(7).submat(0, 470, 280, 360)); // WARNING: USING FIXED NUMBERS!!!
+		double wallY = 0.0;
+		if (wall.size() > 0) {
+			blobs.put("blue", wall.subList(0, 1));
+			wallY = wall.get(1)[0];
+		} else {
+			blobs.put("blue", wall);
+		}
+		
+		blobs.put("red", findBlobs(buffers.get(5),wallY));
+		blobs.put("green", findBlobs(buffers.get(6),wallY));
+//		blobs.put("blue", findWalls(buffers.get(7).submat(0, 470, 280, 360))); 
+		
+		List<double[]> reactorWall = findWalls(buffers.get(8));
+		if (reactorWall.size() > 0) {
+			blobs.put("teal", reactorWall.subList(0, 1));
+		} else {
+			blobs.put("teal", reactorWall);
+		}
 		
 		return blobs;
 	}
 	
 	
 	//returns list of blobs' centers (x,y)
-	public List<double[]> findBlobs(Mat binaryImg) {
+	public List<double[]> findBlobs(Mat binaryImg, double wallY) {
+		if (wallY > 0.0) {
+			binaryImg = binaryImg.submat((int)wallY, IMG_HEIGHT, 0, IMG_WIDTH);
+		}
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Imgproc.findContours(binaryImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		List<double[]> blobs = new ArrayList<double[]>();
 		for (MatOfPoint cnt : contours) {
 			if (Imgproc.contourArea(cnt) > contourAreaThresh) {
 				Rect bound = Imgproc.boundingRect(cnt);
-				blobs.add(new double[] {bound.x + (bound.width / 2.0), bound.y + (bound.height / 2.0)});
+				blobs.add(new double[] {bound.x + (bound.width / 2.0), bound.y + (bound.height / 2.0) + wallY});
 			}
 		}
 		return blobs;
@@ -111,14 +133,22 @@ public class FrameProcessor {
 	public List<double[]> findWalls(Mat binaryImg) {
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Imgproc.findContours(binaryImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		List<double[]> blobs = new ArrayList<double[]>();
-		for (MatOfPoint cnt : contours) {
+		List<double[]> wall = new ArrayList<double[]>();
+		Rect bestbound = null;
+		for (int i = 0; i < contours.size(); i++) {
+			MatOfPoint cnt = contours.get(i);
 			if (Imgproc.contourArea(cnt) > contourAreaThresh*2) {
 				Rect bound = Imgproc.boundingRect(cnt);
-				blobs.add(new double[] {bound.x + (bound.width / 2.0), bound.y + bound.height});
+				if (bestbound == null || bound.y > bestbound.y) {
+					bestbound = bound;
+				}
 			}
 		}
-		return blobs;
+		if (bestbound != null) {
+			wall.add(new double[] {bestbound.x + (bestbound.width / 2.0), bestbound.y + bestbound.height});
+			wall.add(new double[] {bestbound.y + (bestbound.height / 2.0)});
+		}
+		return wall;
 	}
 	
 	/**
