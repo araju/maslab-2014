@@ -4,6 +4,7 @@
 
 import copy
 import time
+from threading import Thread
 from distance_sensor import DistanceSensors
 from bump_sensor import BumpSensors
 from vision_consumer import VisionConsumer
@@ -11,38 +12,103 @@ from odometry_reading import Odometry
 
 class SensorManager:
 
-	def __init__(self, port, maple):
-		distanceNum = 4
-		shortRangeNum = 6
+    def __init__(self, port, maple):
+        distanceNum = 6
+        shortRangeNum = 4
 
-		self.maple = maple
-		self.distanceSensors = DistanceSensors(distanceNum, maple)
-		self.shortRangeIRs = BumpSensors(shortRangeNum, maple)
-		self.odometry = Odometry(maple)
-		self.visionConsumer = VisionConsumer(port)
-		self.currentSensorReadings = {
-			"sonar" : [0 for i in range(distanceNum)],
-			"shortIR" : [0 for i in range(shortRangeNum)],
-			"odometry" : {"direction" : 0.0, "distance" : 0.0}
-			"vision" : {"red" : [], "green" : [], "blue" : [], "reactor" : [] }
-		}
-
-		# starts receiving info from the maple
-		def readMapleInfo():
-			while (1):
-				self.maple.periodicTask()
-				time.sleep(0.1)
-
-		readThread = Thread(target = readMapleInfo)
-		readThread.start()
+        self.maple = maple
+        self.sonars = DistanceSensors(distanceNum, maple)
+        self.bumps = BumpSensors(shortRangeNum, maple)
+        self.odo = Odometry(maple)
+        self.visionConsumer = VisionConsumer(port)
+        self.vision = VisionInfo(self.visionConsumer)
+        self.currentSensorReadings = {
+            "sonar" : [0 for i in range(distanceNum)],
+            "shortIR" : [0 for i in range(shortRangeNum)],
+            "odometry" : {"direction" : 0.0, "distance" : 0.0},
+            "vision" : {"red" : [], "green" : [], "blue" : [], "reactor" : [] }
+        }
+        self.visionConsumer.startServer()
+        self.mapleRead = True
+        readThread = Thread(target = self.readMaple)
+        readThread.start()
 
 
+    def readMaple(self):
+        while self.mapleRead:
+            self.maple.periodic_task()
+            time.sleep(0.01)
 
 
-	def getSensorReadings(self):
-		self.currentSensorReadings["sonar"] = copy.copy(self.distanceSensors.distances)
-		self.currentSensorReadings["shortIR"] = copy.copy(self.shortRangeIRs.bumped)
-		self.currentSensorReadings["vision"] = copy.deepcopy(self.visionConsumer)
-		self.currentSensorReadings["odometry"]["direction"] = self.odometry.direction
-		self.currentSensorReadings["odometry"]["distance"] = self.odometry.distance
-		return self.currentSensorReadings
+    def close(self):
+        self.mapleRead = False
+        self.visionConsumer.close()
+        
+
+    def getSensorReadings(self):
+        self.currentSensorReadings["sonar"] = copy.copy(self.distanceSensors.distances)
+        self.currentSensorReadings["shortIR"] = copy.copy(self.shortRangeIRs.bumped)
+        self.currentSensorReadings["vision"] = copy.deepcopy(self.visionConsumer)
+        self.currentSensorReadings["odometry"]["direction"] = self.odometry.direction
+        self.currentSensorReadings["odometry"]["distance"] = self.odometry.distance
+        return self.currentSensorReadings
+
+
+####################################################
+
+
+# essentially a copy of the info in vision_consumer, but used as a copy
+# a bit ugly, but I don't want to deal with locks and stuff
+class VisionInfo:
+    def __init__(self, visCom):
+        self.visionConsumer = visCom
+
+        self.goalBall = [] # direction, distance, color of goal
+        self.goalReactor = []
+        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactors" : []}
+
+    # call this once a loop to get consistent vision info for the entire loop
+    # helps avoid concurrency issues
+    def getVisionInfo(self):
+        self.ballMap = copy.copy(self.visionConsumer.ballMap)
+        green = copy.copy(self.ballMap["green"])
+        green.append("green")
+        red = copy.copy(self.ballMap["red"])
+        red.append("red")
+        if len(red) == 1 and len(green) == 1:
+            self.goalBall = []
+        elif len(red) > len(green):
+            self.goalBall = red
+        elif len(green) > len(red):
+            self.goalBall = green
+        elif (red[1] < green[1]):
+            self.goalBall = red
+        else:
+            self.goalBall = green
+
+        if len(self.ballMap["reactors"]) > 0:
+            self.goalReactor = self.ballMap["reactors"]
+        else:
+            self.goalReactor = []
+
+
+    def seeGreenBall(self):
+        return len(self.ballMap["green"]) > 0
+
+    def seeRedBall(self):
+        return len(self.ballMap["red"]) > 0
+
+    def seeReactor(self):
+        return len(self.goalReactor) > 0
+
+    def seeBall(self):
+        return self.seeGreenBall() or self.seeRedBall()
+
+    def seeObject(self):
+        return self.seeBall() or self.seeReactor()
+
+    def getWallY(self):
+        if len(self.ballMap["blue"]) > 0:
+            return self.ballMap["blue"][1]
+        else:
+            return 0

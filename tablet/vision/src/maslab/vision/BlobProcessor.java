@@ -25,16 +25,21 @@ public class BlobProcessor {
 			balls.put(color, new ArrayList<List<Double>>());
 			for (double[] point : blobs.get(color)) {
 				ArrayList<Double> b = new ArrayList<Double>();
-				double direction = calculateDirection(point[0]);
-				double distance = color.equals("blue") ? calculateWallDistance(point[0],point[1]) : calculateDistance(point[0],point[1]);
+				double direction, distance;
+				if (color.equals("teal")) {
+					direction = calculateReactorDirection(point[0],point[1]);
+					distance = calculateReactorDistance(point[0],point[1]);
+				} else {
+					direction = calculateDirection(point[0]);
+					distance = color.equals("blue") ? calculateWallDistance(point[0],point[1]) : calculateDistance(point[0],point[1]);
+				}
 				if (distance > 0) {
 					b.add(direction);
 					b.add(distance);
 					balls.get(color).add(b);
 				}
 			}
-			//TODO: maybe we need to not sort this for blue or sort in some other way!!!
-			if (!color.equals("blue")) {
+			if (color.equals("red") || color.equals("green") || color.equals("teal")) {
 				Collections.sort(balls.get(color), new Comparator<List<Double>>() {
 	
 					@Override
@@ -53,16 +58,33 @@ public class BlobProcessor {
 		return balls;
 	}
 	
+	//TODO: find out if other info is more useful for figuring out how far away the reactor is
 	
-	public static double calculateDistance(double x, double y) {
-		double zDist;
-		if (y > 80.0)
-			zDist = 3500.0 / (y - 255.0);
-		else
-			return -1;  // TODO figure out a better solution for this stuff. right now, if too far, don't consider it a valid ball.
+	private static double calculateReactorDistance(double x, double y) {
+		double zDist = 1050.0 / (y - 255.0);
 		double xDist = zDist * x / 340.0;
 		double dist = Math.sqrt(Math.pow(xDist,2) + Math.pow(zDist,2));
 		return dist;
+	}
+
+
+	private static double calculateReactorDirection(double x, double y) {
+		return calculateDirection(x);
+	}
+
+	// screw it, just return the y
+	public static double calculateDistance(double x, double y) {
+//		double zDist;
+//		if (y > 80.0)
+//			zDist = 3500.0 / (y - 80.0);
+//		else
+//			return -1;  // TODO figure out a better solution for this stuff. right now, if too far, don't consider it a valid ball.
+//		double xDist = zDist * x / 340.0;
+//		double dist = Math.sqrt(Math.pow(xDist,2) + Math.pow(zDist,2));
+//		return dist;
+		if (y < 50.0) return -1.0;
+		
+		return (480 - y);
 	}
 	
 	
@@ -76,6 +98,7 @@ public class BlobProcessor {
 	public static double calculateDirection(double x) {
 		return Math.toDegrees(Math.atan((x - 320.0) / 340.0));
 	}
+
 
 
 	/**
