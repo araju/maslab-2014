@@ -1,4 +1,4 @@
-#define LRIR_1 12
+#define LRIR_1 15
 
 #define LRIR_INTTABLE_NUMENTRIES 20
 
@@ -45,13 +45,18 @@ float _lrir_reading1 = 0;
 void lrir_periodic() {
   _lrir_reading1 = .95 * _lrir_reading1 +  .05 * analogRead(LRIR_1);
   if (getDebug()) {
-    SerialUSB.print("LRIR: ");
-    SerialUSB.print(_lrir_reading1);
-    SerialUSB.print(" V: ");
-    SerialUSB.print(_lrir_reading1 / 4095 * 3.3);
-    SerialUSB.print(" Dist: ");
-    SerialUSB.println(_lrir_adcToDist(_lrir_reading1));
+//    SerialUSB.print("LRIR: ");
+//    SerialUSB.print(_lrir_reading1);
+//    SerialUSB.print(" V: ");
+//    SerialUSB.print(_lrir_reading1 / 4095 * 3.3);
+//    SerialUSB.print(" Dist: ");
+//    SerialUSB.println(_lrir_adcToDist(_lrir_reading1));
+    uint8 buf[5] = {0x0b, 0x03, 0x00, 0x00, 0x00};
     
+    buf[2] = 0;
+    buf[3] = ((uint32)_lrir_reading1) & 0xFF;
+    buf[4] = (((uint32)_lrir_reading1) >> 8) & 0xFF;
+    serial_tx(buf, 5);  
   }
  
 }

@@ -1,10 +1,10 @@
-#define MOTOR_L_DIR 17
+#define MOTOR_L_DIR 28
 #define MOTOR_L_PWM 0
 
 #define MOTOR_L_TICK 31
 #define MOTOR_L_QUAD 32
 
-#define MOTOR_R_DIR 16
+#define MOTOR_R_DIR 27
 #define MOTOR_R_PWM 1
 
 #define MOTOR_R_TICK 33

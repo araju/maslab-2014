@@ -10,11 +10,6 @@ typedef enum {
 execute_t;
 
 void setup() {
-    Serial1.begin(230400);
-//  pinMode(FET_GATE, OUTPUT);
-//  digitalWrite(FET_GATE, HIGH);
-//  
-//  
   delay(3000);
   gyro_init();
   motor_init();
@@ -70,11 +65,9 @@ void loop() {
 
     sc_periodic();
 
-//    driveSquare();
     lrir_periodic();
-//    sonar_periodic();
 
-//      servo_periodic();
+//    servo_periodic();
     range_periodic();
 
     //Read Color Sensor
