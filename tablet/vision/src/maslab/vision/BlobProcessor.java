@@ -61,10 +61,11 @@ public class BlobProcessor {
 	//TODO: find out if other info is more useful for figuring out how far away the reactor is
 	
 	private static double calculateReactorDistance(double x, double y) {
-		double zDist = 1050.0 / (y - 255.0);
-		double xDist = zDist * x / 340.0;
-		double dist = Math.sqrt(Math.pow(xDist,2) + Math.pow(zDist,2));
-		return dist;
+//		double zDist = 1050.0 / (y - 255.0);
+//		double xDist = zDist * x / 340.0;
+//		double dist = Math.sqrt(Math.pow(xDist,2) + Math.pow(zDist,2));
+//		return dist;
+		return (480 - y);
 	}
 
 

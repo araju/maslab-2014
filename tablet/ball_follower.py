@@ -15,8 +15,10 @@ from sensor_manager import SensorManager
 
 class BallFollower:
 
-    NO_OBJ, TURN_TO_OBJ, GO_TO_BALL, GO_TO_REACTOR = ("noObj", "turnToObj", "goToBall", "goToReactor")
-    ANGLE_THRSH = 20
+    NO_OBJ, TURN_TO_OBJ, GO_TO_BALL, GO_TO_REACTOR, CLOSE_TO_BALL = ("noObj", "turnToObj", "goToBall", "goToReactor", "closeToBall")
+    ANGLE_THRSH = 15
+    DIST_THRESH = 20
+    CLOSE_DIST = 20
 
     def __init__(self, maple, manager):
         self.maple = maple
@@ -24,7 +26,9 @@ class BallFollower:
         # self.vision = VisionConsumer(port)
         # self.odo = Odometry(self.maple)
         self.sensorManager = manager
-        
+        self.gettingBall = "none"
+        self.greenBallCount = 0
+        self.redBallCount = 0
         self.state = self.NO_OBJ
         # self.mapleRead = True
         self.stateStartTime = time.time()
@@ -62,13 +66,12 @@ class BallFollower:
             goalDir = self.sensorManager.vision.goalReactor[0]
             goingForBall = False
         else:
-            if self.sensorManager.vision.goalBall[1] < self.sensorManager.vision.goalReactor[1]: # ball is closer
-                goalDir - self.sensorManager.vision.goalBall[0]
+            if self.sensorManager.vision.goalBall[1] < self.sensorManager.vision.goalReactor[1] or self.greenBallCount == 0: # ball is closer
+                goalDir = self.sensorManager.vision.goalBall[0]
                 goingForBall = True
             else:
                 goingForBall = False
                 goalDir = self.sensorManager.vision.goalReactor[0]
-
         if goingForBall:
             print "Turning to: ", self.sensorManager.vision.goalBall[2]
         else:
@@ -99,6 +102,10 @@ class BallFollower:
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
 
+        if self.sensorManager.vision.goalBall[1] < self.DIST_THRESH:
+            self.gettingBall = self.sensorManager.vision.goalBall[2]
+            return self.closeToBallSetup()
+
         print "Going to: ", self.sensorManager.vision.goalBall[2], " , ", self.sensorManager.vision.goalBall[1]
         # self.driver.driveMotors(self.sensorManager.vision.goalBall[1])
         self.driver.driveMotors(10)
@@ -123,8 +130,24 @@ class BallFollower:
         self.driver.driveMotors(self.sensorManager.vision.goalReactor[1])
         return self.GO_TO_REACTOR
 
+    def closeToBallSetup(self):
+        if self.gettingBall == "green":
+            self.greenBallCount += 1
+        if self.gettingBall == "red":
+            self.redBallCount += 1
+        self.stateStartTime = time.time()
+        self.sensorManager.odo.distance = 0
+        self.driver.driveMotors(self.CLOSE_DIST)
+        return self.CLOSE_TO_BALL
+
+    def closeToBall(self):
+        if self.sensorManager.odo.distance > self.CLOSE_DIST - 2:
+            self.gettingBall = "none"
+            return self.noObjSetup()
+        return self.CLOSE_TO_BALL
+
     def reset(self):
-        self.state = self.noObjSetup()
+        self.state = self.turnToObjSetup()
 
     def mainLoop(self):
         while True:
@@ -142,6 +165,8 @@ class BallFollower:
             self.state = self.goToBall()
         elif self.state == self.GO_TO_REACTOR:
             self.state = self.goToReactor()
+        elif self.state == self.CLOSE_TO_BALL:
+            self.state = self.closeToBall()
 
 
 if __name__ == '__main__':

@@ -1,10 +1,15 @@
 package maslab.vision;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -39,7 +44,7 @@ public class FrameProcessor {
 	private static final Scalar lowerTeal = new Scalar(20, 100, 50);
 	private static final Scalar upperTeal = new Scalar(33, 255, 255);
 	
-	private static final int contourAreaThresh = 50;
+	private static final int contourAreaThresh = 90;
 	private static final int cleanKernelSize = 5;
 	private static final int numBuffers = 9; //0: HSV, 1: Red Thresh, 2: Green, 3: Blue, 4: Teal
 											 // 5,6,7,8: cleaned Red, Green, Blue, Teal
@@ -50,7 +55,8 @@ public class FrameProcessor {
 	private Mat cleanKernel;
 	
 	static {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+//		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		loadLibrary();
 	}
 	
 	public FrameProcessor() {
@@ -79,26 +85,32 @@ public class FrameProcessor {
 		Core.inRange(buffers.get(0), lowerGreen, upperGreen, buffers.get(2));
 		Core.inRange(buffers.get(0), lowerBlue, upperBlue, buffers.get(3));
 		Core.inRange(buffers.get(0), lowerTeal, upperTeal, buffers.get(4));
-		
 		//clean thresholded images
 		Imgproc.morphologyEx(buffers.get(1), buffers.get(5), Imgproc.MORPH_OPEN, cleanKernel);
-		Imgproc.morphologyEx(buffers.get(2), processedFrame, Imgproc.MORPH_OPEN, cleanKernel);
+		Imgproc.morphologyEx(buffers.get(2), buffers.get(6), Imgproc.MORPH_OPEN, cleanKernel);
 		Imgproc.morphologyEx(buffers.get(3), buffers.get(7), Imgproc.MORPH_OPEN, cleanKernel);
 		Imgproc.morphologyEx(buffers.get(4), buffers.get(8), Imgproc.MORPH_OPEN, cleanKernel);
-		buffers.set(6, processedFrame);
-		
+//		buffers.set(6, processedFrame);
 		Map<String,List<double[]>> blobs = new HashMap<String, List<double[]>>();
-		List<double[]> wall = findWalls(buffers.get(7).submat(0, 470, 280, 360)); // WARNING: USING FIXED NUMBERS!!!
-		double wallY = 0.0;
-		if (wall.size() > 0) {
-			blobs.put("blue", wall.subList(0, 1));
-			wallY = wall.get(1)[0];
-		} else {
-			blobs.put("blue", wall);
-		}
+		List<double[]> wall = findWalls(buffers.get(7).submat(0, 470, 240, 400)); // WARNING: USING FIXED NUMBERS!!!
+//		double wallY = 0.0;
+//		if (wall.size() > 0) {
+//			blobs.put("blue", wall.subList(0, 1));
+//			wallY = wall.get(1)[0];
+//		} else {
+//			blobs.put("blue", wall);
+//		}
+		double[] wallYVals = findWallY(buffers.get(7));
 		
-		blobs.put("red", findBlobs(buffers.get(5),wallY));
-		blobs.put("green", findBlobs(buffers.get(6),wallY));
+		//visualize it:
+		
+		Mat temp = Mat.zeros(IMG_HEIGHT, IMG_WIDTH, CvType.CV_8U);
+		for (int i = 0; i < wallYVals.length; i++) {
+			temp.put((int)wallYVals[i],i, 255.0);
+		}
+		temp.copyTo(processedFrame);
+		blobs.put("red", findBlobs(buffers.get(5),wallYVals));
+		blobs.put("green", findBlobs(buffers.get(6),wallYVals));
 //		blobs.put("blue", findWalls(buffers.get(7).submat(0, 470, 280, 360))); 
 		
 		List<double[]> reactorWall = findWalls(buffers.get(8));
@@ -113,20 +125,46 @@ public class FrameProcessor {
 	
 	
 	//returns list of blobs' centers (x,y)
-	public List<double[]> findBlobs(Mat binaryImg, double wallY) {
-		if (wallY > 0.0) {
-			binaryImg = binaryImg.submat((int)wallY, IMG_HEIGHT, 0, IMG_WIDTH);
-		}
+	public List<double[]> findBlobs(Mat binaryImg, double[] wallY) {
+//		if (wallY > 0.0) {
+//			binaryImg = binaryImg.submat((int)wallY, IMG_HEIGHT, 0, IMG_WIDTH);
+//		}
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Imgproc.findContours(binaryImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		List<double[]> blobs = new ArrayList<double[]>();
 		for (MatOfPoint cnt : contours) {
 			if (Imgproc.contourArea(cnt) > contourAreaThresh) {
 				Rect bound = Imgproc.boundingRect(cnt);
-				blobs.add(new double[] {bound.x + (bound.width / 2.0), bound.y + (bound.height / 2.0) + wallY});
+				double x = bound.x + (bound.width / 2.0);
+				double y = bound.y + (bound.height / 2.0);
+				if (bound.y > wallY[(int)x]) {
+					blobs.add(new double[] {x,y});
+				}
+//				blobs.add(new double[] {bound.x + (bound.width / 2.0), bound.y + (bound.height / 2.0) + wallY});
 			}
 		}
 		return blobs;
+	}
+	
+	public double[] findWallY(Mat binaryImg) {
+		double[] ret = new double[IMG_WIDTH];
+		double[] pix = {};
+		int max = 0;
+		for (int i = 0; i < IMG_WIDTH; i++) {
+			for (int j = IMG_HEIGHT - 1; j >= 0; j--) {
+				pix = binaryImg.get(j,i);
+				if (pix.length > 0 && pix[0] > 0.5) {
+					ret[i] = j;
+					if (j > max) max = j;
+					break;
+				}
+			}
+			if (ret[i] == 0)
+				ret[i] = max;
+//			double avg = ((double)total) / count;
+//			ret[i] = avg;
+		}
+		return ret;
 	}
 	
 	// this is specifically for the blue walls. instead of returning the center, return the lower edge y
@@ -149,6 +187,49 @@ public class FrameProcessor {
 			wall.add(new double[] {bestbound.y + (bestbound.height / 2.0)});
 		}
 		return wall;
+	}
+	
+	
+	private static void loadLibrary() {
+	    try {
+	        InputStream in = null;
+	        File fileOut = null;
+	        String osName = System.getProperty("os.name");
+	        System.out.println(osName);
+	        if(osName.startsWith("Windows")){
+	            int bitness = Integer.parseInt(System.getProperty("sun.arch.data.model"));
+	            if(bitness == 32){
+	                System.out.println("32 bit detected");
+	                in = FrameProcessor.class.getResourceAsStream("/opencv/x86/opencv_java245.dll");
+	                fileOut = File.createTempFile("lib", ".dll");
+	            }
+	            else if (bitness == 64){
+	                System.out.println("64 bit detected");
+	                in = FrameProcessor.class.getResourceAsStream("/opencv/x64/opencv_java248.dll");
+	                fileOut = File.createTempFile("lib", ".dll");
+	            }
+	            else{
+	                System.out.println("Unknown bit detected - trying with 32 bit");
+	                in = FrameProcessor.class.getResourceAsStream("/opencv/x86/opencv_java248.dll");
+	                fileOut = File.createTempFile("lib", ".dll");
+	            }
+	        }
+	        else if(osName.equals("Mac OS X")){
+	            in = FrameProcessor.class.getResourceAsStream("/opencv/mac/libopencv_java248.dylib");
+	            fileOut = File.createTempFile("lib", ".dylib");
+	        }
+
+
+	        OutputStream out = FileUtils.openOutputStream(fileOut);
+	        if (out == null) System.out.println("out is null");
+	        if (in == null) System.out.println("in is null");
+	        IOUtils.copy(in, out);
+	        in.close();
+	        out.close();
+	        System.load(fileOut.toString());
+	    } catch (Exception e) {
+	        throw new RuntimeException("Failed to load opencv native library", e);
+	    }
 	}
 	
 	/**

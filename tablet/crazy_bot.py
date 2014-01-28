@@ -15,7 +15,7 @@ import random
 from sensor_manager import SensorManager
 
 class CrazyBot:
-    MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR = ("moveForward", "backup", "search", "turnToDir")
+    MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR = ("moveForward", "backup", "searchDirection", "turnToDir")
 
     def __init__(self, maple, manager):
         self.state = self.SEARCH_DIRECTION
@@ -134,10 +134,12 @@ class CrazyBot:
     def mainLoop(self):
         while True:
             self.mainIter()
+            # print "Orientation: ", self.sensorManager.odo.direction
+            # print "LRIR: ", self.sensorManager.sonars.distances[0]
             time.sleep(.05)
 
     def mainIter(self):
-        # print "State: ", self.state
+        print "State: ", self.state
         if self.state == self.MOVE_FORWARD:
             self.state = self.moveForward()
             if time.time() - self.stateStartTime > 15:
