@@ -16,7 +16,7 @@ class VisionConsumer:
         self.goalBall = [] # direction, distance, color of goal
         self.goalReactor = []
         self.goalYellow = []
-        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactors" : [], "yellow" : []}
+        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactors" : [], "yellow" : [], "wallEnds" : []}
         self.run = True
 
     

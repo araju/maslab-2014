@@ -52,7 +52,8 @@ class CrazyBot:
 
         # print "Sonar Distances: ", self.sensorManager.sonars.distances[0]
 
-        if (self.sensorManager.sonars.distances[0] < 20):
+        if (self.sensorManager.sonars.distances[0] < 20 or self.sensorManager.sonars.distances[1] < 20 or
+                self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
             print 'staph dood'
             self.driver.driveMotors(0)
             return self.backUpSetup()
@@ -69,7 +70,7 @@ class CrazyBot:
 
         # print "Odo dist: ", self.sensorManager.odo.distance
 
-        if self.sensorManager.odo.distance < -30:
+        if self.sensorManager.odo.distance < -30 or self.sensorManager.bumps.bumped[4]:
             self.driver.driveMotors(0)
             return self.searchDirectionSetup()
 
@@ -91,8 +92,9 @@ class CrazyBot:
         # print self.sensorManager.sonars.distances
 
         idx = int(math.floor(self.sensorManager.odo.direction/10) + (self.halfFlag - 1) * 18) % 36
-        if (self.distances[idx] < self.sensorManager.sonars.distances[0]):
-            self.distances[idx] = self.sensorManager.sonars.distances[0]
+        currDist = (self.sensorManager.sonars.distances[0] + self.sensorManager.sonars.distances[1]) / 2.0
+        if (self.distances[idx] < currDist):
+            self.distances[idx] = currDist
         
         if self.sensorManager.odo.direction > 175 and self.halfFlag == 2:
             print 'End Turn'

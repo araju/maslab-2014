@@ -29,6 +29,9 @@ public class BlobProcessor {
 				if (color.equals("teal") || color.equals("yellow")) {
 					direction = calculateReactorDirection(point[0],point[1]);
 					distance = calculateReactorDistance(point[0],point[1]);
+				} else if (color.equals("wallEnds")) {
+					direction = point[0]; // not actually a direction or distance. just a place holder
+					distance = point[1];
 				} else {
 					direction = calculateDirection(point[0]);
 					distance = color.equals("blue") ? calculateWallDistance(point[0],point[1]) : calculateDistance(point[0],point[1]);
@@ -36,6 +39,10 @@ public class BlobProcessor {
 				if (distance > 0) {
 					b.add(direction);
 					b.add(distance);
+					if (color.equals("teal") || color.equals("yellow")) {
+						b.add(point[2]);
+						b.add(point[3]);
+					}
 					balls.get(color).add(b);
 				}
 			}

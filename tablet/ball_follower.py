@@ -180,7 +180,8 @@ class BallFollower:
             return self.turnToObjSetup()
 
         if self.sensorManager.vision.goalReactor[1] < 200:
-            if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]:
+            if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1] or \
+                    self.sensorManager.vision.goalReactor[2] > 600 or self.sensorManager.vision.goalReactor[1] < 100:
                 self.driver.driveMotors(0)
                 self.sensorManager.odo.distance = 0
                 return self.atReactorSetup()
@@ -204,7 +205,9 @@ class BallFollower:
             return self.turnToObjSetup()
 
         if self.sensorManager.vision.goalYellow[1] < 200:
-            if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]:
+            if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1] or \
+                    self.sensorManager.vision.goalYellow[2] > 600 or \
+                    self.sensorManager.vision.goalYellow[1] < 100:
                 self.driver.driveMotors(0)
                 self.sensorManager.odo.distance = 0
                 return self.atYellowSetup()
@@ -214,6 +217,8 @@ class BallFollower:
 
     def atReactorSetup(self):
         self.stateStartTime = time.time()
+        self.greenBallCount = 0
+        self.driver.stopMotors()
         return self.AT_REACTOR
 
     def atReactor(self):
@@ -221,6 +226,7 @@ class BallFollower:
 
     def atYellowSetup(self):
         self.stateStartTime = time.time()
+        self.redBallCount = 0
         self.driver.stopMotors()
         return self.AT_YELLOW
 

@@ -142,6 +142,25 @@ public class FrameProcessor {
 			blobs.put("yellow", yellowWall);
 		}
 		
+		if (wallYVals.length == IMG_WIDTH) {
+			double total = 0.0;
+			List<double[]> wallEnds = new ArrayList<double[]>();
+			double[] ends = new double[2];
+			for (int i = 0; i < 10; i++) {
+				total += wallYVals[i];
+			}
+			ends[0] = total / 10.0;
+			total = 0.0;
+			for (int i = 1; i <= 10; i++) {
+				total += wallYVals[IMG_WIDTH - i];
+			}
+			ends[1] = total / 10.0;
+			wallEnds.add(ends);
+			blobs.put("wallEnds", wallEnds);
+		} else {
+			blobs.put("wallEnds", new ArrayList<double[]>());
+		}
+		
 		return blobs;
 	}
 	
@@ -209,7 +228,7 @@ public class FrameProcessor {
 			}
 		}
 		if (bestbound != null) {
-			wall.add(new double[] {bestbound.x + (bestbound.width / 2.0), bestbound.y + bestbound.height});
+			wall.add(new double[] {bestbound.x + (bestbound.width / 2.0), bestbound.y + bestbound.height, bestbound.width, bestbound.height});
 			wall.add(new double[] {bestbound.y + (bestbound.height / 2.0)});
 		}
 		return wall;
