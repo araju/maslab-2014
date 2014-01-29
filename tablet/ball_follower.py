@@ -11,11 +11,9 @@ from vision_consumer import VisionConsumer
 from sensor_manager import SensorManager
 
 
-# TODO: handle the orientation info from vision for the reactor
-
 class BallFollower:
 
-    NO_OBJ, TURN_TO_OBJ, GO_TO_BALL, GO_TO_REACTOR, CLOSE_TO_BALL = ("noObj", "turnToObj", "goToBall", "goToReactor", "closeToBall")
+    NO_OBJ, TURN_TO_OBJ, GO_TO_BALL, GO_TO_REACTOR, CLOSE_TO_BALL, GO_TO_YELLOW, AT_YELLOW, AT_REACTOR = ("noObj", "turnToObj", "goToBall", "goToReactor", "closeToBall", "goToYellow", "atYellow", "atReactor")
     ANGLE_THRSH = 15
     DIST_THRESH = 20
     CLOSE_DIST = 20
@@ -44,10 +42,8 @@ class BallFollower:
         return self.NO_OBJ
 
     def noObj(self):
-        if self.sensorManager.vision.seeGreenBall() or self.sensorManager.vision.seeRedBall():
+        if self.sensorManager.vision.seeObject():
             return self.turnToObjSetup()
-        elif self.sensorManager.vision.seeReactor():
-            return self.goToReactorSetup()
         else:
             return self.NO_OBJ
 
@@ -56,33 +52,89 @@ class BallFollower:
         return self.TURN_TO_OBJ
 
     def turnToObj(self):
-        goingForBall = True
-        if len(self.sensorManager.vision.goalBall) == 0 and len(self.sensorManager.vision.goalReactor) == 0:
+        goingFor = 0 # 0: ball, 1: reactor, 2: yellow wall, 3: nothing
+        if not self.sensorManager.vision.seeObject():
             return self.noObjSetup()# lost sight of the object
-        elif len(self.sensorManager.vision.goalBall) > 0 and len(self.sensorManager.vision.goalReactor) == 0:
-            goalDir = self.sensorManager.vision.goalBall[0]
-            goingForBall = True
-        elif len(self.sensorManager.vision.goalBall) == 0 and len(self.sensorManager.vision.goalReactor) > 0:
-            goalDir = self.sensorManager.vision.goalReactor[0]
-            goingForBall = False
-        else:
-            if self.sensorManager.vision.goalBall[1] < self.sensorManager.vision.goalReactor[1] or self.greenBallCount == 0: # ball is closer
-                goalDir = self.sensorManager.vision.goalBall[0]
-                goingForBall = True
-            else:
-                goingForBall = False
+
+        reactorPossible = self.sensorManager.vision.seeReactor() and self.greenBallCount > 0
+        yellowWallPossible = self.sensorManager.vision.seeYellowWall() and self.redBallCount > 0
+        if not self.sensorManager.vision.seeBall():
+            if reactorPossible and not yellowWallPossible:
                 goalDir = self.sensorManager.vision.goalReactor[0]
-        if goingForBall:
-            print "Turning to: ", self.sensorManager.vision.goalBall[2]
+                goingFor = 1
+            elif not reactorPossible and yellowWallPossible:
+                goalDir = self.sensorManager.vision.goalYellow[0]
+                goingFor = 2
+            elif reactorPossible and yellowWallPossible:
+                if self.sensorManager.vision.goalReactor[1] < self.sensorManager.vision.goalYellow[1]:
+                    goalDir = self.sensorManager.vision.goalReactor[0]
+                    goingFor = 1
+                else:
+                    goalDir = self.sensorManager.vision.goalYellow[0]
+                    goingFor = 2
+            else:
+                # nothing is possible
+                return self.noObjSetup()
+        elif not reactorPossible:
+            if not yellowWallPossible:
+                goalDir = self.sensorManager.vision.goalBall[0]
+                goingFor = 0
+            else: # see yellow and ball
+                if self.sensorManager.vision.goalBall[1] < self.sensorManager.vision.goalYellow[1]:
+                    goalDir = self.sensorManager.vision.goalBall[0]
+                    goingFor = 0
+                else:
+                    goalDir = self.sensorManager.vision.goalYellow[0]
+                    goingFor = 2
+        elif not yellowWallPossible:
+            if self.sensorManager.vision.goalBall[1] < self.sensorManager.vision.goalReactor[1]:
+                goalDir = self.sensorManager.vision.goalBall[0]
+                goingFor = 0
+            else:
+                goalDir = self.sensorManager.vision.goalReactor[0]
+                goingFor = 1
         else:
+            distances = [self.sensorManager.vision.goalBall[1], self.sensorManager.vision.goalReactor[1], self.sensorManager.vision.goalYellow[1]]
+            minD = min(distances)
+            minIdx = distances.index(minD)
+            if minIdx == 0:
+                goalDir = self.sensorManager.vision.goalBall[0]
+                goingFor = 0
+            elif minIdx == 1:
+                goalDir = self.sensorManager.vision.goalReactor[0]
+                goingFor = 1
+            else:
+                goalDir = self.sensorManager.vision.goalYellow[0]
+                goingFor = 2
+
+        # elif len(self.sensorManager.vision.goalBall) > 0 and len(self.sensorManager.vision.goalReactor) == 0:
+        #     goalDir = self.sensorManager.vision.goalBall[0]
+        #     goingFor = 0
+        # elif len(self.sensorManager.vision.goalBall) == 0 and len(self.sensorManager.vision.goalReactor) > 0:
+        #     goalDir = self.sensorManager.vision.goalReactor[0]
+        #     goingForBall = False
+        # else:
+        #     if self.sensorManager.vision.goalBall[1] < self.sensorManager.vision.goalReactor[1] or self.greenBallCount == 0: # ball is closer
+        #         goalDir = self.sensorManager.vision.goalBall[0]
+        #         goingForBall = True
+        #     else:
+        #         goingForBall = False
+        #         goalDir = self.sensorManager.vision.goalReactor[0]
+        if goingFor == 0:
+            print "Turning to: ", self.sensorManager.vision.goalBall[2]
+        elif goingFor == 1:
             print "Turning to: reactor"
+        else:
+            print "Turning to: yellow"
         if abs(goalDir) < self.ANGLE_THRSH:
             self.driver.turnMotors(0)
             self.sensorManager.odo.direction = 0
-            if goingForBall:
+            if goingFor == 0:
                 return self.goToBallSetup()
-            else:
+            elif goingFor == 1:
                 return self.goToReactorSetup()
+            else:
+                return self.goToYellowWallSetup()
 
         self.driver.turnMotors(-goalDir / 4.0)
         return self.TURN_TO_OBJ
@@ -108,7 +160,7 @@ class BallFollower:
 
         print "Going to: ", self.sensorManager.vision.goalBall[2], " , ", self.sensorManager.vision.goalBall[1]
         # self.driver.driveMotors(self.sensorManager.vision.goalBall[1])
-        self.driver.driveMotors(10)
+        self.driver.driveMotors(20)
         return self.GO_TO_BALL
 
 
@@ -127,8 +179,54 @@ class BallFollower:
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
 
+        if self.sensorManager.vision.goalReactor[1] < 200:
+            if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]:
+                self.driver.driveMotors(0)
+                self.sensorManager.odo.distance = 0
+                return self.atReactorSetup()
+
         self.driver.driveMotors(self.sensorManager.vision.goalReactor[1])
         return self.GO_TO_REACTOR
+
+    def goToYellowWallSetup(self):
+        self.stateStartTime = time.time()
+        return self.GO_TO_YELLOW
+
+    def goToYellowWall(self):
+        if not (self.sensorManager.vision.seeYellowWall()):
+            self.driver.driveMotors(0)
+            self.sensorManager.odo.distance = 0
+            return self.noObjSetup()
+
+        if abs(self.sensorManager.vision.goalYellow[0]) > self.ANGLE_THRSH:
+            self.driver.driveMotors(0)
+            self.sensorManager.odo.distance = 0
+            return self.turnToObjSetup()
+
+        if self.sensorManager.vision.goalYellow[1] < 200:
+            if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]:
+                self.driver.driveMotors(0)
+                self.sensorManager.odo.distance = 0
+                return self.atYellowSetup()
+
+        self.driver.driveMotors(self.sensorManager.vision.goalYellow[1])
+        return self.GO_TO_YELLOW
+
+    def atReactorSetup(self):
+        self.stateStartTime = time.time()
+        return self.AT_REACTOR
+
+    def atReactor(self):
+        return self.AT_REACTOR
+
+    def atYellowSetup(self):
+        self.stateStartTime = time.time()
+        self.driver.stopMotors()
+        return self.AT_YELLOW
+
+    def atYellow(self):
+        return self.AT_YELLOW
+
 
     def closeToBallSetup(self):
         if self.gettingBall == "green":
@@ -152,11 +250,12 @@ class BallFollower:
     def mainLoop(self):
         while True:
             self.sensorManager.vision.getVisionInfo()
+            # print self.sensorManager.vision.goalYellow
             self.mainIter()
             time.sleep(0.05)
 
     def mainIter(self):
-        print self.state
+        print self.state, self.greenBallCount, self.redBallCount
         if self.state == self.NO_OBJ:
             self.state = self.noObj()
         elif self.state == self.TURN_TO_OBJ:
@@ -167,6 +266,12 @@ class BallFollower:
             self.state = self.goToReactor()
         elif self.state == self.CLOSE_TO_BALL:
             self.state = self.closeToBall()
+        elif self.state == self.GO_TO_YELLOW:
+            self.state = self.goToYellowWall()
+        elif self.state == self.AT_YELLOW:
+            self.state = self.atYellow()
+        elif self.state == self.AT_REACTOR:
+            self.state = self.atReactor()
 
 
 if __name__ == '__main__':

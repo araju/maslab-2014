@@ -14,7 +14,7 @@ class SensorManager:
 
     def __init__(self, port, maple):
         distanceNum = 6
-        shortRangeNum = 4
+        shortRangeNum = 6
 
         self.maple = maple
         self.sonars = DistanceSensors(distanceNum, maple)
@@ -65,7 +65,8 @@ class VisionInfo:
 
         self.goalBall = [] # direction, distance, color of goal
         self.goalReactor = []
-        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactors" : []}
+        self.goalYellow = []
+        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactors" : [], "yellow" : []}
 
     # call this once a loop to get consistent vision info for the entire loop
     # helps avoid concurrency issues
@@ -91,6 +92,11 @@ class VisionInfo:
         else:
             self.goalReactor = []
 
+        if "yellow" in self.ballMap.keys() and len(self.ballMap["yellow"]) > 0:
+            self.goalYellow = self.ballMap["yellow"]
+        else:
+            self.goalYellow = []
+
 
     def seeGreenBall(self):
         return len(self.ballMap["green"]) > 0
@@ -101,14 +107,17 @@ class VisionInfo:
     def seeReactor(self):
         return len(self.goalReactor) > 0
 
+    def seeYellowWall(self):
+        return len(self.goalYellow) > 0
+
     def seeBall(self):
         return self.seeGreenBall() or self.seeRedBall()
 
     def seeObject(self):
-        return self.seeBall() or self.seeReactor()
+        return self.seeBall() or self.seeReactor() or self.seeYellowWall()
 
-    def getWallY(self):
-        if len(self.ballMap["blue"]) > 0:
-            return self.ballMap["blue"][1]
-        else:
-            return 0
+    # def getWallY(self):
+    #     if len(self.ballMap["blue"]) > 0:
+    #         return self.ballMap["blue"][1]
+    #     else:
+    #         return 0

@@ -15,7 +15,8 @@ class VisionConsumer:
         self.svrSock.listen(5)
         self.goalBall = [] # direction, distance, color of goal
         self.goalReactor = []
-        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactors" : []}
+        self.goalYellow = []
+        self.ballMap = {"red" : [], "green" : [], "blue" : [], "reactors" : [], "yellow" : []}
         self.run = True
 
     

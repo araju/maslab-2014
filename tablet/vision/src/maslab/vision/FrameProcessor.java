@@ -44,12 +44,15 @@ public class FrameProcessor {
 	private static final Scalar lowerTeal = new Scalar(20, 100, 50);
 	private static final Scalar upperTeal = new Scalar(33, 255, 255);
 	
+	private static final Scalar lowerYellow = new Scalar(75,90,70);
+	private static final Scalar upperYellow = new Scalar(95,255,255);
+	
 	private static final int contourAreaThresh = 90;
 	private static final int cleanKernelSize = 5;
-	private static final int numBuffers = 9; //0: HSV, 1: Red Thresh, 2: Green, 3: Blue, 4: Teal
-											 // 5,6,7,8: cleaned Red, Green, Blue, Teal
-	
-	//TODO: do not detect above the lowest blue
+	private static final int numBuffers = 12; //0: HSV, 1: Red Thresh, 2: Green, 3: Blue, 4: Teal
+											 // 5,6,7,8: cleaned Red, Green, Blue, Teal, Yellow
+											  // 9, Yellow Thresh, 10: Yellow cleaned
+											  // 11: The bitwise or of the blue, teal, yellow
 	
 	private List<Mat> buffers = null;
 	private Mat cleanKernel;
@@ -85,14 +88,17 @@ public class FrameProcessor {
 		Core.inRange(buffers.get(0), lowerGreen, upperGreen, buffers.get(2));
 		Core.inRange(buffers.get(0), lowerBlue, upperBlue, buffers.get(3));
 		Core.inRange(buffers.get(0), lowerTeal, upperTeal, buffers.get(4));
+		Core.inRange(buffers.get(0), lowerYellow, upperYellow, buffers.get(9));
 		//clean thresholded images
-		Imgproc.morphologyEx(buffers.get(1), buffers.get(5), Imgproc.MORPH_OPEN, cleanKernel);
-		Imgproc.morphologyEx(buffers.get(2), buffers.get(6), Imgproc.MORPH_OPEN, cleanKernel);
-		Imgproc.morphologyEx(buffers.get(3), buffers.get(7), Imgproc.MORPH_OPEN, cleanKernel);
-		Imgproc.morphologyEx(buffers.get(4), buffers.get(8), Imgproc.MORPH_OPEN, cleanKernel);
-//		buffers.set(6, processedFrame);
+		Imgproc.morphologyEx(buffers.get(1), buffers.get(5), Imgproc.MORPH_OPEN, cleanKernel); // Red
+		Imgproc.morphologyEx(buffers.get(2), buffers.get(6), Imgproc.MORPH_OPEN, cleanKernel); // Green
+		Imgproc.morphologyEx(buffers.get(3), buffers.get(7), Imgproc.MORPH_OPEN, cleanKernel); // Blue
+		Imgproc.morphologyEx(buffers.get(4), buffers.get(8), Imgproc.MORPH_OPEN, cleanKernel); // Teal
+		Imgproc.morphologyEx(buffers.get(9), buffers.get(10), Imgproc.MORPH_OPEN, cleanKernel); // Yellow
+//		buffers.set(10, processedFrame);
+		
 		Map<String,List<double[]>> blobs = new HashMap<String, List<double[]>>();
-		List<double[]> wall = findWalls(buffers.get(7).submat(0, 470, 240, 400)); // WARNING: USING FIXED NUMBERS!!!
+//		List<double[]> wall = findWalls(buffers.get(7).submat(0, 470, 240, 400)); // WARNING: USING FIXED NUMBERS!!!
 //		double wallY = 0.0;
 //		if (wall.size() > 0) {
 //			blobs.put("blue", wall.subList(0, 1));
@@ -100,7 +106,14 @@ public class FrameProcessor {
 //		} else {
 //			blobs.put("blue", wall);
 //		}
-		double[] wallYVals = findWallY(buffers.get(7));
+		
+		// or the yellow, teal, and blue masks:
+		Core.bitwise_or(buffers.get(7), buffers.get(8), buffers.get(11)); // blue or teal
+		Core.bitwise_or(buffers.get(11), buffers.get(10), buffers.get(11)); //(blue or teal) or yellow
+		
+//		buffers.set(11, processedFrame);
+		
+		double[] wallYVals = findWallY(buffers.get(11));
 		
 		//visualize it:
 		
@@ -109,15 +122,24 @@ public class FrameProcessor {
 			temp.put((int)wallYVals[i],i, 255.0);
 		}
 		temp.copyTo(processedFrame);
+		
+		
 		blobs.put("red", findBlobs(buffers.get(5),wallYVals));
 		blobs.put("green", findBlobs(buffers.get(6),wallYVals));
 //		blobs.put("blue", findWalls(buffers.get(7).submat(0, 470, 280, 360))); 
 		
-		List<double[]> reactorWall = findWalls(buffers.get(8));
+		List<double[]> reactorWall = findWalls(buffers.get(8), wallYVals);
 		if (reactorWall.size() > 0) {
 			blobs.put("teal", reactorWall.subList(0, 1));
 		} else {
 			blobs.put("teal", reactorWall);
+		}
+		
+		List<double[]> yellowWall = findWalls(buffers.get(10), wallYVals);
+		if (yellowWall.size() > 0) {
+			blobs.put("yellow", yellowWall.subList(0, 1));
+		} else {
+			blobs.put("yellow", yellowWall);
 		}
 		
 		return blobs;
@@ -159,16 +181,17 @@ public class FrameProcessor {
 					break;
 				}
 			}
-			if (ret[i] == 0)
+		}
+		for (int i = 0; i < IMG_WIDTH; i++) {
+			if (ret[i] == 0) // if something weird happened and we don't have a wall pixel in this column
 				ret[i] = max;
-//			double avg = ((double)total) / count;
-//			ret[i] = avg;
 		}
 		return ret;
 	}
 	
-	// this is specifically for the blue walls. instead of returning the center, return the lower edge y
-	public List<double[]> findWalls(Mat binaryImg) {
+	// for walls, instead of returning the center, return the lower edge y
+	// use the wallY to define a lower edge bound
+	public List<double[]> findWalls(Mat binaryImg, double[] wallY) {
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Imgproc.findContours(binaryImg, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		List<double[]> wall = new ArrayList<double[]>();
@@ -178,7 +201,10 @@ public class FrameProcessor {
 			if (Imgproc.contourArea(cnt) > contourAreaThresh*2) {
 				Rect bound = Imgproc.boundingRect(cnt);
 				if (bestbound == null || bound.y > bestbound.y) {
-					bestbound = bound;
+					// check against wallY
+					if (bound.y + bound.height + 10 >= wallY[(int)(bound.x + bound.width / 2)]) {
+						bestbound = bound;
+					}
 				}
 			}
 		}

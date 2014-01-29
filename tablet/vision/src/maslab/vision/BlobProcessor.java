@@ -26,7 +26,7 @@ public class BlobProcessor {
 			for (double[] point : blobs.get(color)) {
 				ArrayList<Double> b = new ArrayList<Double>();
 				double direction, distance;
-				if (color.equals("teal")) {
+				if (color.equals("teal") || color.equals("yellow")) {
 					direction = calculateReactorDirection(point[0],point[1]);
 					distance = calculateReactorDistance(point[0],point[1]);
 				} else {
@@ -39,7 +39,7 @@ public class BlobProcessor {
 					balls.get(color).add(b);
 				}
 			}
-			if (color.equals("red") || color.equals("green") || color.equals("teal")) {
+			if (color.equals("red") || color.equals("green") || color.equals("teal") || color.equals("yellow")) {
 				Collections.sort(balls.get(color), new Comparator<List<Double>>() {
 	
 					@Override
