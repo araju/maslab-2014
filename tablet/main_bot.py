@@ -140,7 +140,7 @@ class MainBot:
 if __name__ == '__main__':
     m = MainBot()
     try:
-        m.waitForStart()
+        # m.waitForStart()
         m.mainLoop()
     except:
         traceback.print_exc()
