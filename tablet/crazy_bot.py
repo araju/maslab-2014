@@ -171,7 +171,7 @@ class CrazyBot:
                 break
         
         self.gameStarted = False
-        p = subprocess.Popen('java -jar BotClient/Java/botclient.jar',
+        p = subprocess.Popen('C:/Program Files (x86)/Java/bin/java.exe -jar BotClient/Java/botclient.jar',
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT)
         botClientThread = Thread(target = handleOutput, args = (iter(p.stdout.readline, b''),))
