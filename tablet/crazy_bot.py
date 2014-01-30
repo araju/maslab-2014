@@ -54,7 +54,7 @@ class CrazyBot:
 
         # print "Sonar Distances: ", self.sensorManager.sonars.distances[0]
 
-        if (self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]):
+        if (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
             print 'staph dood'
             self.driver.driveMotors(0)
             return self.backUpSetup()
