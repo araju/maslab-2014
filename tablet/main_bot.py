@@ -51,6 +51,7 @@ class MainBot:
     def searchSetup(self):
         self.stateStartTime = time.time()
         self.searchBot.reset()
+        print "Main State: SEARCH"
         return self.SEARCH
 
     def search(self):
@@ -64,6 +65,7 @@ class MainBot:
         self.stateStartTime = time.time()
         self.driver.stopMotors()
         self.ballFollower.reset()
+        print "Main State: BALL_FOLLOW"
         return self.BALL_FOLLOW
 
     def ballFollow(self):
@@ -90,6 +92,7 @@ class MainBot:
         self.stateStartTime = time.time()
         self.scoreBot.reset()
         self.scoreBot.atReactor = atReactor
+        print "Main State: SCORE"
         return self.SCORE
 
     def score(self):
@@ -103,6 +106,7 @@ class MainBot:
         self.prevState = self.state
         self.stateStartTime = time.time()
         self.avoidBot.reset(180)
+        print "Main State: AVOID"
         return self.AVOID
 
     def avoid(self):
@@ -114,7 +118,7 @@ class MainBot:
 
 
     def mainIter(self):
-        print self.state
+        # print self.state
         if self.state == self.SEARCH:
             self.state = self.search()
         elif self.state == self.BALL_FOLLOW:

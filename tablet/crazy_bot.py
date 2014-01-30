@@ -135,7 +135,7 @@ class CrazyBot:
         return self.TURN_TO_DIR
 
     def reset(self):
-        self.state = self.searchDirectionSetup()
+        self.state = self.moveForwardSetup()
 
     def mainLoop(self):
         while True:

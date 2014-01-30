@@ -61,15 +61,18 @@ class VisionConsumer:
         def printOutput(out):
             print "in print"
             for output_line in out:
-                # print output_line
-                pass
-
-        p = subprocess.Popen('java -jar vision/maslab-vision.jar',
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT)
-        if (printVision):
-            visThread = Thread(target = printOutput, args = (iter(p.stdout.readline, b''),))
-            visThread.start()
+                print output_line
+                #pass
+        try:
+            p = subprocess.Popen('java -jar vision/maslab-vision.jar',
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+        except: # maybe we are on the tablet
+            p = subprocess.Popen('C:/Program Files (x86)/Java/jdk1.7.0_45/bin/java.exe -jar vision/maslab-vision.jar',
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+        visThread = Thread(target = printOutput, args = (iter(p.stdout.readline, b''),))
+        visThread.start()
         time.sleep(3)
         return p
 
