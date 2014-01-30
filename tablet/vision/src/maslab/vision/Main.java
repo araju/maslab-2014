@@ -65,7 +65,7 @@ public class Main {
 		int width = (int) (camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH));
 		int height = (int) (camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
 //		JLabel cameraPane = createWindow("Camera output", width, height);
-//		JLabel opencvPane = createWindow("OpenCV output", width, height);
+		JLabel opencvPane = createWindow("OpenCV output", width, height);
 
 		// Set up structures for processing images
 		Mat rawImage = new Mat();
@@ -96,8 +96,8 @@ public class Main {
 				vp.publish(balls, reactors); //right now ignores the reactors list
 				// Update the GUI windows
 				
-//				if (processedImage.width() > 0)
-//					updateWindow(opencvPane, processedImage, processedImageConverter);
+				if (processedImage.width() > 0)
+					updateWindow(opencvPane, processedImage, processedImageConverter);
 				
 				try {
 					Thread.sleep(10);

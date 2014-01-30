@@ -96,12 +96,12 @@ public class FrameProcessor {
 		Core.inRange(buffers.get(0), lowerPurple, upperPurple, buffers.get(11));
 		//clean thresholded images
 		Imgproc.morphologyEx(buffers.get(1), buffers.get(5), Imgproc.MORPH_OPEN, cleanKernel); // Red
-		Imgproc.morphologyEx(buffers.get(2), buffers.get(6), Imgproc.MORPH_OPEN, cleanKernel); // Green
+		Imgproc.morphologyEx(buffers.get(2), processedFrame, Imgproc.MORPH_OPEN, cleanKernel); // Green
 		Imgproc.morphologyEx(buffers.get(3), buffers.get(7), Imgproc.MORPH_OPEN, cleanKernel); // Blue
 		Imgproc.morphologyEx(buffers.get(4), buffers.get(8), Imgproc.MORPH_OPEN, cleanKernel); // Teal
 		Imgproc.morphologyEx(buffers.get(9), buffers.get(10), Imgproc.MORPH_OPEN, cleanKernel); // Yellow
 		Imgproc.morphologyEx(buffers.get(11), buffers.get(12), Imgproc.MORPH_OPEN, cleanKernel);  //Purple
-//		buffers.set(12, processedFrame);
+		buffers.set(6, processedFrame);
 		
 		Map<String,List<double[]>> blobs = new HashMap<String, List<double[]>>();
 //		List<double[]> wall = findWalls(buffers.get(7).submat(0, 470, 240, 400)); // WARNING: USING FIXED NUMBERS!!!
