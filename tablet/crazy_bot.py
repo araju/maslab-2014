@@ -19,7 +19,8 @@ class CrazyBot:
     MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR = ("moveForward", "backup", "searchDirection", "turnToDir")
 
     def __init__(self, maple, manager):
-        self.state = self.SEARCH_DIRECTION
+        self.state = MOVE_FORWARD
+        #self.state = self.SEARCH_DIRECTION
         # self.state = self.BACK_UP
         self.stateStartTime = time.time();
         self.maple = maple
@@ -53,7 +54,7 @@ class CrazyBot:
 
         # print "Sonar Distances: ", self.sensorManager.sonars.distances[0]
 
-        if (self.sensorManager.sonars.distances[0] < 20 or self.sensorManager.sonars.distances[1] < 20):
+        if (self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]):
             print 'staph dood'
             self.driver.driveMotors(0)
             return self.backUpSetup()
