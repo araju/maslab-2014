@@ -40,6 +40,7 @@ class BallFollower:
 
     def noObjSetup(self):
         self.stateStartTime = time.time()
+        self.driver.driveMotors(0)
         return self.NO_OBJ
 
     def noObj(self):
@@ -341,7 +342,9 @@ if __name__ == '__main__':
         c.mainLoop()
     except:
         traceback.print_exc()
+    finally:
         c.mapleRead = False
+        sense.close()
 
 
 
