@@ -43,7 +43,7 @@ class CrazyBot:
 
     def moveForwardSetup(self):
         self.stateStartTime = time.time()
-        print 'move forward setup'
+        print "State: MOVE_FORWARD"
         return self.MOVE_FORWARD
 
     def moveForward(self):
@@ -64,6 +64,7 @@ class CrazyBot:
         self.stateStartTime = time.time()
         self.sensorManager.odo.distance = 0
         self.driver.driveMotors(-35)
+        print "State: BACK_UP"
         return self.BACK_UP
 
     def backUp(self):
@@ -80,6 +81,7 @@ class CrazyBot:
         self.stateStartTime = time.time()
         self.halfFlag = 0
         self.distances = [-1 for i in range(36)]
+        print "State: SEARCH_DIRECTION"
         return self.SEARCH_DIRECTION
 
     def searchDirection(self):
@@ -119,6 +121,7 @@ class CrazyBot:
         self.sensorManager.odo.direction = 0
 
         print 'Max distance Angle:', self.maxDir
+        print "State: TURN_TO_DIR"
         return self.TURN_TO_DIR
 
     # Assumes that self.distances is populated with a list of distances
@@ -141,22 +144,26 @@ class CrazyBot:
             time.sleep(.05)
 
     def mainIter(self):
-        print "State: ", self.state
+        # print "State: ", self.state
         if self.state == self.MOVE_FORWARD:
             self.state = self.moveForward()
             if time.time() - self.stateStartTime > 15:
+                print "timed out"
                 self.state = self.backUpSetup()
         elif self.state == self.BACK_UP:
             self.state = self.backUp()
             if time.time() - self.stateStartTime > 15:
+                print "timed out"
                 self.state = self.searchDirectionSetup()
         elif self.state == self.SEARCH_DIRECTION:
             self.state = self.searchDirection()
             if time.time() - self.stateStartTime > 15:
+                print "timed out"
                 self.state = self.turnToDirSetup()
         elif self.state == self.TURN_TO_DIR:
             self.state = self.turnToDir()
             if time.time() - self.stateStartTime > 15:
+                print "timed out"
                 self.state = self.moveForwardSetup()
 
 
