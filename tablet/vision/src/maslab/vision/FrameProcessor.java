@@ -125,11 +125,11 @@ public class FrameProcessor {
 		
 		//visualize it:
 		
-		Mat temp = Mat.zeros(IMG_HEIGHT, IMG_WIDTH, CvType.CV_8U);
-		for (int i = 0; i < wallYVals.length; i++) {
-			temp.put((int)wallYVals[i],i, 255.0);
-		}
-		temp.copyTo(processedFrame);
+//		Mat temp = Mat.zeros(IMG_HEIGHT, IMG_WIDTH, CvType.CV_8U);
+//		for (int i = 0; i < wallYVals.length; i++) {
+//			temp.put((int)wallYVals[i],i, 255.0);
+//		}
+//		temp.copyTo(processedFrame);
 		
 		
 		blobs.put("red", findBlobs(buffers.get(5),wallYVals));
