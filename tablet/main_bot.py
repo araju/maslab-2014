@@ -43,7 +43,6 @@ class MainBot:
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
         except: # maybe we are on the tablet
-            traceback.print_exc()
             p = subprocess.Popen('C:/Program Files (x86)/Java/jdk1.7.0_45/bin/java.exe -jar vision/maslab-vision.jar',
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)

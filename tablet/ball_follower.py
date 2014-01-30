@@ -9,6 +9,7 @@ from mapleIf import Maple
 from motor_controller import MotorDriver
 from vision_consumer import VisionConsumer
 from sensor_manager import SensorManager
+import subprocess
 
 
 class BallFollower:
@@ -309,12 +310,34 @@ class BallFollower:
         elif self.state == self.AVOID:
             self.state = self.avoid()
 
+    def executeVisionProcess(self):
+        printVision = True
+
+        def printOutput(out):
+            print "in print"
+            for output_line in out:
+                print output_line
+                #pass
+        try:
+            p = subprocess.Popen('java -jar vision/maslab-vision.jar',
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+        except: # maybe we are on the tablet
+            p = subprocess.Popen('C:/Program Files (x86)/Java/jdk1.7.0_45/bin/java.exe -jar vision/maslab-vision.jar',
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+        visThread = Thread(target = printOutput, args = (iter(p.stdout.readline, b''),))
+        visThread.start()
+        time.sleep(3)
+        return p
+
 
 if __name__ == '__main__':
     m = Maple()
     sense = SensorManager(2300, m)
     c = BallFollower(m,sense)
     try:
+        c.executeVisionProcess()
         c.mainLoop()
     except:
         traceback.print_exc()
