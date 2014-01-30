@@ -49,7 +49,7 @@ class CrazyBot:
 
     def moveForward(self):
         # print 'move forward bitches'
-        self.driver.driveMotors(50)
+        self.driver.driveMotors(20)
 
         # print "Sonar Distances: ", self.sensorManager.sonars.distances[0]
 
@@ -64,14 +64,14 @@ class CrazyBot:
     def backUpSetup(self):
         self.stateStartTime = time.time()
         self.sensorManager.odo.distance = 0
-        self.driver.driveMotors(-50)
+        self.driver.driveMotors(-30)
         return self.BACK_UP
 
     def backUp(self):
 
         # print "Odo dist: ", self.sensorManager.odo.distance
 
-        if self.sensorManager.odo.distance < -40 or self.sensorManager.bumps.bumped[4]:
+        if self.sensorManager.odo.distance < -25 or self.sensorManager.bumps.bumped[4]:
             self.driver.driveMotors(0)
             return self.searchDirectionSetup()
 

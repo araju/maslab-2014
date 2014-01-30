@@ -58,7 +58,7 @@ class ScoreBot():
 
     def moveForwardSetup(self):
         self.stateStartTime = time.time()
-        self.driver.driveMotors(30)
+        self.driver.driveMotors(15)
         self.sensorManager.odo.distance = 0
         return self.MOVE_FORWARD
 
@@ -97,12 +97,12 @@ class ScoreBot():
 
     def backUpSetup(self):
         self.stateStartTime = time.time()
-        self.driver.driveMotors(-50)
+        self.driver.driveMotors(-30)
         self.sensorManager.odo.distance = 0
         return self.BACK_UP
 
     def backUp(self):
-        if (self.sensorManager.odo.distance < -40 or time.time() - self.stateStartTime > 3):
+        if (self.sensorManager.odo.distance < -25 or time.time() - self.stateStartTime > 3):
             return self.turnAwaySetup()
         return self.BACK_UP
 

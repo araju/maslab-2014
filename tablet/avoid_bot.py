@@ -23,12 +23,12 @@ class AvoidBot:
 
     def backUpSetup(self):
         self.stateStartTime = time.time()
-        self.driver.driveMotors(-50)
+        self.driver.driveMotors(-30)
         self.sensorManager.odo.distance = 0
         return self.BACK_UP
 
     def backUp(self):
-        if (self.sensorManager.odo.distance < -40 or time.time() - self.stateStartTime > 5):
+        if (self.sensorManager.odo.distance < -25 or time.time() - self.stateStartTime > 5):
             return self.turnAroundSetup()
         return self.BACK_UP
 
