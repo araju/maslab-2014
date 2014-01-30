@@ -5,7 +5,8 @@ import json
 import socket
 from threading import Thread
 import traceback 
-
+import subprocess
+import time
 
 class VisionConsumer:
 
@@ -25,7 +26,7 @@ class VisionConsumer:
             clisock, (remhost, remport) = self.svrSock.accept()
             while self.run:
                 jsonStr = clisock.recv(4096)
-                # print jsonStr
+                print jsonStr
                 self.ballMap = json.loads(jsonStr)
                 
                 # green = self.ballMap["green"]
@@ -54,12 +55,30 @@ class VisionConsumer:
         self.run = False
         self.svrSock.close()
 
+    def executeVisionProcess(self):
+        printVision = False
+
+        def printOutput(out):
+            for output_line in out:
+                print output_line
+                # pass
+
+        p = subprocess.Popen('java -jar vision/maslab-vision.jar',
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT)
+        if (printVision):
+            visThread = Thread(target = printOutput, args = (iter(p.stdout.readline, b''),))
+            visThread.start()
+        time.sleep(3)
+        return p
+
 
 if __name__ == '__main__':
     vc = None
     try:
         vc = VisionConsumer(2300)
         vc.startServer()
+        vc.executeVisionProcess()
     except:
         traceback.print_exc()
         if vc != None:

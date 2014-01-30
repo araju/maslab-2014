@@ -9,13 +9,14 @@ from threading import Thread
 from crazy_bot import CrazyBot
 from ball_follower import BallFollower
 from score_bot import ScoreBot
+from avoid_bot import AvoidBot
 from sensor_manager import SensorManager
 from mapleIf import Maple
 from motor_controller import MotorDriver
 
 class MainBot:
     
-    SEARCH, BALL_FOLLOW, SCORE = ("search", "ball_follow", "score")
+    SEARCH, BALL_FOLLOW, SCORE, AVOID = ("search", "ball_follow", "score", "avoid")
 
     def __init__(self):
         self.maple = Maple()
@@ -23,19 +24,21 @@ class MainBot:
         self.searchBot = CrazyBot(self.maple, self.sensorManager)
         self.ballFollower = BallFollower(self.maple, self.sensorManager)
         self.scoreBot = ScoreBot(self.maple, self.sensorManager)
+        self.avoidBot = AvoidBot(self.maple, self.sensorManager)
         self.state = self.SEARCH
         self.stateStartTime = time.time()
         self.visionProcess = self.executeVisionProcess()
         self.driver = MotorDriver(self.maple)
         self.gameStarted = True
+        self.prevState = self.SEARCH
 
     def executeVisionProcess(self):
         printVision = False
 
         def printOutput(out):
             for output_line in out:
-                # print output_line
-                pass
+                print output_line
+                # pass
 
         p = subprocess.Popen('java -jar vision/maslab-vision.jar',
                         stdout=subprocess.PIPE,
@@ -65,6 +68,9 @@ class MainBot:
         return self.BALL_FOLLOW
 
     def ballFollow(self):
+        if self.ballFollower.state == self.ballFollower.AVOID:
+            self.driver.stopMotors()
+            return self.avoidSetup()
         if self.ballFollower.state == self.ballFollower.AT_REACTOR:
             self.driver.stopMotors()
             return self.scoreSetup(True)
@@ -94,16 +100,37 @@ class MainBot:
         self.scoreBot.mainIter()
         return self.SCORE
 
+    def avoidSetup(self):
+        self.prevState = self.state
+        self.stateStartTime = time.time()
+        self.avoidBot.reset(180)
+        return self.AVOID
+
+    def avoid(self):
+        if (self.avoidBot.state == self.avoidBot.DONE):
+            self.driver.stopMotors()
+            self.state = self.prevState
+        self.avoidBot.mainIter()
+        return self.AVOID
+
+
+    def mainIter(self):
+        print self.state
+        if self.state == self.SEARCH:
+            self.state = self.search()
+        elif self.state == self.BALL_FOLLOW:
+            self.state = self.ballFollow()
+        elif self.state == self.SCORE:
+            self.state = self.score()
+        elif self.state == self.AVOID:
+            self.state = self.avoid()
+
     def mainLoop(self):
         while True:
             self.sensorManager.vision.getVisionInfo()
-            # print self.state
-            if self.state == self.SEARCH:
-                self.state = self.search()
-            elif self.state == self.BALL_FOLLOW:
-                self.state = self.ballFollow()
-            elif self.state == self.SCORE:
-                self.state = self.score()
+            if len(self.sensorManager.vision.goalBall) > 0:
+                print self.sensorManager.vision.goalBall[2]
+            # self.mainIter()
             time.sleep(0.01)
 
     

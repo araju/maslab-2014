@@ -13,7 +13,7 @@ from sensor_manager import SensorManager
 
 class BallFollower:
 
-    NO_OBJ, TURN_TO_OBJ, GO_TO_BALL, GO_TO_REACTOR, CLOSE_TO_BALL, GO_TO_YELLOW, AT_YELLOW, AT_REACTOR = ("noObj", "turnToObj", "goToBall", "goToReactor", "closeToBall", "goToYellow", "atYellow", "atReactor")
+    NO_OBJ, TURN_TO_OBJ, GO_TO_BALL, GO_TO_REACTOR, CLOSE_TO_BALL, GO_TO_YELLOW, AT_YELLOW, AT_REACTOR, AVOID = ("noObj", "turnToObj", "goToBall", "goToReactor", "closeToBall", "goToYellow", "atYellow", "atReactor", "avoid")
     ANGLE_THRSH = 15
     DIST_THRESH = 20
     CLOSE_DIST = 20
@@ -52,6 +52,10 @@ class BallFollower:
         return self.TURN_TO_OBJ
 
     def turnToObj(self):
+        if time.time() - self.stateStartTime > 15:
+            # something is wrong
+            return self.avoidSetup()
+
         goingFor = 0 # 0: ball, 1: reactor, 2: yellow wall, 3: nothing
         if not self.sensorManager.vision.seeObject():
             return self.noObjSetup()# lost sight of the object
@@ -144,6 +148,9 @@ class BallFollower:
         return self.GO_TO_BALL
 
     def goToBall(self):
+        if time.time() - self.stateStartTime > 20:
+            return self.avoidSetup()
+
         if len(self.sensorManager.vision.goalBall) == 0:
             self.driver.driveMotors(0)
             self.sensorManager.odo.distance = 0
@@ -169,6 +176,9 @@ class BallFollower:
         return self.GO_TO_REACTOR
 
     def goToReactor(self):
+        if time.time() - self.stateStartTime > 20:
+            return self.avoidSetup()
+
         if not (self.sensorManager.vision.seeReactor()):
             self.driver.driveMotors(0)
             self.sensorManager.odo.distance = 0
@@ -194,6 +204,9 @@ class BallFollower:
         return self.GO_TO_YELLOW
 
     def goToYellowWall(self):
+        if time.time() - self.stateStartTime > 20:
+            return self.avoidSetup()
+
         if not (self.sensorManager.vision.seeYellowWall()):
             self.driver.driveMotors(0)
             self.sensorManager.odo.distance = 0
@@ -222,6 +235,8 @@ class BallFollower:
         return self.AT_REACTOR
 
     def atReactor(self):
+        if time.time() - self.stateStartTime > 10:
+            return self.avoidSetup()
         return self.AT_REACTOR
 
     def atYellowSetup(self):
@@ -231,8 +246,9 @@ class BallFollower:
         return self.AT_YELLOW
 
     def atYellow(self):
+        if time.time() - self.stateStartTime() > 10:
+            return self.avoidSetup()
         return self.AT_YELLOW
-
 
     def closeToBallSetup(self):
         if self.gettingBall == "green":
@@ -245,10 +261,22 @@ class BallFollower:
         return self.CLOSE_TO_BALL
 
     def closeToBall(self):
+        if time.time() - self.stateStartTime > 10:
+            return self.avoidSetup()
+
         if self.sensorManager.odo.distance > self.CLOSE_DIST - 2:
             self.gettingBall = "none"
             return self.noObjSetup()
         return self.CLOSE_TO_BALL
+
+    def avoidSetup(self):
+        self.stateStartTime = time.time()
+        print "Hit timeout while in state: ", self.state
+        self.driver.stopMotors()
+        return self.AVOID
+
+    def avoid(self):
+        return self.AVOID
 
     def reset(self):
         self.state = self.turnToObjSetup()
@@ -278,6 +306,8 @@ class BallFollower:
             self.state = self.atYellow()
         elif self.state == self.AT_REACTOR:
             self.state = self.atReactor()
+        elif self.state == self.AVOID:
+            self.state = self.avoid()
 
 
 if __name__ == '__main__':

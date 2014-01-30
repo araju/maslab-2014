@@ -27,6 +27,9 @@ class ScoreBot():
         return self.LINING
 
     def lining(self):
+        if time.time() - self.stateStartTime > 10:
+            return self.moveForwardSetup() # just moveForward and hope for the best
+        
         if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
             self.driver.stopMotors()
             return self.moveForwardSetup()
