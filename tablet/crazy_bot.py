@@ -19,7 +19,7 @@ class CrazyBot:
     MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR = ("moveForward", "backup", "searchDirection", "turnToDir")
 
     def __init__(self, maple, manager):
-        self.state = MOVE_FORWARD
+        self.state = self.MOVE_FORWARD
         #self.state = self.SEARCH_DIRECTION
         # self.state = self.BACK_UP
         self.stateStartTime = time.time();
