@@ -74,7 +74,7 @@ public class VisionPublisher {
 //		}
 		
 		String json = JSONValue.toJSONString(sendMap);
-		System.out.println(json);
+		System.out.println("Publish: " + json);
 		outputWriter.println(json);
 	}
 	
