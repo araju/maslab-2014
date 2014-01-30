@@ -56,12 +56,13 @@ class VisionConsumer:
         self.svrSock.close()
 
     def executeVisionProcess(self):
-        printVision = False
+        printVision = True
 
         def printOutput(out):
+            print "in print"
             for output_line in out:
-                print output_line
-                # pass
+                # print output_line
+                pass
 
         p = subprocess.Popen('java -jar vision/maslab-vision.jar',
                         stdout=subprocess.PIPE,

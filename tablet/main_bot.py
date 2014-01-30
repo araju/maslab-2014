@@ -33,20 +33,19 @@ class MainBot:
         self.prevState = self.SEARCH
 
     def executeVisionProcess(self):
-        printVision = False
-
         def printOutput(out):
             for output_line in out:
-                print output_line
-                # pass
+                # print output_line
+                pass
 
         p = subprocess.Popen('java -jar vision/maslab-vision.jar',
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT)
-        if (printVision):
-            visThread = Thread(target = printOutput, args = (iter(p.stdout.readline, b''),))
-            visThread.start()
-        time.sleep(3)
+
+        visThread = Thread(target = printOutput, args = (iter(p.stdout.readline, b''),))
+        visThread.start()
+        time.sleep(1)
+        
         return p
 
     def searchSetup(self):
@@ -128,9 +127,9 @@ class MainBot:
     def mainLoop(self):
         while True:
             self.sensorManager.vision.getVisionInfo()
-            if len(self.sensorManager.vision.goalBall) > 0:
-                print self.sensorManager.vision.goalBall[2]
-            # self.mainIter()
+            # if len(self.sensorManager.vision.goalBall) > 0:
+            #     print self.sensorManager.vision.goalBall[2]
+            self.mainIter()
             time.sleep(0.01)
 
     
