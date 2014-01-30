@@ -74,9 +74,9 @@ class MainBot:
         return self.BALL_FOLLOW
 
     def ballFollow(self):
-        if self.ballFollower.state == self.ballFollower.AVOID:
-            self.driver.stopMotors()
-            return self.avoidSetup()
+        # if self.ballFollower.state == self.ballFollower.AVOID:
+        #     self.driver.stopMotors()
+        #     return self.avoidSetup()
         if self.ballFollower.state == self.ballFollower.AT_REACTOR:
             self.driver.stopMotors()
             return self.scoreSetup(True)
@@ -117,7 +117,7 @@ class MainBot:
     def avoid(self):
         if (self.avoidBot.state == self.avoidBot.DONE):
             self.driver.stopMotors()
-            self.state = self.prevState
+            return self.prevState 
         self.avoidBot.mainIter()
         return self.AVOID
 

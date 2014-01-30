@@ -53,9 +53,9 @@ class BallFollower:
         return self.TURN_TO_OBJ
 
     def turnToObj(self):
-        if time.time() - self.stateStartTime > 15:
-            # something is wrong
-            return self.avoidSetup()
+        # if time.time() - self.stateStartTime > 15:
+        #     # something is wrong
+        #     return self.avoidSetup()
 
         goingFor = 0 # 0: ball, 1: reactor, 2: yellow wall, 3: nothing
         if not self.sensorManager.vision.seeObject():
@@ -149,8 +149,8 @@ class BallFollower:
         return self.GO_TO_BALL
 
     def goToBall(self):
-        if time.time() - self.stateStartTime > 20:
-            return self.avoidSetup()
+        # if time.time() - self.stateStartTime > 20:
+        #     return self.avoidSetup()
 
         if len(self.sensorManager.vision.goalBall) == 0:
             self.driver.driveMotors(0)
@@ -177,8 +177,8 @@ class BallFollower:
         return self.GO_TO_REACTOR
 
     def goToReactor(self):
-        if time.time() - self.stateStartTime > 20:
-            return self.avoidSetup()
+        # if time.time() - self.stateStartTime > 20:
+        #     return self.avoidSetup()
 
         if not (self.sensorManager.vision.seeReactor()):
             self.driver.driveMotors(0)
@@ -205,8 +205,8 @@ class BallFollower:
         return self.GO_TO_YELLOW
 
     def goToYellowWall(self):
-        if time.time() - self.stateStartTime > 20:
-            return self.avoidSetup()
+        # if time.time() - self.stateStartTime > 20:
+        #     return self.avoidSetup()
 
         if not (self.sensorManager.vision.seeYellowWall()):
             self.driver.driveMotors(0)
@@ -236,8 +236,8 @@ class BallFollower:
         return self.AT_REACTOR
 
     def atReactor(self):
-        if time.time() - self.stateStartTime > 10:
-            return self.avoidSetup()
+        # if time.time() - self.stateStartTime > 10:
+        #     return self.avoidSetup()
         return self.AT_REACTOR
 
     def atYellowSetup(self):
@@ -247,8 +247,8 @@ class BallFollower:
         return self.AT_YELLOW
 
     def atYellow(self):
-        if time.time() - self.stateStartTime() > 10:
-            return self.avoidSetup()
+        # if time.time() - self.stateStartTime() > 10:
+        #     return self.avoidSetup()
         return self.AT_YELLOW
 
     def closeToBallSetup(self):
@@ -262,8 +262,8 @@ class BallFollower:
         return self.CLOSE_TO_BALL
 
     def closeToBall(self):
-        if time.time() - self.stateStartTime > 10:
-            return self.avoidSetup()
+        # if time.time() - self.stateStartTime > 10:
+        #     return self.avoidSetup()
 
         if self.sensorManager.odo.distance > self.CLOSE_DIST - 2:
             self.gettingBall = "none"
