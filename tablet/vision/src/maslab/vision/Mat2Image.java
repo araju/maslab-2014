@@ -64,7 +64,7 @@ public class Mat2Image {
 	            int bitness = Integer.parseInt(System.getProperty("sun.arch.data.model"));
 	            if(bitness == 32){
 	                System.out.println("32 bit detected");
-	                in = Mat2Image.class.getResourceAsStream("/opencv/x86/opencv_java245.dll");
+	                in = Mat2Image.class.getResourceAsStream("/opencv/x86/opencv_java248.dll");
 	                fileOut = File.createTempFile("lib", ".dll");
 	            }
 	            else if (bitness == 64){

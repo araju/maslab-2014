@@ -82,10 +82,16 @@ class VisionInfo:
             self.goalBall = red
         elif len(green) > len(red):
             self.goalBall = green
-        elif (red[1] < green[1]):
-            self.goalBall = red
-        else:
-            self.goalBall = green
+        elif abs(red[1] - green[1]) > 10: # big diff in distance
+            if (red[1] < green[1]):
+                self.goalBall = red
+            else:
+                self.goalBall = green
+        else: # small diff in distance
+            if abs(red[0]) < abs(green[0]): # red more centralized
+                self.goalBall = red
+            else:
+                self.goalBall = green
 
         if len(self.ballMap["reactors"]) > 0:
             self.goalReactor = self.ballMap["reactors"]

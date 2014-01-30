@@ -13,6 +13,7 @@ import math
 from music import playMusic
 import random
 from sensor_manager import SensorManager
+import subprocess
 
 class CrazyBot:
     MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR = ("moveForward", "backup", "searchDirection", "turnToDir")
@@ -48,7 +49,7 @@ class CrazyBot:
 
     def moveForward(self):
         # print 'move forward bitches'
-        self.driver.driveMotors(15)
+        self.driver.driveMotors(20)
 
         # print "Sonar Distances: ", self.sensorManager.sonars.distances[0]
 
@@ -69,7 +70,6 @@ class CrazyBot:
     def backUp(self):
 
         # print "Odo dist: ", self.sensorManager.odo.distance
-
         if self.sensorManager.odo.distance < -30:
             self.driver.driveMotors(0)
             return self.searchDirectionSetup()
@@ -166,13 +166,39 @@ class CrazyBot:
                 print "timed out"
                 self.state = self.moveForwardSetup()
 
+    def waitForStart(self):
+        def handleOutput(out):
+            for output_line in out:
+                # if output_line == "GAME-STARTED-BITCHES":
+                #     self.gameStarted = True
+                #     break
+                print output_line
+                self.gameStarted = True
+                break
+        
+        self.gameStarted = False
+        p = subprocess.Popen('C:/Program Files (x86)/Java/bin/java.exe -jar BotClient/Java/botclient.jar',
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT)
+        botClientThread = Thread(target = handleOutput, args = (iter(p.stdout.readline, b''),))
+        botClientThread.start()
 
+        while not self.gameStarted:
+            time.sleep(0.1)
+
+        try:
+            p.kill()
+        except:
+            traceback.print_exc()
+            
+        time.sleep(2)
 
 if __name__ == '__main__':
     m = Maple()
     sense = SensorManager(2300, m)
     c = CrazyBot(m, sense)
     try:
+        #c.waitForStart()
         c.mainLoop()
     except:
         traceback.print_exc()
