@@ -15,8 +15,8 @@ class BallFollower:
 
     NO_OBJ, TURN_TO_OBJ, GO_TO_BALL, GO_TO_REACTOR, CLOSE_TO_BALL, GO_TO_YELLOW, AT_YELLOW, AT_REACTOR, AVOID = ("noObj", "turnToObj", "goToBall", "goToReactor", "closeToBall", "goToYellow", "atYellow", "atReactor", "avoid")
     ANGLE_THRSH = 15
-    DIST_THRESH = 20
-    CLOSE_DIST = 20
+    DIST_THRESH = 20 # defines when we go into close ball
+    CLOSE_DIST = 50
 
     def __init__(self, maple, manager):
         self.maple = maple
@@ -167,7 +167,7 @@ class BallFollower:
 
         print "Going to: ", self.sensorManager.vision.goalBall[2], " , ", self.sensorManager.vision.goalBall[1]
         # self.driver.driveMotors(self.sensorManager.vision.goalBall[1])
-        self.driver.driveMotors(20)
+        self.driver.driveMotors(50)
         return self.GO_TO_BALL
 
 

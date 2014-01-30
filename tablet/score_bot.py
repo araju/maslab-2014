@@ -58,12 +58,12 @@ class ScoreBot():
 
     def moveForwardSetup(self):
         self.stateStartTime = time.time()
-        self.driver.driveMotors(15)
+        self.driver.driveMotors(30)
         self.sensorManager.odo.distance = 0
         return self.MOVE_FORWARD
 
     def moveForward(self):
-        if (self.sensorManager.odo.distance > 10 or time.time() - self.stateStartTime > 1):
+        if (self.sensorManager.odo.distance > 25 or time.time() - self.stateStartTime > 1):
             self.driver.stopMotors()
             if (self.atReactor):
                 return self.dumpGreenSetup()
