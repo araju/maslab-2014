@@ -51,6 +51,13 @@ void gyro_periodic(){
 //  SerialUSB.println("");
   //If the reading is okay
   
+  if (getDebug()) {
+//    SerialUSB.print("Raw Reading: ");
+//    SerialUSB.print(reading);
+//    SerialUSB.print(" ");
+//    SerialUSB.println(reading, HEX);    
+  }
+  
   if ((reading & GYRO_DATA_OKAY_MASK) == GYRO_DATA_OKAY) {
     //Use it
     reading = (int16)(reading >> 10) & 0x0000FFFF;
@@ -59,8 +66,13 @@ void gyro_periodic(){
       reading |= 0xFFFF0000;
     }
     _gyro_lastReading = reading;
+    if (getDebug()) {
+//      SerialUSB.print("Shifted: ");
+//      SerialUSB.println(reading);
+    }
   }else {
     //Otherwise use the last reading
+//    SerialUSB.println("Bad Reading");
     reading = _gyro_lastReading;
   }
   
@@ -78,6 +90,12 @@ void gyro_periodic(){
     }else if (_gyro_angle < 0) {
       _gyro_angle += 360;
     }
+  }
+  if (getDebug()) {
+//    SerialUSB.print("Rate: ");
+//    SerialUSB.print(_gyro_degreesPerS);    
+//    SerialUSB.print(" Angle: ");    
+//    SerialUSB.println(_gyro_angle);
   }
 
 //  if (getDebug()) {

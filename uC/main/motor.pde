@@ -10,6 +10,11 @@
 #define MOTOR_R_TICK 33
 #define MOTOR_R_QUAD 34
 
+#define MOTOR_BALL_DIR 23
+#define MOTOR_BALL_PWM 2
+
+#define dbgPin 9
+
 volatile int32 _motor_leftTicks = 0;
 int32 _motor_leftLastTicks = 0;
 float _motor_leftThetaDot = 0;
@@ -35,10 +40,18 @@ void motor_init() {
 
  pinMode(MOTOR_R_TICK, INPUT);
  pinMode(MOTOR_R_QUAD, INPUT);
+ 
+ pinMode(MOTOR_BALL_DIR, OUTPUT);
+ pinMode(MOTOR_BALL_PWM, PWM);
 
+ digitalWrite(MOTOR_BALL_DIR, LOW);
+ pwmWrite(MOTOR_BALL_PWM, 12000);
+// pwmWrite(MOTOR_BALL_PWM, 0);
+ 
+ pinMode(dbgPin,OUTPUT);
  
  setMotors(0, 0);
- 
+// 
  noInterrupts();
  _motor_leftLastQuadState = digitalRead(MOTOR_L_QUAD);
  _motor_rightLastQuadState = digitalRead(MOTOR_R_QUAD);
@@ -51,6 +64,7 @@ void motor_init() {
 
 
 void motor_leftIRQ(){
+  digitalWrite(dbgPin, HIGH);
   uint8 tickState = digitalRead(MOTOR_L_TICK);
   uint8 quadState = digitalRead(MOTOR_L_QUAD);
   //Let's check to see if a transition happened on the quadrature pin
@@ -68,9 +82,11 @@ void motor_leftIRQ(){
 
   _motor_leftTicks += _motor_leftEncDir;
   _motor_leftLastQuadState = quadState;  
+  digitalWrite(dbgPin, LOW);  
 }
 
 void motor_rightIRQ(){
+  digitalWrite(dbgPin, HIGH);    
   uint8 tickState = digitalRead(MOTOR_R_TICK);
   uint8 quadState = digitalRead(MOTOR_R_QUAD);
   //Let's check to see if a transition happened on the quadrature pin
@@ -88,6 +104,7 @@ void motor_rightIRQ(){
 
   _motor_rightTicks += _motor_rightEncDir;
   _motor_rightLastQuadState = quadState; 
+  digitalWrite(dbgPin, LOW);    
 }
 
 void motor_clearTicks(){
