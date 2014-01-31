@@ -3,6 +3,8 @@
 
 import time
 import traceback
+import subprocess
+from threading import Thread
 
 from mapleIf import Maple
 from motor_controller import MotorDriver
@@ -24,14 +26,19 @@ class ScoreBot():
 
     def liningSetup(self):
         self.stateStartTime = time.time()
+        self.driveMotors(0)
         return self.LINING
 
     def lining(self):
         if time.time() - self.stateStartTime > 10:
             print "Timed out of lining"
             return self.moveForwardSetup() # just moveForward and hope for the best
-        
+        wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
         if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
+            self.driver.stopMotors()
+            return self.moveForwardSetup()
+        elif len(wallEnds) > 0 and abs(wallEnds[0] - wallEnds[1]) < 20:
+            print "wall ends lined up in image"
             self.driver.stopMotors()
             return self.moveForwardSetup()
         elif self.sensorManager.bumps.bumped[0]:
@@ -42,12 +49,7 @@ class ScoreBot():
             self.driver.driveMotorPWM(100,0)
             # self.driver.turnMotors(-5)
             return self.LINING
-        wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
         if len(wallEnds) > 0:
-            if abs(wallEnds[0] - wallEnds[1]) < 20:
-                print "wall ends lined up in image"
-                self.driver.stopMotors()
-                return self.moveForwardSetup()
             elif wallEnds[0] - wallEnds[1] < 0:
                 self.driver.driveMotorPWM(100,0)
                 return self.LINING
@@ -138,6 +140,27 @@ class ScoreBot():
     def reset(self):
         self.state = self.liningSetup()
 
+    def executeVisionProcess(self):
+        def printOutput(out):
+            for output_line in out:
+                # print output_line
+                pass
+
+        try:
+            p = subprocess.Popen('java -jar vision/maslab-vision.jar',
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+        except: # maybe we are on the tablet
+            p = subprocess.Popen('C:/Program Files (x86)/Java/jdk1.7.0_45/bin/java.exe -jar vision/maslab-vision.jar',
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+
+        visThread = Thread(target = printOutput, args = (iter(p.stdout.readline, b''),))
+        visThread.start()
+        time.sleep(3)
+        
+        return p
+
     def mainIter(self):
         if self.state == self.IDLE:
             self.state = self.idle()
@@ -153,4 +176,21 @@ class ScoreBot():
             self.state = self.turnAway()
         elif self.state == self.BACK_UP:
             self.state = self.backUp()
+
+    def mainLoop(self):
+        while True:
+            self.mainIter()
+            time.sleep(0.05)
+
+
+if __name__ == '__main__':
+    m = Maple()
+    sense = SensorManager(2300, maple)
+    s = ScoreBot(m,sense)
+    try:
+        s.executeVisionProcess()
+        s.mainLoop()
+    except:
+        traceback.print_exc()
+
 
