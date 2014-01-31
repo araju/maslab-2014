@@ -235,7 +235,7 @@ public class FrameProcessor {
 				Rect bound = Imgproc.boundingRect(cnt);
 				if (bestbound == null || bound.y > bestbound.y) {
 					// check against wallY
-					if (bound.y + bound.height + 5 >= wallY[(int)(bound.x + bound.width / 2)]) {
+					if (bound.y + bound.height + 2 >= wallY[(int)(bound.x + bound.width / 2)]) {
 						bestbound = bound;
 					}
 				}
