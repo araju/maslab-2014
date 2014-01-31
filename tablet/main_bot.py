@@ -153,10 +153,16 @@ class MainBot:
         startTime = time.time()
         self.ballFollower.startTime = startTime
         while time.time() < (startTime + 180):
-            self.sensorManager.vision.getVisionInfo()
+            try:
+                self.sensorManager.vision.getVisionInfo()
+            except:
+                traceback.print_exc()
             # if len(self.sensorManager.vision.goalBall) > 0:
             #     print self.sensorManager.vision.goalBall[2]
-            self.mainIter()
+            try:
+                self.mainIter()
+            except:
+                traceback.print_exc()
             time.sleep(0.01)
 
     
