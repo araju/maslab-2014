@@ -39,6 +39,7 @@ class BallFollower:
     #         time.sleep(0.01)
 
     def noObjSetup(self):
+        print "Ball State: NO_OBJ" self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         self.driver.driveMotors(0)
         return self.NO_OBJ
@@ -50,6 +51,8 @@ class BallFollower:
             return self.NO_OBJ
 
     def turnToObjSetup(self):
+        print "Ball State: TURN_TO_OBJ" self.greenBallCount, self.redBallCount
+        self.driver.driveMotors(0)
         self.stateStartTime = time.time()
         return self.TURN_TO_OBJ
 
@@ -113,19 +116,6 @@ class BallFollower:
                 goalDir = self.sensorManager.vision.goalYellow[0]
                 goingFor = 2
 
-        # elif len(self.sensorManager.vision.goalBall) > 0 and len(self.sensorManager.vision.goalReactor) == 0:
-        #     goalDir = self.sensorManager.vision.goalBall[0]
-        #     goingFor = 0
-        # elif len(self.sensorManager.vision.goalBall) == 0 and len(self.sensorManager.vision.goalReactor) > 0:
-        #     goalDir = self.sensorManager.vision.goalReactor[0]
-        #     goingForBall = False
-        # else:
-        #     if self.sensorManager.vision.goalBall[1] < self.sensorManager.vision.goalReactor[1] or self.greenBallCount == 0: # ball is closer
-        #         goalDir = self.sensorManager.vision.goalBall[0]
-        #         goingForBall = True
-        #     else:
-        #         goingForBall = False
-        #         goalDir = self.sensorManager.vision.goalReactor[0]
         if goingFor == 0:
             print "Turning to: ", self.sensorManager.vision.goalBall[2]
         elif goingFor == 1:
@@ -146,6 +136,8 @@ class BallFollower:
         return self.TURN_TO_OBJ
 
     def goToBallSetup(self):
+        print "Ball State: GO_TO_BALL" self.greenBallCount, self.redBallCount
+        print "Going to: ", self.sensorManager.vision.goalBall[2], " , ", self.sensorManager.vision.goalBall[1]
         self.stateStartTime = time.time()
         return self.GO_TO_BALL
 
@@ -167,13 +159,13 @@ class BallFollower:
             self.gettingBall = self.sensorManager.vision.goalBall[2]
             return self.closeToBallSetup()
 
-        print "Going to: ", self.sensorManager.vision.goalBall[2], " , ", self.sensorManager.vision.goalBall[1]
         # self.driver.driveMotors(self.sensorManager.vision.goalBall[1])
         self.driver.driveMotors(20)
         return self.GO_TO_BALL
 
 
     def goToReactorSetup(self):
+        print "Ball State: GO_TO_REACTOR" self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         return self.GO_TO_REACTOR
 
@@ -202,6 +194,7 @@ class BallFollower:
         return self.GO_TO_REACTOR
 
     def goToYellowWallSetup(self):
+        print "Ball State: GO_TO_YELLOW" self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         return self.GO_TO_YELLOW
 
@@ -231,6 +224,7 @@ class BallFollower:
         return self.GO_TO_YELLOW
 
     def atReactorSetup(self):
+        print "Ball State: AT_REACTOR" self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         self.greenBallCount = 0
         self.driver.stopMotors()
@@ -242,6 +236,7 @@ class BallFollower:
         return self.AT_REACTOR
 
     def atYellowSetup(self):
+        print "Ball State: AT_YELLOW" self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         self.redBallCount = 0
         self.driver.stopMotors()
@@ -253,6 +248,7 @@ class BallFollower:
         return self.AT_YELLOW
 
     def closeToBallSetup(self):
+        print "Ball State: CLOSE_TO_BALL" self.greenBallCount, self.redBallCount
         if self.gettingBall == "green":
             self.greenBallCount += 1
         if self.gettingBall == "red":
@@ -291,7 +287,6 @@ class BallFollower:
             time.sleep(0.05)
 
     def mainIter(self):
-        print self.state, self.greenBallCount, self.redBallCount
         if self.state == self.NO_OBJ:
             self.state = self.noObj()
         elif self.state == self.TURN_TO_OBJ:

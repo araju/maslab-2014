@@ -95,13 +95,6 @@ public class Main {
 				Map<String, List<double[]>> blobs = fp.processFrame(rawImage, processedImage);
 				List<List<Double>> reactors = null; //ReactorFinder.findReactors(rawImage);
 				Map<String, List<List<Double>>> balls = BlobProcessor.processBlobs(blobs);
-//				Map<String,List<List<Double>>> balls = new HashMap<String, List<List<Double>>>();
-//				balls.put("green", new ArrayList<List<Double>>());
-//				balls.put("red", new ArrayList<List<Double>>());
-//				balls.put("reactors", new ArrayList<List<Double>>());
-//				balls.put("wallEnds", new ArrayList<List<Double>>());
-//				balls.put("yellow", new ArrayList<List<Double>>());
-//				List<List<Double>> reactors = null;
 				vp.publish(balls, reactors); //right now ignores the reactors list
 				// Update the GUI windows
 				
