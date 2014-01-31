@@ -110,20 +110,25 @@ class ScoreBot():
 
     def moveForwardSetup(self):
         print "Score State: MOVE_FORWARD"
+        self.driver.driveMotors(0)
+        time.sleep(2)
         self.stateStartTime = time.time()
-        self.driver.driveMotorPWM(100,100)
+        self.driver.driveMotorPWM(70,70)
         self.sensorManager.odo.distance = 0
         return self.MOVE_FORWARD
 
     def moveForward(self):
         if (time.time() - self.stateStartTime > 3):
             self.driver.stopMotors()
-            if len(self.sensorManager.vision.goalReactor) == 0 or self.sensorManager.vision.goalReactor[2] < self.IMG_WIDTH * 0.6:
-                # this is screwed up, we need to back up and drive towards the reactor again
-                return self.retrySetup()
             if (self.atReactor):
+                if len(self.sensorManager.vision.goalReactor) == 0 or self.sensorManager.vision.goalReactor[2] < self.IMG_WIDTH * 0.6:
+                    # this is screwed up, we need to back up and drive towards the reactor again
+                    return self.retrySetup()
                 return self.dumpGreenSetup()
             else:
+                if len(self.sensorManager.vision.goalYellow) == 0:
+                    # this is screwed up, we need to back up and drive towards the reactor again
+                    return self.retrySetup()
                 return self.dumpRedSetup()
         return self.MOVE_FORWARD
 

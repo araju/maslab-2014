@@ -138,6 +138,10 @@ class BallFollower:
     def goToBallSetup(self):
         print "Ball State: GO_TO_BALL", self.greenBallCount, self.redBallCount
         print "Going to: ", self.sensorManager.vision.goalBall[2], " , ", self.sensorManager.vision.goalBall[1]
+        if self.sensorManager.vision.goalBall[2] == "green":
+            self.greenBallCount += 1
+        else:
+            self.redBallCount += 1
         self.stateStartTime = time.time()
         return self.GO_TO_BALL
 
@@ -249,10 +253,10 @@ class BallFollower:
 
     def closeToBallSetup(self):
         print "Ball State: CLOSE_TO_BALL", self.greenBallCount, self.redBallCount
-        if self.gettingBall == "green":
-            self.greenBallCount += 1
-        if self.gettingBall == "red":
-            self.redBallCount += 1
+        # if self.gettingBall == "green":
+        #     self.greenBallCount += 1
+        # if self.gettingBall == "red":
+        #     self.redBallCount += 1
         self.stateStartTime = time.time()
         self.sensorManager.odo.distance = 0
         self.driver.driveMotors(self.CLOSE_DIST)
