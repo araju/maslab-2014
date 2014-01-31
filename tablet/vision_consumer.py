@@ -13,7 +13,7 @@ class VisionConsumer:
     def __init__(self, port):
         self.svrSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.svrSock.bind(('localhost', port))
-        self.svrSock.listen(5)
+        self.svrSock.listen(1)
         self.goalBall = [] # direction, distance, color of goal
         self.goalReactor = []
         self.goalYellow = []
@@ -24,10 +24,15 @@ class VisionConsumer:
     def startServer(self):
         def runServer():
             clisock, (remhost, remport) = self.svrSock.accept()
+            # clisock.
             while self.run:
-                jsonStr = clisock.recv(4096)
-                print "Receive: ", jsonStr
-                self.ballMap = json.loads(jsonStr)
+                try:
+                    jsonStr = clisock.recv(4096)
+                    print "Receive: ", jsonStr
+                    self.ballMap = json.loads(jsonStr)
+                except:
+                    print "Bad recieve"
+                    traceback.print_exc()
                 
                 # green = self.ballMap["green"]
                 # green.append("green")
