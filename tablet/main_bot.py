@@ -61,7 +61,7 @@ class MainBot:
 
     def search(self):
         if self.sensorManager.vision.seeObject():
-            if self.sensorManager.vision.seeBall() or (self.sensorManager.vision.seeReactor() and self.ballFollower.greenBallCount > 0):
+            if self.sensorManager.vision.seeBall() or (self.sensorManager.vision.seeReactor() and self.ballFollower.greenBallCount > 0) or (self.sensorManager.vision.seeYellowWall() and self.ballFollower.redBallCount > 0):
                 return self.ballFollowSetup()
         self.searchBot.mainIter()
         return self.SEARCH
@@ -105,6 +105,10 @@ class MainBot:
             # done scoring
             return self.searchSetup()
         elif (self.scoreBot.state == self.scoreBot.RETRY_DONE):
+            if self.scoreBot.atReactor:
+                self.ballFollower.greenBallCount += 1
+            else:
+                self.ballFollower.redBallCount += 1
             return self.ballFollowSetup() # try to line up again
         self.scoreBot.mainIter()
         return self.SCORE
