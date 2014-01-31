@@ -124,7 +124,7 @@ class CrazyBot:
         return self.UNSTUCK_TURN
 
     def unstuckTurn(self):
-        if self.sensorManager.odo.direction < 350 && self.sensorManager.odo.direction > 5:
+        if self.sensorManager.odo.direction < 350 and self.sensorManager.odo.direction > 5:
             return self.backUpSetup()
 
         return self.UNSTUCK_TURN
