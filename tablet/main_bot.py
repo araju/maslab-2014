@@ -5,7 +5,7 @@ import time
 import traceback
 import subprocess
 from threading import Thread
-
+import sys
 from crazy_bot import CrazyBot
 from ball_follower import BallFollower
 from score_bot import ScoreBot
@@ -151,12 +151,12 @@ class MainBot:
     def waitForStart(self):
         def handleOutput(out):
             for output_line in out:
-                if output_line == "GAME-STARTED-BITCHES":
+                if output_line.startswith("GAME-STARTED-BITCHES"):
                     self.gameStarted = True
                     break
         
         self.gameStarted = False
-        p = subprocess.Popen('java -jar BotClient/Java/botclient.jar',
+        p = subprocess.Popen(['java','-jar','BotClient/Java/botclient.jar'],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT)
         botClientThread = Thread(target = handleOutput, args = (iter(p.stdout.readline, b''),))
