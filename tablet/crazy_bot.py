@@ -103,8 +103,6 @@ class CrazyBot:
         currDist = (self.sensorManager.sonars.distances[0] + self.sensorManager.sonars.distances[1]) / 2.0
         if (self.distances[idx] < currDist):
             self.distances[idx] = currDist
-        
-        print 'Angular Rate:',self.sensorManager.odo.angularRate
 
         if self.sensorManager.odo.direction > 175 and self.halfFlag == 2:
             print 'End Turn'
@@ -112,7 +110,7 @@ class CrazyBot:
             self.halfFlag = 0;
             return self.turnToDirSetup()
 
-        if self.sensorManager.odo.angularRate < 1:
+        if abs(self.sensorManager.odo.angularRate) < 5:
             self.stuckCounter += 1
 
         if self.stuckCounter > 100:
@@ -122,11 +120,11 @@ class CrazyBot:
 
     def unstuckTurnSetup(self):
         self.stateStartTime = time.time()
-        self.driver.turnMotors(-30)
+        self.driver.turnMotors(-15)
         return self.UNSTUCK_TURN
 
     def unstuckTurn(self):
-        if self.sensorManager.odo.direction < -25:
+        if self.sensorManager.odo.direction < 350 && self.sensorManager.odo.direction > 5:
             return self.backUpSetup()
 
         return self.UNSTUCK_TURN
@@ -160,7 +158,7 @@ class CrazyBot:
             print 'Done Bitches'
             return self.moveForwardSetup()
 
-        if self.sensorManager.odo.angularRate < 1:
+        if abs(self.sensorManager.odo.angularRate) < 5:
             self.stuckCounter += 1
 
         if self.stuckCounter > 100:

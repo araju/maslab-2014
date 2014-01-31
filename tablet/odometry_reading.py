@@ -17,13 +17,13 @@ class Odometry:
 			self.direction = (arg_list[1] | (arg_list[2] << 8)) / 100.0
 			if not self.lastReading is None:
 				dt = time.time() - self.lastReadingTime
-				dTheta = self.lastReading - self.direction
+				dTheta = self.direction - self.lastReading
 				self.angularRate = self.angularRate * .75 + .25 * dTheta/dt
 			self.lastReadingTime = time.time()
 			self.lastReading = self.direction
 			# if self.direction > 180:
 			# 	self.direction -= 360
-			# print self.direction, self.angularRate
+			print self.direction, self.angularRate
 
 		def updateDistance(arg_list):
 			self.distance = (arg_list[1] | (arg_list[2] << 8)) / 10.0 
