@@ -13,6 +13,7 @@ from avoid_bot import AvoidBot
 from sensor_manager import SensorManager
 from mapleIf import Maple
 from motor_controller import MotorDriver
+from music import playMusic
 
 class MainBot:
     
@@ -187,11 +188,16 @@ class MainBot:
             traceback.print_exc()
             
         time.sleep(2)
-        
 
 
     def closeMaple(self):
         self.sensorManager.close()
+
+    def playTheMusic(self):
+        try:
+            playMusic.play()
+        except:
+            traceback.print_exc()
 
 
 if __name__ == '__main__':
