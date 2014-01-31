@@ -67,9 +67,9 @@ class BallFollower:
             # something is wrong
             bumpSensors = self.sensorManager.bumps.bumped
             if bumpSensors[0] or bumpSensors[1] or bumpSensors[2]:
-                return self.avoidSetup(True, 0)
+                return self.avoidSetup(False, 0)
             elif bumpSensors[3] or bumpSensors[4] or bumpSensors[5]:
-                return self.avoidSetup(False, 0) 
+                return self.avoidSetup(True, 0) 
             else:
                 return self.avoidSetup(False, 90)
 
@@ -184,6 +184,11 @@ class BallFollower:
             return self.turnToObjSetup()
 
         if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
+            if self.sensorManager.vision.goalBall[1] > 30:
+                if self.sensorManager.vision.goalBall[0] > 0:
+                    return self.avoidSetup(False, -45)
+                else:
+                    return self.avoidSetup(False, 45)
             self.bumpsHit = True
             self.stateStartTime = time.time() - 18
 
@@ -224,6 +229,11 @@ class BallFollower:
             return self.turnToObjSetup()
 
         if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
+            if self.sensorManager.vision.goalReactor[1] > 30:
+                if self.sensorManager.vision.goalReactor[0] > 0:
+                    return self.avoidSetup(False, -45)
+                else:
+                    return self.avoidSetup(False, 45)
             self.bumpsHit = True
             self.stateStartTime = time.time() - 18
 
@@ -264,6 +274,11 @@ class BallFollower:
             return self.turnToObjSetup()
 
         if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
+            if self.sensorManager.vision.goalYellow[1] > 30:
+                if self.sensorManager.vision.goalYellow[0] > 0:
+                    return self.avoidSetup(False, -45)
+                else:
+                    return self.avoidSetup(False, 45)
             self.bumpsHit = True
             self.stateStartTime = time.time() - 18
 
