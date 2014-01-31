@@ -31,6 +31,10 @@ class BallFollower:
         self.state = self.NO_OBJ
         # self.mapleRead = True
         self.stateStartTime = time.time()
+        self.bumpsHit = False
+
+        self.avoidForward = False
+        self.avoidDegrees = 180
         # self.vision.startServer()
 
     # def readMaple(self):
@@ -55,12 +59,19 @@ class BallFollower:
         self.driver.driveMotors(0)
         time.sleep(1)
         self.stateStartTime = time.time()
+        self.bumpsHit = False
         return self.TURN_TO_OBJ
 
     def turnToObj(self):
-        # if time.time() - self.stateStartTime > 15:
-        #     # something is wrong
-        #     return self.avoidSetup()
+        if time.time() - self.stateStartTime > 20:
+            # something is wrong
+            bumpSensors = self.sensorManager.bumps.bumped
+            if bumpSensors[0] or bumpSensors[1] or bumpSensors[2]:
+                return self.avoidSetup(True, 0)
+            elif bumpSensors[3] or bumpSensors[4] or bumpSensors[5]:
+                return self.avoidSetup(False, 0) 
+            else:
+                return self.avoidSetup(False, 90)
 
         goingFor = 0 # 0: ball, 1: reactor, 2: yellow wall, 3: nothing
         if not self.sensorManager.vision.seeObject():
@@ -133,6 +144,11 @@ class BallFollower:
             else:
                 return self.goToYellowWallSetup()
 
+        bumpSensors = self.sensorManager.bumps.bumped
+        if not self.bumpsHit and (bumpSensors[0] or bumpSensors[1] or bumpSensors[2] or bumpSensors[3] or bumpSensors[4] or bumpSensors[5]):
+            self.stateStartTime = time.time() - 18.0
+            self.bumpsHit = True
+
         self.driver.turnMotors(-goalDir / 6.2)
         return self.TURN_TO_OBJ
 
@@ -144,11 +160,18 @@ class BallFollower:
         else:
             self.redBallCount += 1
         self.stateStartTime = time.time()
+        self.bumpsHit = False
         return self.GO_TO_BALL
 
     def goToBall(self):
-        # if time.time() - self.stateStartTime > 20:
-        #     return self.avoidSetup()
+        if time.time() - self.stateStartTime > 20:
+            if (self.sensorManager.vision.seeBall()):
+                if self.sensorManager.vision.goalBall[0] > 0:
+                    return self.avoidSetup(False, -45)
+                else:
+                    return self.avoidSetup(False, 45)
+            else:
+                return self.avoidSetup(False, 90)
 
         if len(self.sensorManager.vision.goalBall) == 0:
             self.driver.driveMotors(0)
@@ -159,6 +182,10 @@ class BallFollower:
             self.driver.driveMotors(0)
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
+
+        if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
+            self.bumpsHit = True
+            self.stateStartTime = time.time() - 18
 
         if self.sensorManager.vision.goalBall[1] < self.DIST_THRESH:
             self.gettingBall = self.sensorManager.vision.goalBall[2]
@@ -173,11 +200,18 @@ class BallFollower:
         print "Ball State: GO_TO_REACTOR", self.greenBallCount, self.redBallCount
         self.driver.driveMotors(0)
         self.stateStartTime = time.time()
+        self.bumpsHit = False
         return self.GO_TO_REACTOR
 
     def goToReactor(self):
-        # if time.time() - self.stateStartTime > 20:
-        #     return self.avoidSetup()
+        if time.time() - self.stateStartTime > 20:
+            if (self.sensorManager.vision.seeReactor()):
+                if self.sensorManager.vision.goalReactor[0] > 0:
+                    return self.avoidSetup(False, -45)
+                else:
+                    return self.avoidSetup(False, 45)
+            else:
+                return self.avoidSetup(False, 90)
 
         if not (self.sensorManager.vision.seeReactor()):
             self.driver.driveMotors(0)
@@ -188,6 +222,10 @@ class BallFollower:
             self.driver.driveMotors(0)
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
+
+        if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
+            self.bumpsHit = True
+            self.stateStartTime = time.time() - 18
 
         if self.sensorManager.vision.goalReactor[1] < 100:
             if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1] or \
@@ -202,11 +240,18 @@ class BallFollower:
     def goToYellowWallSetup(self):
         print "Ball State: GO_TO_YELLOW", self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
+        self.bumpsHit = False
         return self.GO_TO_YELLOW
 
     def goToYellowWall(self):
-        # if time.time() - self.stateStartTime > 20:
-        #     return self.avoidSetup()
+        if time.time() - self.stateStartTime > 20:
+            if (self.sensorManager.vision.seeYellowWall()):
+                if self.sensorManager.vision.goalYellow[0] > 0:
+                    return self.avoidSetup(False, -45)
+                else:
+                    return self.avoidSetup(False, 45)
+            else:
+                return self.avoidSetup(False, 90)
 
         if not (self.sensorManager.vision.seeYellowWall()):
             self.driver.driveMotors(0)
@@ -217,6 +262,10 @@ class BallFollower:
             self.driver.driveMotors(0)
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
+
+        if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
+            self.bumpsHit = True
+            self.stateStartTime = time.time() - 18
 
         if self.sensorManager.vision.goalYellow[1] < 100:
             if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1] or \
@@ -265,15 +314,17 @@ class BallFollower:
         return self.CLOSE_TO_BALL
 
     def closeToBall(self):
-        # if time.time() - self.stateStartTime > 10:
-        #     return self.avoidSetup()
+        if time.time() - self.stateStartTime > 7:
+            return self.avoidSetup(False, 180)
 
         if self.sensorManager.odo.distance > self.CLOSE_DIST - 2:
             self.gettingBall = "none"
             return self.noObjSetup()
         return self.CLOSE_TO_BALL
 
-    def avoidSetup(self):
+    def avoidSetup(self, forward, degrees):
+        self.avoidForward = forward
+        self.avoidDegrees = degrees
         self.stateStartTime = time.time()
         print "Hit timeout while in state: ", self.state
         self.driver.stopMotors()
