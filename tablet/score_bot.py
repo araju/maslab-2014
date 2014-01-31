@@ -83,7 +83,7 @@ class ScoreBot():
             self.driver.stopMotors()
             if len(self.sensorManager.vision.goalReactor) > 0 and self.sensorManager.vision.goalReactor[2] < self.IMG_WIDTH * 0.6:
                 # this is screwed up, we need to back up and drive towards the reactor again
-                return self.
+                return self.RETRY
             if (self.atReactor):
                 return self.dumpGreenSetup()
             else:
