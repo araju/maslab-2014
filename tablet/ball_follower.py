@@ -35,6 +35,7 @@ class BallFollower:
 
         self.avoidForward = False
         self.avoidDegrees = 180
+        self.startTime = 0
         # self.vision.startServer()
 
     # def readMaple(self):
@@ -78,7 +79,7 @@ class BallFollower:
             return self.noObjSetup()# lost sight of the object
 
         reactorPossible = self.sensorManager.vision.seeReactor() and self.greenBallCount > 0
-        yellowWallPossible = self.sensorManager.vision.seeYellowWall() and self.redBallCount > 0
+        yellowWallPossible = self.sensorManager.vision.seeYellowWall() and self.redBallCount > 0 and time.time() > (self.startTime + 120)
         if not self.sensorManager.vision.seeBall():
             if reactorPossible and not yellowWallPossible:
                 goalDir = self.sensorManager.vision.goalReactor[0]

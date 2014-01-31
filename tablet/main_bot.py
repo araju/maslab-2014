@@ -62,7 +62,7 @@ class MainBot:
 
     def search(self):
         if self.sensorManager.vision.seeObject():
-            if self.sensorManager.vision.seeBall() or (self.sensorManager.vision.seeReactor() and self.ballFollower.greenBallCount > 0) or (self.sensorManager.vision.seeYellowWall() and self.ballFollower.redBallCount > 0):
+            if self.sensorManager.vision.seeBall() or (self.sensorManager.vision.seeReactor() and self.ballFollower.greenBallCount > 0) or (self.sensorManager.vision.seeYellowWall() and self.ballFollower.redBallCount > 0 and time.time() > self.ballFollower.startTime + 120):
                 return self.ballFollowSetup()
         self.searchBot.mainIter()
         return self.SEARCH
@@ -151,6 +151,7 @@ class MainBot:
 
     def mainLoop(self):
         startTime = time.time()
+        self.ballFollower.startTime = startTime
         while time.time() < (startTime + 180):
             self.sensorManager.vision.getVisionInfo()
             # if len(self.sensorManager.vision.goalBall) > 0:
