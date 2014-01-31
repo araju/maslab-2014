@@ -16,6 +16,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class FrameProcessor {
@@ -29,8 +30,11 @@ public class FrameProcessor {
 //	private static final Scalar lowerRed = new Scalar(0, 100, 10);
 //	private static final Scalar upperRed = new Scalar(15, 255, 255);
 	
-	private static final int IMG_HEIGHT = 480;
-	private static final int IMG_WIDTH = 640;
+	private static final int ORIG_IMG_HEIGHT = 480;
+	private static final int ORIG_IMG_WIDTH = 640;
+	private static final int IMG_HEIGHT = 240;
+	private static final int IMG_WIDTH = 320;
+	private static final double RESIZE_FACTOR = 0.5;
 	
 	private static final Scalar lowerRed = new Scalar(110, 100, 10);
 	private static final Scalar upperRed = new Scalar(130, 255, 255);
@@ -50,13 +54,14 @@ public class FrameProcessor {
 	private static final Scalar lowerPurple = new Scalar(131, 40, 40);
 	private static final Scalar upperPurple = new Scalar(200, 255, 255);
 	
-	private static final int contourAreaThresh = 90;
+	private static final int contourAreaThresh = 50;
 	private static final int cleanKernelSize = 5;
-	private static final int numBuffers = 14; //0: HSV, 1: Red Thresh, 2: Green, 3: Blue, 4: Teal
+	private static final int numBuffers = 15; //0: HSV, 1: Red Thresh, 2: Green, 3: Blue, 4: Teal
 											 // 5,6,7,8: cleaned Red, Green, Blue, Teal, Yellow
 											  // 9, Yellow Thresh, 10: Yellow cleaned
 											  // 11: Purple thresh, 12: Purple cleaned
 											  // 13: The bitwise or of the blue, teal, yellow, purple
+											// 14: resized image
 	
 	private List<Mat> buffers = null;
 	private Mat cleanKernel;
@@ -86,8 +91,9 @@ public class FrameProcessor {
 	
 	// returns map of color to list of blobs' centers, (x,y) in img coordinates. colors: red, green, blue
 	public Map<String,List<double[]>> processFrame(Mat frame, Mat processedFrame) {
+		Imgproc.resize(frame, buffers.get(14), new Size(IMG_WIDTH, IMG_HEIGHT));
 		//first convert to hsv, store it in the first buffer
-		Imgproc.cvtColor(frame, buffers.get(0), Imgproc.COLOR_BGR2HSV);
+		Imgproc.cvtColor(buffers.get(14), buffers.get(0), Imgproc.COLOR_BGR2HSV);
 		Core.inRange(buffers.get(0), lowerRed, upperRed, buffers.get(1));
 		Core.inRange(buffers.get(0), lowerGreen, upperGreen, buffers.get(2));
 		Core.inRange(buffers.get(0), lowerBlue, upperBlue, buffers.get(3));
@@ -229,7 +235,7 @@ public class FrameProcessor {
 				Rect bound = Imgproc.boundingRect(cnt);
 				if (bestbound == null || bound.y > bestbound.y) {
 					// check against wallY
-					if (bound.y + bound.height + 10 >= wallY[(int)(bound.x + bound.width / 2)]) {
+					if (bound.y + bound.height + 5 >= wallY[(int)(bound.x + bound.width / 2)]) {
 						bestbound = bound;
 					}
 				}

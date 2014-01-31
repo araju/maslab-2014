@@ -183,9 +183,9 @@ class BallFollower:
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
 
-        if self.sensorManager.vision.goalReactor[1] < 200:
+        if self.sensorManager.vision.goalReactor[1] < 100:
             if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1] or \
-                    self.sensorManager.vision.goalReactor[2] > 600 or self.sensorManager.vision.goalReactor[1] < 100:
+                    self.sensorManager.vision.goalReactor[2] > 300 or self.sensorManager.vision.goalReactor[1] < 50:
                 self.driver.driveMotors(0)
                 self.sensorManager.odo.distance = 0
                 return self.atReactorSetup()
@@ -212,10 +212,10 @@ class BallFollower:
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
 
-        if self.sensorManager.vision.goalYellow[1] < 200:
+        if self.sensorManager.vision.goalYellow[1] < 100:
             if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1] or \
-                    self.sensorManager.vision.goalYellow[2] > 600 or \
-                    self.sensorManager.vision.goalYellow[1] < 100:
+                    self.sensorManager.vision.goalYellow[2] > 300 or \
+                    self.sensorManager.vision.goalYellow[1] < 50:
                 self.driver.driveMotors(0)
                 self.sensorManager.odo.distance = 0
                 return self.atYellowSetup()

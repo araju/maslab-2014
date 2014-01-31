@@ -72,7 +72,7 @@ public class BlobProcessor {
 //		double xDist = zDist * x / 340.0;
 //		double dist = Math.sqrt(Math.pow(xDist,2) + Math.pow(zDist,2));
 //		return dist;
-		return (480 - y);
+		return (240 - y);
 	}
 
 
@@ -90,9 +90,9 @@ public class BlobProcessor {
 //		double xDist = zDist * x / 340.0;
 //		double dist = Math.sqrt(Math.pow(xDist,2) + Math.pow(zDist,2));
 //		return dist;
-		if (y < 50.0) return -1.0;
+		if (y < 25.0) return -1.0;
 		
-		return (480 - y);
+		return (240 - y);
 	}
 	
 	
@@ -104,6 +104,7 @@ public class BlobProcessor {
 
 
 	public static double calculateDirection(double x) {
+		x = x*2;
 		return Math.toDegrees(Math.atan((x - 320.0) / 340.0));
 	}
 
