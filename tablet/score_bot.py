@@ -14,7 +14,8 @@ from sensor_manager import SensorManager
 
 class ScoreBot():
     
-    LINING, MOVE_FORWARD, DUMP_RED, DUMP_GREEN, TURN_AWAY, BACK_UP, IDLE = ("lining", "moveForward", "dumpRed", "dumpGreen", "turnAway", "backUp", "idle")
+    LINING, MOVE_FORWARD, DUMP_RED, DUMP_GREEN, TURN_AWAY, BACK_UP, RETRY, IDLE, RETRY_DONE = ("lining", "moveForward", "dumpRed", "dumpGreen", "turnAway", "backUp", "retry", "idle", "retryDone")
+    IMG_WIDTH = 640
 
     def __init__(self, maple, sensorManager):
         self.maple = maple
@@ -43,18 +44,18 @@ class ScoreBot():
             return self.moveForwardSetup()
         if len(wallEnds) > 0:
             if wallEnds[0] - wallEnds[1] < 0:
-                self.driver.driveMotorPWM(125, 90)
+                self.driver.driveMotorPWM(125, -70)
                 return self.LINING
             else:
-                self.driver.driveMotorPWM(90,125)
+                self.driver.driveMotorPWM(-70,125)
                 return self.LINING
         else:
             if self.sensorManager.bumps.bumped[0]:
-                self.driver.driveMotorPWM(90, 125)
+                self.driver.driveMotorPWM(-70, 125)
                 # self.driver.turnMotors(5)
                 return self.LINING
             elif self.sensorManager.bumps.bumped[1]:
-                self.driver.driveMotorPWM(125,90)
+                self.driver.driveMotorPWM(125,-70)
                 # self.driver.turnMotors(-5)
                 return self.LINING
 
@@ -80,6 +81,9 @@ class ScoreBot():
     def moveForward(self):
         if (self.sensorManager.odo.distance > 10 or time.time() - self.stateStartTime > 1):
             self.driver.stopMotors()
+            if len(self.sensorManager.vision.goalReactor) > 0 and self.sensorManager.vision.goalReactor[2] < self.IMG_WIDTH * 0.6:
+                # this is screwed up, we need to back up and drive towards the reactor again
+                return self.
             if (self.atReactor):
                 return self.dumpGreenSetup()
             else:
@@ -93,7 +97,7 @@ class ScoreBot():
         return self.DUMP_RED
 
     def dumpRed(self):
-        if (time.time() - self.stateStartTime > 1):
+        if (time.time() - self.stateStartTime > 5):
             return self.backUpSetup()
         return self.DUMP_RED
 
@@ -104,7 +108,7 @@ class ScoreBot():
         return self.DUMP_GREEN
 
     def dumpGreen(self):
-        if (time.time() - self.stateStartTime > 1):
+        if (time.time() - self.stateStartTime > 5):
             return self.backUpSetup()
         return self.DUMP_GREEN
 
@@ -138,6 +142,26 @@ class ScoreBot():
 
     def idle(self):
         return self.IDLE
+
+    def retrySetup(self):
+        print "Score State: RETRY"
+        self.stateStartTime = time.time()
+        self.driver.driveMotors(-45)
+        self.sensorManager.odo.distance = 0
+        return self.BACK_UP
+
+    def retry(self):
+        if (self.sensorManager.odo.distance < -37 or time.time() - self.stateStartTime > 3):
+            return self.retryDoneSetup()
+        return self.RETRY
+
+    def retryDoneSetup(self):
+        self.stateStartTime = time.time()
+        self.driver.stopMotors()
+        return self.RETRY_DONE
+
+    def retryDone(self):
+        return self.RETRY_DONE
 
     def reset(self):
         self.state = self.liningSetup()

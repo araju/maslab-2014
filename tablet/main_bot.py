@@ -104,6 +104,8 @@ class MainBot:
         if (self.scoreBot.state == self.scoreBot.IDLE):
             # done scoring
             return self.searchSetup()
+        elif (self.scoreBot.state == self.scoreBot.RETRY_DONE):
+            return self.ballFollowSetup() # try to line up again
         self.scoreBot.mainIter()
         return self.SCORE
 
