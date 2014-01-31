@@ -15,7 +15,7 @@ from sensor_manager import SensorManager
 class ScoreBot():
     
     LINING, MOVE_FORWARD, DUMP_RED, DUMP_GREEN, TURN_AWAY, BACK_UP, RETRY, IDLE, RETRY_DONE = ("lining", "moveForward", "dumpRed", "dumpGreen", "turnAway", "backUp", "retry", "idle", "retryDone")
-    IMG_WIDTH = 640
+    IMG_WIDTH = 320
 
     def __init__(self, maple, sensorManager):
         self.maple = maple
