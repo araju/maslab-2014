@@ -34,34 +34,49 @@ class ScoreBot():
         if time.time() - self.stateStartTime > 10:
             print "Timed out of lining"
             return self.moveForwardSetup() # just moveForward and hope for the best
-        wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
+
         if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
             self.driver.stopMotors()
             return self.moveForwardSetup()
-        elif len(wallEnds) > 0 and abs(wallEnds[0] - wallEnds[1]) < 10:
-            print "wall ends lined up in image"
-            self.driver.stopMotors()
-            return self.moveForwardSetup()
+        wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
         if len(wallEnds) > 0:
-            if wallEnds[0] - wallEnds[1] < 0:
-                self.driver.driveMotorPWM(125, -40)
-                print "Lining turning right"
+            if abs(wallEnds[0] - wallEnds[1]) < 20:
+                self.driver.stopMotors()
+                return self.moveForwardSetup()
+            elif wallEnds[0] - wallEnds[1] < 0:
+                self.driver.turnMotors(-5)
                 return self.LINING
             else:
-                print "Lining turning left"
-                self.driver.driveMotorPWM(-40,125)
+                self.driver.turnMotors(5)
                 return self.LINING
-        else:
-            if self.sensorManager.bumps.bumped[0]:
-                print "Lining turning right, bumped"
-                self.driver.driveMotorPWM(-40, 125)
-                # self.driver.turnMotors(5)
-                return self.LINING
-            elif self.sensorManager.bumps.bumped[1]:
-                print "Lining turning right, bumped"
-                self.driver.driveMotorPWM(125,-40)
-                # self.driver.turnMotors(-5)
-                return self.LINING
+        # wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
+        # if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
+        #     self.driver.stopMotors()
+        #     return self.moveForwardSetup()
+        # elif len(wallEnds) > 0 and abs(wallEnds[0] - wallEnds[1]) < 10:
+        #     print "wall ends lined up in image"
+        #     self.driver.stopMotors()
+        #     return self.moveForwardSetup()
+        # if len(wallEnds) > 0:
+        #     if wallEnds[0] - wallEnds[1] < 0:
+        #         self.driver.driveMotorPWM(125, -40)
+        #         print "Lining turning right"
+        #         return self.LINING
+        #     else:
+        #         print "Lining turning left"
+        #         self.driver.driveMotorPWM(-40,125)
+        #         return self.LINING
+        # else:
+        #     if self.sensorManager.bumps.bumped[0]:
+        #         print "Lining turning right, bumped"
+        #         self.driver.driveMotorPWM(-40, 125)
+        #         # self.driver.turnMotors(5)
+        #         return self.LINING
+        #     elif self.sensorManager.bumps.bumped[1]:
+        #         print "Lining turning right, bumped"
+        #         self.driver.driveMotorPWM(125,-40)
+        #         # self.driver.turnMotors(-5)
+        #         return self.LINING
 
         # if self.sensorManager.bumps.bumped[0]:
         #     # self.driver.driveMotorPWM(0,200)
@@ -71,6 +86,7 @@ class ScoreBot():
         #     # self.driver.driveMotorPWM(200,0)
         #     self.driver.turnMotors(-5)
         #     return self.LINING
+        
         print "just driving forward in LINING"
         self.driver.driveMotors(15)
         return self.LINING
@@ -83,11 +99,11 @@ class ScoreBot():
         return self.MOVE_FORWARD
 
     def moveForward(self):
-        if (self.sensorManager.odo.distance > 10 or time.time() - self.stateStartTime > 1):
+        if (self.sensorManager.odo.distance > 10 or time.time() - self.stateStartTime > 3):
             self.driver.stopMotors()
-            if len(self.sensorManager.vision.goalReactor) > 0 and self.sensorManager.vision.goalReactor[2] < self.IMG_WIDTH * 0.6:
+            if len(self.sensorManager.vision.goalReactor) == 0 or self.sensorManager.vision.goalReactor[2] < self.IMG_WIDTH * 0.6:
                 # this is screwed up, we need to back up and drive towards the reactor again
-                return self.RETRY
+                return self.retrySetup()
             if (self.atReactor):
                 return self.dumpGreenSetup()
             else:
@@ -152,7 +168,7 @@ class ScoreBot():
         self.stateStartTime = time.time()
         self.driver.driveMotors(-45)
         self.sensorManager.odo.distance = 0
-        return self.BACK_UP
+        return self.RETRY
 
     def retry(self):
         if (self.sensorManager.odo.distance < -37 or time.time() - self.stateStartTime > 3):
