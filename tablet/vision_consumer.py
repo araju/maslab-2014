@@ -27,8 +27,9 @@ class VisionConsumer:
             # clisock.
             while self.run:
                 try:
+                    # print "before"
                     jsonStr = clisock.recv(4096)
-                    print "Receive: ", jsonStr
+                    # print "Receive: ", jsonStr
                     self.ballMap = json.loads(jsonStr)
                 except:
                     print "Bad recieve"

@@ -79,16 +79,21 @@ public class VisionPublisher {
 	//		}
 			
 			String json = JSONValue.toJSONString(sendMap);
-			System.out.println(this.socket.isConnected() + " Publish: " + json);
+			System.out.println(json);
 		try {
+//			System.out.println("Before Write");
 			outputWriter.write(json);
+//			System.out.println("After write");
 			outputWriter.newLine();
+//			System.out.println("After newline");
 			outputWriter.flush();
+//			System.out.println("After flush");
 		}
 		catch (IOException ioe) {
 			ioe.printStackTrace();
 			try {
 				this.socket = new Socket(this.HOST, this.port);
+				this.outputWriter = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
