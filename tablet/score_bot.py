@@ -39,7 +39,7 @@ class ScoreBot():
         if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
             self.driver.stopMotors()
             return self.moveForwardSetup()
-        elif len(wallEnds) > 0 and abs(wallEnds[0] - wallEnds[1]) < 8:
+        elif len(wallEnds) > 0 and abs(wallEnds[0] - wallEnds[1]) < 5:
             print "wall ends lined up in image"
             self.driver.stopMotors()
             return self.moveForwardSetup()
@@ -56,7 +56,7 @@ class ScoreBot():
             return self.LINING 
 
         if len(wallEnds) > 0:
-            if abs(wallEnds[0] - wallEnds[1]) < 8:
+            if abs(wallEnds[0] - wallEnds[1]) < 5:
                 print "lined up based on vision"
                 self.driver.stopMotors()
                 return self.moveForwardSetup()
@@ -111,7 +111,7 @@ class ScoreBot():
     def moveForwardSetup(self):
         print "Score State: MOVE_FORWARD"
         self.stateStartTime = time.time()
-        self.driver.driveMotors(20)
+        self.driver.driveMotorPWM(120,120)
         self.sensorManager.odo.distance = 0
         return self.MOVE_FORWARD
 
