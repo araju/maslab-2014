@@ -115,6 +115,7 @@ class MainBot:
 
     def avoidSetup(self, forward, degrees):
         self.prevState = self.state
+        print "Prev State: ", self.prevState
         self.stateStartTime = time.time()
         self.avoidBot.reset(forward, degrees)
         print "Main State: AVOID"
@@ -123,7 +124,15 @@ class MainBot:
     def avoid(self):
         if (self.avoidBot.state == self.avoidBot.DONE):
             self.driver.stopMotors()
-            return self.prevState 
+            print "Avoid State Over in Main: ", self.prevState
+            if self.prevState == self.SEARCH:
+                return self.searchSetup()
+            elif self.prevState == self.BALL_FOLLOW:
+                return self.ballFollowSetup()
+            elif self.prevState == self.SCORE:
+                return self.scoreSetup()
+            else:
+                return self.searchSetup()
         self.avoidBot.mainIter()
         return self.AVOID
 

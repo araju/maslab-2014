@@ -121,10 +121,11 @@ class ScoreBot():
         if (time.time() - self.stateStartTime > 3):
             self.driver.stopMotors()
             if (self.atReactor):
-                if len(self.sensorManager.vision.goalReactor) == 0 or self.sensorManager.vision.goalReactor[2] < self.IMG_WIDTH * 0.6:
+                if self.sensorManager.vision.seeReactor() and abs(self.sensorManager.vision.goalReactor[0]) < 45 and self.sensorManager.vision.goalReactor[1] < 70:
+                    return self.dumpGreenSetup()
+                else:
                     # this is screwed up, we need to back up and drive towards the reactor again
                     return self.retrySetup()
-                return self.dumpGreenSetup()
             else:
                 if len(self.sensorManager.vision.goalYellow) == 0:
                     # this is screwed up, we need to back up and drive towards the reactor again
