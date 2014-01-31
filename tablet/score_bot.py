@@ -47,12 +47,12 @@ class ScoreBot():
         if self.sensorManager.bumps.bumped[0]:
             # print "Lining turning right, bumped"
             # self.driver.driveMotorPWM(-40, 125)
-            self.driver.turnMotors(5)
+            self.driver.turnMotors(3)
             return self.LINING
         elif self.sensorManager.bumps.bumped[1]:
             # print "Lining turning right, bumped"
             # self.driver.driveMotorPWM(125,-40)
-            self.driver.turnMotors(-5)
+            self.driver.turnMotors(-3)
             return self.LINING 
 
         if len(wallEnds) > 0:
@@ -61,10 +61,10 @@ class ScoreBot():
                 self.driver.stopMotors()
                 return self.moveForwardSetup()
             elif wallEnds[0] - wallEnds[1] < 0:
-                self.driver.turnMotors(-5)
+                self.driver.turnMotors(-3)
                 return self.LINING
             else:
-                self.driver.turnMotors(5)
+                self.driver.turnMotors(3)
                 return self.LINING
         # wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
         # if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
