@@ -202,6 +202,10 @@ class ScoreBot():
             self.state = self.turnAway()
         elif self.state == self.BACK_UP:
             self.state = self.backUp()
+        elif self.state == self.RETRY:
+            self.state = self.retry()
+        elif self.state == self.RETRY_DONE:
+            self.state = self.retryDone()
 
     def mainLoop(self):
         while True:
