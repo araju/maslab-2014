@@ -10,9 +10,11 @@ class BumpSensors():
 
 			idx = arg_list[1] & 0x7F
 			value = arg_list[1] & 0x80
-
-			# print idx, value
+			if idx >= 6:
+				return
+			# print "Bump: ", idx, value
 			self.bumped[idx] = (int(value) >> 7 == 1)
+			# print self.bumped
 			# if (self.bumped[idx]):
 				# print self.bumped
 
