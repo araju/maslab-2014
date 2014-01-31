@@ -26,6 +26,7 @@ class ScoreBot():
     
 
     def liningSetup(self):
+        print "Score State: LINING"
         self.stateStartTime = time.time()
         self.driver.driveMotors(0)
         return self.LINING
@@ -33,14 +34,30 @@ class ScoreBot():
     def lining(self):
         if time.time() - self.stateStartTime > 10:
             print "Timed out of lining"
-            return self.moveForwardSetup() # just moveForward and hope for the best
-
+            return self.retrySetup() 
+        wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
         if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
             self.driver.stopMotors()
             return self.moveForwardSetup()
-        wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
+        elif len(wallEnds) > 0 and abs(wallEnds[0] - wallEnds[1]) < 8:
+            print "wall ends lined up in image"
+            self.driver.stopMotors()
+            return self.moveForwardSetup()
+
+        if self.sensorManager.bumps.bumped[0]:
+            # print "Lining turning right, bumped"
+            # self.driver.driveMotorPWM(-40, 125)
+            self.driver.turnMotors(5)
+            return self.LINING
+        elif self.sensorManager.bumps.bumped[1]:
+            # print "Lining turning right, bumped"
+            # self.driver.driveMotorPWM(125,-40)
+            self.driver.turnMotors(-5)
+            return self.LINING 
+
         if len(wallEnds) > 0:
-            if abs(wallEnds[0] - wallEnds[1]) < 20:
+            if abs(wallEnds[0] - wallEnds[1]) < 8:
+                print "lined up based on vision"
                 self.driver.stopMotors()
                 return self.moveForwardSetup()
             elif wallEnds[0] - wallEnds[1] < 0:
