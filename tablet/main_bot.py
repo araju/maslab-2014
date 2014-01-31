@@ -35,8 +35,8 @@ class MainBot:
     def executeVisionProcess(self):
         def printOutput(out):
             for output_line in out:
-                print output_line
-                #pass
+                # print output_line
+                pass
 
         try:
             p = subprocess.Popen('java -jar vision/maslab-vision.jar',
@@ -74,9 +74,9 @@ class MainBot:
         return self.BALL_FOLLOW
 
     def ballFollow(self):
-        # if self.ballFollower.state == self.ballFollower.AVOID:
-        #     self.driver.stopMotors()
-        #     return self.avoidSetup()
+        if self.ballFollower.state == self.ballFollower.AVOID:
+            self.driver.stopMotors()
+            return self.avoidSetup(self.ballFollower.avoidForward, self.ballFollower.avoidDegrees)
         if self.ballFollower.state == self.ballFollower.AT_REACTOR:
             self.driver.stopMotors()
             return self.scoreSetup(True)
@@ -113,17 +113,26 @@ class MainBot:
         self.scoreBot.mainIter()
         return self.SCORE
 
-    def avoidSetup(self):
+    def avoidSetup(self, forward, degrees):
         self.prevState = self.state
+        print "Prev State: ", self.prevState
         self.stateStartTime = time.time()
-        self.avoidBot.reset(180)
+        self.avoidBot.reset(forward, degrees)
         print "Main State: AVOID"
         return self.AVOID
 
     def avoid(self):
         if (self.avoidBot.state == self.avoidBot.DONE):
             self.driver.stopMotors()
-            return self.prevState 
+            print "Avoid State Over in Main: ", self.prevState
+            if self.prevState == self.SEARCH:
+                return self.searchSetup()
+            elif self.prevState == self.BALL_FOLLOW:
+                return self.ballFollowSetup()
+            elif self.prevState == self.SCORE:
+                return self.scoreSetup()
+            else:
+                return self.searchSetup()
         self.avoidBot.mainIter()
         return self.AVOID
 

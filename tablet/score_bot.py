@@ -47,12 +47,12 @@ class ScoreBot():
         if self.sensorManager.bumps.bumped[0]:
             # print "Lining turning right, bumped"
             # self.driver.driveMotorPWM(-40, 125)
-            self.driver.turnMotors(5)
+            self.driver.turnMotors(3)
             return self.LINING
         elif self.sensorManager.bumps.bumped[1]:
             # print "Lining turning right, bumped"
             # self.driver.driveMotorPWM(125,-40)
-            self.driver.turnMotors(-5)
+            self.driver.turnMotors(-3)
             return self.LINING 
 
         if len(wallEnds) > 0:
@@ -61,10 +61,10 @@ class ScoreBot():
                 self.driver.stopMotors()
                 return self.moveForwardSetup()
             elif wallEnds[0] - wallEnds[1] < 0:
-                self.driver.turnMotors(-5)
+                self.driver.turnMotors(-3)
                 return self.LINING
             else:
-                self.driver.turnMotors(5)
+                self.driver.turnMotors(3)
                 return self.LINING
         # wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
         # if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
@@ -121,10 +121,11 @@ class ScoreBot():
         if (time.time() - self.stateStartTime > 3):
             self.driver.stopMotors()
             if (self.atReactor):
-                if len(self.sensorManager.vision.goalReactor) == 0 or self.sensorManager.vision.goalReactor[2] < self.IMG_WIDTH * 0.6:
+                if self.sensorManager.vision.seeReactor() and abs(self.sensorManager.vision.goalReactor[0]) < 45 and self.sensorManager.vision.goalReactor[1] < 70:
+                    return self.dumpGreenSetup()
+                else:
                     # this is screwed up, we need to back up and drive towards the reactor again
                     return self.retrySetup()
-                return self.dumpGreenSetup()
             else:
                 if len(self.sensorManager.vision.goalYellow) == 0:
                     # this is screwed up, we need to back up and drive towards the reactor again

@@ -153,17 +153,17 @@ class CrazyBot:
                 self.state = self.backUpSetup()
         elif self.state == self.BACK_UP:
             self.state = self.backUp()
-            if time.time() - self.stateStartTime > 15:
+            if time.time() - self.stateStartTime > 7:
                 print "timed out"
                 self.state = self.searchDirectionSetup()
         elif self.state == self.SEARCH_DIRECTION:
             self.state = self.searchDirection()
-            if time.time() - self.stateStartTime > 15:
+            if time.time() - self.stateStartTime > 10:
                 print "timed out"
                 self.state = self.turnToDirSetup()
         elif self.state == self.TURN_TO_DIR:
             self.state = self.turnToDir()
-            if time.time() - self.stateStartTime > 15:
+            if time.time() - self.stateStartTime > 10:
                 print "timed out"
                 self.state = self.moveForwardSetup()
 
