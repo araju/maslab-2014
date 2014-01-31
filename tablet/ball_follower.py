@@ -69,7 +69,7 @@ class BallFollower:
             bumpSensors = self.sensorManager.bumps.bumped
             if bumpSensors[0] or bumpSensors[1] or bumpSensors[2]:
                 return self.avoidSetup(False, 0)
-            elif bumpSensors[3] or bumpSensors[4] or bumpSensors[5]:
+            elif bumpSensors[4] or bumpSensors[5]:
                 return self.avoidSetup(True, 0) 
             else:
                 return self.avoidSetup(False, 90)
@@ -146,7 +146,7 @@ class BallFollower:
                 return self.goToYellowWallSetup()
 
         bumpSensors = self.sensorManager.bumps.bumped
-        if not self.bumpsHit and (bumpSensors[0] or bumpSensors[1] or bumpSensors[2] or bumpSensors[3] or bumpSensors[4] or bumpSensors[5]):
+        if not self.bumpsHit and (bumpSensors[0] or bumpSensors[1] or bumpSensors[2] or bumpSensors[4] or bumpSensors[5]):
             self.stateStartTime = time.time() - 18.0
             self.bumpsHit = True
 
