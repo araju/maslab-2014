@@ -26,7 +26,7 @@ class ScoreBot():
 
     def liningSetup(self):
         self.stateStartTime = time.time()
-        self.driveMotors(0)
+        self.driver.driveMotors(0)
         return self.LINING
 
     def lining(self):
@@ -185,7 +185,7 @@ class ScoreBot():
 
 if __name__ == '__main__':
     m = Maple()
-    sense = SensorManager(2300, maple)
+    sense = SensorManager(2300, m)
     s = ScoreBot(m,sense)
     try:
         s.executeVisionProcess()
