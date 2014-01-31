@@ -51,10 +51,10 @@ class MotorDriver:
         self.maple.send(buf)
 
     def driveMotorPWM(self, pwmLeft, pwmRight):
-        pwmLeft = max(min(pwmLeft, 255), 0)
-        pwmRight = max(min(pwmRight, 255), 0)
+        pwmLeft = max(min(pwmLeft, 127), -127)
+        pwmRight = max(min(pwmRight, 127), -127)
 
-        buf = [0x18, 0x03, int(pwmLeft) & 0xFF, int(pwmRight) & 0xFF]
+        buf = [0x18, 0x02, int(pwmLeft) & 0xFF, int(pwmRight) & 0xFF]
         self.maple.send(buf)
 
     def dumpGreen(self):

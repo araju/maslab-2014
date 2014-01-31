@@ -28,21 +28,31 @@ class ScoreBot():
 
     def lining(self):
         if time.time() - self.stateStartTime > 10:
+            print "Timed out of lining"
             return self.moveForwardSetup() # just moveForward and hope for the best
         
         if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
             self.driver.stopMotors()
             return self.moveForwardSetup()
+        elif self.sensorManager.bumps.bumped[0]:
+            self.driver.driveMotorPWM(0,100)
+            # self.driver.turnMotors(5)
+            return self.LINING
+        elif self.sensorManager.bumps.bumped[1]:
+            self.driver.driveMotorPWM(100,0)
+            # self.driver.turnMotors(-5)
+            return self.LINING
         wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
         if len(wallEnds) > 0:
             if abs(wallEnds[0] - wallEnds[1]) < 20:
+                print "wall ends lined up in image"
                 self.driver.stopMotors()
                 return self.moveForwardSetup()
             elif wallEnds[0] - wallEnds[1] < 0:
-                self.driver.turnMotors(-5)
+                self.driver.driveMotorPWM(100,0)
                 return self.LINING
             else:
-                self.driver.turnMotors(5)
+                self.driver.driveMotorPWM(0,100)
                 return self.LINING
         # if self.sensorManager.bumps.bumped[0]:
         #     # self.driver.driveMotorPWM(0,200)
@@ -52,11 +62,12 @@ class ScoreBot():
         #     # self.driver.driveMotorPWM(200,0)
         #     self.driver.turnMotors(-5)
         #     return self.LINING
-
+        print "just driving forward in LINING"
         self.driver.driveMotors(15)
         return self.LINING
 
     def moveForwardSetup(self):
+        print "Score State: MOVE_FORWARD"
         self.stateStartTime = time.time()
         self.driver.driveMotors(15)
         self.sensorManager.odo.distance = 0
@@ -72,6 +83,7 @@ class ScoreBot():
         return self.MOVE_FORWARD
 
     def dumpRedSetup(self):
+        print "Score State: DUMP_RED"
         self.stateStartTime = time.time()
         self.driver.dumpRed()
         return self.DUMP_RED
@@ -82,6 +94,7 @@ class ScoreBot():
         return self.DUMP_RED
 
     def dumpGreenSetup(self):
+        print "Score State: DUMP_GREEN"
         self.stateStartTime = time.time()
         self.driver.dumpGreen()
         return self.DUMP_GREEN
@@ -96,6 +109,7 @@ class ScoreBot():
         return self.IDLE
 
     def backUpSetup(self):
+        print "Score State: BACK_UP"
         self.stateStartTime = time.time()
         self.driver.driveMotors(-30)
         self.sensorManager.odo.distance = 0
@@ -107,6 +121,7 @@ class ScoreBot():
         return self.BACK_UP
 
     def turnAwaySetup(self):
+        print "Score State: TURN_AWAY"
         self.stateStartTime = time.time()
         self.driver.turnMotors(180)
         self.sensorManager.odo.direction = 0
@@ -124,7 +139,6 @@ class ScoreBot():
         self.state = self.liningSetup()
 
     def mainIter(self):
-        print self.state
         if self.state == self.IDLE:
             self.state = self.idle()
         elif self.state == self.DUMP_GREEN:

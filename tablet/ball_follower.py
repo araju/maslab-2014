@@ -132,7 +132,7 @@ class BallFollower:
             else:
                 return self.goToYellowWallSetup()
 
-        self.driver.turnMotors(-goalDir / 6.5)
+        self.driver.turnMotors(-goalDir / 5.7)
         return self.TURN_TO_OBJ
 
     def goToBallSetup(self):
