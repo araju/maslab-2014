@@ -50,7 +50,7 @@ class ScoreBot():
             # self.driver.turnMotors(-5)
             return self.LINING
         if len(wallEnds) > 0:
-            elif wallEnds[0] - wallEnds[1] < 0:
+            if wallEnds[0] - wallEnds[1] < 0:
                 self.driver.driveMotorPWM(100,0)
                 return self.LINING
             else:
@@ -189,6 +189,7 @@ if __name__ == '__main__':
     s = ScoreBot(m,sense)
     try:
         s.executeVisionProcess()
+        s.reset()
         s.mainLoop()
     except:
         traceback.print_exc()
