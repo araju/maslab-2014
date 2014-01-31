@@ -237,7 +237,7 @@ class BallFollower:
                 return self.atReactorSetup()
 
         if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
-            if self.sensorManager.vision.goalReactor[1] > 30:
+            if self.sensorManager.vision.goalReactor[1] > 140:
                 if self.sensorManager.vision.goalReactor[0] > 0:
                     return self.avoidSetup(False, -45)
                 else:
@@ -285,7 +285,7 @@ class BallFollower:
                 return self.atYellowSetup()
 
         if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
-            if self.sensorManager.vision.goalYellow[1] > 30:
+            if self.sensorManager.vision.goalYellow[1] > 140:
                 if self.sensorManager.vision.goalYellow[0] > 0:
                     return self.avoidSetup(False, -45)
                 else:
