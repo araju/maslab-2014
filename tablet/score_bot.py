@@ -41,14 +41,6 @@ class ScoreBot():
             print "wall ends lined up in image"
             self.driver.stopMotors()
             return self.moveForwardSetup()
-        elif self.sensorManager.bumps.bumped[0]:
-            self.driver.driveMotorPWM(90, 125)
-            # self.driver.turnMotors(5)
-            return self.LINING
-        elif self.sensorManager.bumps.bumped[1]:
-            self.driver.driveMotorPWM(125,90)
-            # self.driver.turnMotors(-5)
-            return self.LINING
         if len(wallEnds) > 0:
             if wallEnds[0] - wallEnds[1] < 0:
                 self.driver.driveMotorPWM(125, 90)
@@ -56,6 +48,16 @@ class ScoreBot():
             else:
                 self.driver.driveMotorPWM(90,125)
                 return self.LINING
+        else:
+            if self.sensorManager.bumps.bumped[0]:
+                self.driver.driveMotorPWM(90, 125)
+                # self.driver.turnMotors(5)
+                return self.LINING
+            elif self.sensorManager.bumps.bumped[1]:
+                self.driver.driveMotorPWM(125,90)
+                # self.driver.turnMotors(-5)
+                return self.LINING
+
         # if self.sensorManager.bumps.bumped[0]:
         #     # self.driver.driveMotorPWM(0,200)
         #     self.driver.turnMotors(5)
