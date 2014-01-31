@@ -61,10 +61,10 @@ class ScoreBot():
                 self.driver.stopMotors()
                 return self.moveForwardSetup()
             elif wallEnds[0] - wallEnds[1] < 0:
-                self.driver.turnMotors(-3)
+                self.driver.turnMotors(-2)
                 return self.LINING
             else:
-                self.driver.turnMotors(3)
+                self.driver.turnMotors(2)
                 return self.LINING
         # wallEnds = self.sensorManager.vision.ballMap["wallEnds"]
         # if self.sensorManager.bumps.bumped[0] and self.sensorManager.bumps.bumped[1]:
