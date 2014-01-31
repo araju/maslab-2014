@@ -54,7 +54,7 @@ public class FrameProcessor {
 	private static final Scalar lowerPurple = new Scalar(131, 40, 40);
 	private static final Scalar upperPurple = new Scalar(200, 255, 255);
 	
-	private static final int contourAreaThresh = 25;
+	private static final int contourAreaThresh = 15;
 	private static final int cleanKernelSize = 5;
 	private static final int numBuffers = 15; //0: HSV, 1: Red Thresh, 2: Green, 3: Blue, 4: Teal
 											 // 5,6,7,8: cleaned Red, Green, Blue, Teal, Yellow
