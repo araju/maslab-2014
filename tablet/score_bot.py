@@ -121,7 +121,7 @@ class ScoreBot():
         if (time.time() - self.stateStartTime > 3):
             self.driver.stopMotors()
             if (self.atReactor):
-                if self.sensorManager.vision.seeReactor() and abs(self.sensorManager.vision.goalReactor[0]) < 45 and self.sensorManager.vision.goalReactor[1] < 70:
+                if self.sensorManager.vision.seeReactor() and abs(self.sensorManager.vision.goalReactor[0]) < 25 and self.sensorManager.vision.goalReactor[1] < 70:
                     return self.dumpGreenSetup()
                 else:
                     # this is screwed up, we need to back up and drive towards the reactor again
