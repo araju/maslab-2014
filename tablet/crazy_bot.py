@@ -202,6 +202,9 @@ class CrazyBot:
                 self.state = self.moveForwardSetup()
         elif self.state == self.UNSTUCK_TURN:
             self.state = self.unstuckTurn()
+            if time.time() - self.stateStartTime > 2:
+                print "timed out"
+                self.state = self.backUpSetup()
 
     def waitForStart(self):
         def handleOutput(out):
