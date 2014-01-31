@@ -149,7 +149,8 @@ class MainBot:
             self.state = self.avoid()
 
     def mainLoop(self):
-        while True:
+        startTime = time.time()
+        while time.time() < (startTime + 180):
             self.sensorManager.vision.getVisionInfo()
             # if len(self.sensorManager.vision.goalBall) > 0:
             #     print self.sensorManager.vision.goalBall[2]
@@ -200,6 +201,7 @@ if __name__ == '__main__':
         m.mainLoop()
     except:
         traceback.print_exc()
+    finally:
         m.visionProcess.kill()
         m.closeMaple()
 
