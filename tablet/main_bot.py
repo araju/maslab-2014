@@ -205,6 +205,7 @@ if __name__ == '__main__':
     m = MainBot()
     try:
         m.waitForStart()
+        m.playTheMusic()
         m.mainLoop()
     except:
         traceback.print_exc()
