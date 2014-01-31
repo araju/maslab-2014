@@ -228,6 +228,14 @@ class BallFollower:
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
 
+
+        if self.sensorManager.vision.goalReactor[1] < 100:
+            if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1] or \
+                    self.sensorManager.vision.goalReactor[2] > 300 or self.sensorManager.vision.goalReactor[1] < 50:
+                self.driver.driveMotors(0)
+                self.sensorManager.odo.distance = 0
+                return self.atReactorSetup()
+
         if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
             if self.sensorManager.vision.goalReactor[1] > 30:
                 if self.sensorManager.vision.goalReactor[0] > 0:
@@ -236,13 +244,6 @@ class BallFollower:
                     return self.avoidSetup(False, 45)
             self.bumpsHit = True
             self.stateStartTime = time.time() - 18
-
-        if self.sensorManager.vision.goalReactor[1] < 100:
-            if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1] or \
-                    self.sensorManager.vision.goalReactor[2] > 300 or self.sensorManager.vision.goalReactor[1] < 50:
-                self.driver.driveMotors(0)
-                self.sensorManager.odo.distance = 0
-                return self.atReactorSetup()
 
         self.driver.driveMotors(self.sensorManager.vision.goalReactor[1])
         return self.GO_TO_REACTOR
@@ -273,14 +274,7 @@ class BallFollower:
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
 
-        if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
-            if self.sensorManager.vision.goalYellow[1] > 30:
-                if self.sensorManager.vision.goalYellow[0] > 0:
-                    return self.avoidSetup(False, -45)
-                else:
-                    return self.avoidSetup(False, 45)
-            self.bumpsHit = True
-            self.stateStartTime = time.time() - 18
+        
 
         if self.sensorManager.vision.goalYellow[1] < 100:
             if self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1] or \
@@ -289,6 +283,15 @@ class BallFollower:
                 self.driver.driveMotors(0)
                 self.sensorManager.odo.distance = 0
                 return self.atYellowSetup()
+
+        if not self.bumpsHit and (self.sensorManager.bumps.bumped[0] or self.sensorManager.bumps.bumped[1]):
+            if self.sensorManager.vision.goalYellow[1] > 30:
+                if self.sensorManager.vision.goalYellow[0] > 0:
+                    return self.avoidSetup(False, -45)
+                else:
+                    return self.avoidSetup(False, 45)
+            self.bumpsHit = True
+            self.stateStartTime = time.time() - 18
 
         self.driver.driveMotors(self.sensorManager.vision.goalYellow[1])
         return self.GO_TO_YELLOW

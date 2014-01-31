@@ -165,9 +165,15 @@ class MainBot:
                     break
         
         self.gameStarted = False
-        p = subprocess.Popen(['java','-jar','BotClient/Java/botclient.jar'],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT)
+        try:
+            p = subprocess.Popen(['java','-jar','BotClient/Java/botclient.jar'],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+        except:
+            p = subprocess.Popen('C:/Program Files (x86)/Java/jdk1.7.0_45/bin/java.exe -jar BotClient/Java/botclient.jar',
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT)
+
         botClientThread = Thread(target = handleOutput, args = (iter(p.stdout.readline, b''),))
         botClientThread.start()
 
@@ -190,7 +196,7 @@ class MainBot:
 if __name__ == '__main__':
     m = MainBot()
     try:
-        # m.waitForStart()
+        m.waitForStart()
         m.mainLoop()
     except:
         traceback.print_exc()
