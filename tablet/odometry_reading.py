@@ -23,7 +23,7 @@ class Odometry:
 			self.lastReading = self.direction
 			# if self.direction > 180:
 			# 	self.direction -= 360
-			print self.direction, self.angularRate
+			# print self.direction, self.angularRate
 
 		def updateDistance(arg_list):
 			self.distance = (arg_list[1] | (arg_list[2] << 8)) / 10.0 
