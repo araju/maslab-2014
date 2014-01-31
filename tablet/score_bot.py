@@ -86,7 +86,7 @@ class ScoreBot():
         #     # self.driver.driveMotorPWM(200,0)
         #     self.driver.turnMotors(-5)
         #     return self.LINING
-        
+
         print "just driving forward in LINING"
         self.driver.driveMotors(15)
         return self.LINING
@@ -229,6 +229,7 @@ class ScoreBot():
 
     def mainLoop(self):
         while True:
+            self.sensorManager.vision.getVisionInfo()
             self.mainIter()
             time.sleep(0.05)
 
