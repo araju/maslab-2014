@@ -42,19 +42,19 @@ class ScoreBot():
             self.driver.stopMotors()
             return self.moveForwardSetup()
         elif self.sensorManager.bumps.bumped[0]:
-            self.driver.driveMotorPWM(0,100)
+            self.driver.driveMotorPWM(90, 125)
             # self.driver.turnMotors(5)
             return self.LINING
         elif self.sensorManager.bumps.bumped[1]:
-            self.driver.driveMotorPWM(100,0)
+            self.driver.driveMotorPWM(125,90)
             # self.driver.turnMotors(-5)
             return self.LINING
         if len(wallEnds) > 0:
             if wallEnds[0] - wallEnds[1] < 0:
-                self.driver.driveMotorPWM(100,0)
+                self.driver.driveMotorPWM(125, 90)
                 return self.LINING
             else:
-                self.driver.driveMotorPWM(0,100)
+                self.driver.driveMotorPWM(90,125)
                 return self.LINING
         # if self.sensorManager.bumps.bumped[0]:
         #     # self.driver.driveMotorPWM(0,200)
@@ -71,12 +71,12 @@ class ScoreBot():
     def moveForwardSetup(self):
         print "Score State: MOVE_FORWARD"
         self.stateStartTime = time.time()
-        self.driver.driveMotors(15)
+        self.driver.driveMotors(20)
         self.sensorManager.odo.distance = 0
         return self.MOVE_FORWARD
 
     def moveForward(self):
-        if (self.sensorManager.odo.distance > 25 or time.time() - self.stateStartTime > 1):
+        if (self.sensorManager.odo.distance > 10 or time.time() - self.stateStartTime > 1):
             self.driver.stopMotors()
             if (self.atReactor):
                 return self.dumpGreenSetup()
@@ -113,12 +113,12 @@ class ScoreBot():
     def backUpSetup(self):
         print "Score State: BACK_UP"
         self.stateStartTime = time.time()
-        self.driver.driveMotors(-30)
+        self.driver.driveMotors(-45)
         self.sensorManager.odo.distance = 0
         return self.BACK_UP
 
     def backUp(self):
-        if (self.sensorManager.odo.distance < -25 or time.time() - self.stateStartTime > 3):
+        if (self.sensorManager.odo.distance < -37 or time.time() - self.stateStartTime > 3):
             return self.turnAwaySetup()
         return self.BACK_UP
 
