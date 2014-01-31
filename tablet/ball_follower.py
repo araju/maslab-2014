@@ -39,7 +39,7 @@ class BallFollower:
     #         time.sleep(0.01)
 
     def noObjSetup(self):
-        print "Ball State: NO_OBJ" self.greenBallCount, self.redBallCount
+        print "Ball State: NO_OBJ", self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         self.driver.driveMotors(0)
         return self.NO_OBJ
@@ -51,7 +51,7 @@ class BallFollower:
             return self.NO_OBJ
 
     def turnToObjSetup(self):
-        print "Ball State: TURN_TO_OBJ" self.greenBallCount, self.redBallCount
+        print "Ball State: TURN_TO_OBJ", self.greenBallCount, self.redBallCount
         self.driver.driveMotors(0)
         self.stateStartTime = time.time()
         return self.TURN_TO_OBJ
@@ -136,7 +136,7 @@ class BallFollower:
         return self.TURN_TO_OBJ
 
     def goToBallSetup(self):
-        print "Ball State: GO_TO_BALL" self.greenBallCount, self.redBallCount
+        print "Ball State: GO_TO_BALL", self.greenBallCount, self.redBallCount
         print "Going to: ", self.sensorManager.vision.goalBall[2], " , ", self.sensorManager.vision.goalBall[1]
         self.stateStartTime = time.time()
         return self.GO_TO_BALL
@@ -165,7 +165,7 @@ class BallFollower:
 
 
     def goToReactorSetup(self):
-        print "Ball State: GO_TO_REACTOR" self.greenBallCount, self.redBallCount
+        print "Ball State: GO_TO_REACTOR", self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         return self.GO_TO_REACTOR
 
@@ -194,7 +194,7 @@ class BallFollower:
         return self.GO_TO_REACTOR
 
     def goToYellowWallSetup(self):
-        print "Ball State: GO_TO_YELLOW" self.greenBallCount, self.redBallCount
+        print "Ball State: GO_TO_YELLOW", self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         return self.GO_TO_YELLOW
 
@@ -224,7 +224,7 @@ class BallFollower:
         return self.GO_TO_YELLOW
 
     def atReactorSetup(self):
-        print "Ball State: AT_REACTOR" self.greenBallCount, self.redBallCount
+        print "Ball State: AT_REACTOR", self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         self.greenBallCount = 0
         self.driver.stopMotors()
@@ -236,7 +236,7 @@ class BallFollower:
         return self.AT_REACTOR
 
     def atYellowSetup(self):
-        print "Ball State: AT_YELLOW" self.greenBallCount, self.redBallCount
+        print "Ball State: AT_YELLOW", self.greenBallCount, self.redBallCount
         self.stateStartTime = time.time()
         self.redBallCount = 0
         self.driver.stopMotors()
@@ -248,7 +248,7 @@ class BallFollower:
         return self.AT_YELLOW
 
     def closeToBallSetup(self):
-        print "Ball State: CLOSE_TO_BALL" self.greenBallCount, self.redBallCount
+        print "Ball State: CLOSE_TO_BALL", self.greenBallCount, self.redBallCount
         if self.gettingBall == "green":
             self.greenBallCount += 1
         if self.gettingBall == "red":
