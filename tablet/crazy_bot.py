@@ -16,7 +16,7 @@ from sensor_manager import SensorManager
 import subprocess
 
 class CrazyBot:
-    MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR = ("moveForward", "backup", "searchDirection", "turnToDir")
+    MOVE_FORWARD, BACK_UP, SEARCH_DIRECTION, TURN_TO_DIR, UNSTUCK_TURN = ("moveForward", "backup", "searchDirection", "turnToDir", 'unstuckTurn')
 
     def __init__(self, maple, manager):
         self.state = self.MOVE_FORWARD
@@ -36,6 +36,9 @@ class CrazyBot:
         self.distances = [-1 for i in range(36)]
         self.halfFlag = 0
         # playMusic.play()
+
+        # for seeing when we are stuck in turns
+
 
 
     # def readMaple(self):
@@ -82,6 +85,8 @@ class CrazyBot:
         self.halfFlag = 1
         self.distances = [-1 for i in range(36)]
         self.driver.turnMotors(180)
+        self.stuckCounter = 0
+
         print "State: SEARCH_DIRECTION"
         return self.SEARCH_DIRECTION
 
@@ -104,7 +109,26 @@ class CrazyBot:
             self.stateStartTime = time.time()
             self.halfFlag = 0;
             return self.turnToDirSetup()
+
+        if self.sensorManager.odo.angularRate < 5:
+            self.stuckCounter += 1
+
+        if self.stuckCounter > 100:
+            print 'HALP I"M STUCKZ!!!'
+            return self.unstuckTurnSetup()
         return self.SEARCH_DIRECTION
+
+    def unstuckTurnSetup(self):
+        self.stateStartTime = time.time()
+        self.driver.turnMotors(-30)
+        return self.UNSTUCK_TURN
+
+    def unstuckTurn(self):
+        if self.sensorManager.odo.direction < -25:
+            return self.backUpSetup()
+
+        return self.UNSTUCK_TURN
+
 
     def turnToDirSetup(self):
         self.stateStartTime = time.time()
@@ -123,6 +147,7 @@ class CrazyBot:
 
         print 'Max distance Angle:', self.maxDir
         print "State: TURN_TO_DIR"
+        self.stuckCounter = 0
         return self.TURN_TO_DIR
 
     # Assumes that self.distances is populated with a list of distances
@@ -132,6 +157,13 @@ class CrazyBot:
             self.sensorManager.odo.direction < (self.maxDir + 5) % 360:
             print 'Done Bitches'
             return self.moveForwardSetup()
+
+        if self.sensorManager.odo.angularRate < 5:
+            self.stuckCounter += 1
+
+        if self.stuckCounter > 100:
+            print 'HALP I"M STUCKZ!!!'
+            pass
         return self.TURN_TO_DIR
 
     def reset(self):
@@ -153,19 +185,21 @@ class CrazyBot:
                 self.state = self.backUpSetup()
         elif self.state == self.BACK_UP:
             self.state = self.backUp()
-            if time.time() - self.stateStartTime > 7:
+            if time.time() - self.stateStartTime > 4:
                 print "timed out"
                 self.state = self.searchDirectionSetup()
         elif self.state == self.SEARCH_DIRECTION:
             self.state = self.searchDirection()
-            if time.time() - self.stateStartTime > 10:
+            if time.time() - self.stateStartTime > 7:
                 print "timed out"
                 self.state = self.turnToDirSetup()
         elif self.state == self.TURN_TO_DIR:
             self.state = self.turnToDir()
-            if time.time() - self.stateStartTime > 10:
+            if time.time() - self.stateStartTime > 7:
                 print "timed out"
                 self.state = self.moveForwardSetup()
+        elif self.state == self.UNSTUCK_TURN:
+            self.state = self.unstuckTurn()
 
     def waitForStart(self):
         def handleOutput(out):

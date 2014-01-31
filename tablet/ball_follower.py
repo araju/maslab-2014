@@ -167,9 +167,9 @@ class BallFollower:
         if time.time() - self.stateStartTime > 20:
             if (self.sensorManager.vision.seeBall()):
                 if self.sensorManager.vision.goalBall[0] > 0:
-                    return self.avoidSetup(False, -45)
+                    return self.avoidSetup(False, -90)
                 else:
-                    return self.avoidSetup(False, 45)
+                    return self.avoidSetup(False, 90)
             else:
                 return self.avoidSetup(False, 90)
 
