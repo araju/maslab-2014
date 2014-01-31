@@ -35,8 +35,8 @@ class MainBot:
     def executeVisionProcess(self):
         def printOutput(out):
             for output_line in out:
-                # print output_line
-                pass
+                print output_line
+                #pass
 
         try:
             p = subprocess.Popen('java -jar vision/maslab-vision.jar',

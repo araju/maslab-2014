@@ -145,6 +145,7 @@ class ScoreBot():
 
     def dumpGreenSetup(self):
         print "Score State: DUMP_GREEN"
+        time.sleep(3)
         self.stateStartTime = time.time()
         self.driver.dumpGreen()
         return self.DUMP_GREEN

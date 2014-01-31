@@ -53,6 +53,7 @@ class BallFollower:
     def turnToObjSetup(self):
         print "Ball State: TURN_TO_OBJ", self.greenBallCount, self.redBallCount
         self.driver.driveMotors(0)
+        time.sleep(5)
         self.stateStartTime = time.time()
         return self.TURN_TO_OBJ
 
@@ -117,11 +118,11 @@ class BallFollower:
                 goingFor = 2
 
         if goingFor == 0:
-            print "Turning to: ", self.sensorManager.vision.goalBall[2]
+            print "Turning to: ", self.sensorManager.vision.goalBall[2], goalDir
         elif goingFor == 1:
-            print "Turning to: reactor"
+            print "Turning to: reactor", goalDir
         else:
-            print "Turning to: yellow"
+            print "Turning to: yellow", goalDir
         if abs(goalDir) < self.ANGLE_THRSH:
             self.driver.turnMotors(0)
             self.sensorManager.odo.direction = 0
@@ -170,6 +171,7 @@ class BallFollower:
 
     def goToReactorSetup(self):
         print "Ball State: GO_TO_REACTOR", self.greenBallCount, self.redBallCount
+        self.driver.driveMotors(0)
         self.stateStartTime = time.time()
         return self.GO_TO_REACTOR
 
