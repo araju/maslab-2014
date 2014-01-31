@@ -53,7 +53,7 @@ class BallFollower:
     def turnToObjSetup(self):
         print "Ball State: TURN_TO_OBJ", self.greenBallCount, self.redBallCount
         self.driver.driveMotors(0)
-        time.sleep(5)
+        time.sleep(1)
         self.stateStartTime = time.time()
         return self.TURN_TO_OBJ
 

@@ -111,7 +111,7 @@ class ScoreBot():
     def moveForwardSetup(self):
         print "Score State: MOVE_FORWARD"
         self.driver.driveMotors(0)
-        time.sleep(2)
+        time.sleep(1)
         self.stateStartTime = time.time()
         self.driver.driveMotorPWM(70,70)
         self.sensorManager.odo.distance = 0
@@ -145,7 +145,7 @@ class ScoreBot():
 
     def dumpGreenSetup(self):
         print "Score State: DUMP_GREEN"
-        time.sleep(3)
+        time.sleep(2)
         self.stateStartTime = time.time()
         self.driver.dumpGreen()
         return self.DUMP_GREEN
