@@ -132,7 +132,7 @@ class BallFollower:
             else:
                 return self.goToYellowWallSetup()
 
-        self.driver.turnMotors(-goalDir / 4.0)
+        self.driver.turnMotors(-goalDir / 6.5)
         return self.TURN_TO_OBJ
 
     def goToBallSetup(self):
@@ -207,7 +207,7 @@ class BallFollower:
             self.sensorManager.odo.distance = 0
             return self.noObjSetup()
 
-        if abs(self.sensorManager.vision.goalYellow[0]) > self.ANGLE_THRSH:
+        if abs(self.sensorManager.vision.goalYellow[0]) > self.ANGLE_THRSH * 1.5:
             self.driver.driveMotors(0)
             self.sensorManager.odo.distance = 0
             return self.turnToObjSetup()
