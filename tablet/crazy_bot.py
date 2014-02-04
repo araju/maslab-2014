@@ -138,8 +138,8 @@ class CrazyBot:
         maxIdx = self.distances.index(maxVal)
         self.maxDir = maxIdx * 10
 
-        # self.maxDir = random.randint(0, 359)
-        # print self.maxDir
+        if random.random() < .333:
+            self.maxDir = random.randint(0, 359)
 
         self.driver.turnMotors(self.maxDir)
 

@@ -38,14 +38,15 @@
 HardWire colorI2C(2, I2C_FAST_MODE);
 
 void color_init() {  
-  SerialUSB.println("Color Init");
+//  SerialUSB.println("Color Init");
   
   //Set the integration time
   colorI2C.beginTransmission(COLOR_ADDR);
   colorI2C.send(COLOR_COMMAND_CMD | COLOR_ATIME);
   colorI2C.send(COLOR_ATIME_DEFAULT);
   colorI2C.endTransmission();
-    
+  
+//  SerialUSB.println("Integration Time Set");
   //Set Gains
   colorI2C.beginTransmission(COLOR_ADDR);
   colorI2C.send(COLOR_COMMAND_CMD | COLOR_CTRL);
@@ -53,13 +54,15 @@ void color_init() {
   colorI2C.endTransmission();
  
   //Enable Power
+//  SerialUSB.println("Gains Set");
   colorI2C.beginTransmission(COLOR_ADDR);
   colorI2C.send(COLOR_COMMAND_CMD | COLOR_ENABLE);
   colorI2C.send(COLOR_ENABLE_PON);
   colorI2C.endTransmission();
+
   
   delay(10);
-  
+//  SerialUSB.println("Power Enabled");  
   //Enable the ADC
   colorI2C.beginTransmission(COLOR_ADDR);
   colorI2C.send(COLOR_COMMAND_CMD | COLOR_ENABLE);
@@ -67,7 +70,7 @@ void color_init() {
   colorI2C.endTransmission();
   delay(10);
   
-  SerialUSB.println("Color End");
+//  SerialUSB.println("Color End");
 }
 
 uint32 _color_clear = 0;
@@ -92,15 +95,18 @@ uint8 color_isBluePresent() {
 }
 void color_periodic() {
     //Read Colors
+//    SerialUSB.println("Color Periodic Start");
     colorI2C.beginTransmission(COLOR_ADDR);
     colorI2C.send(COLOR_COMMAND_CMD | COLOR_COMMAND_AUTOINC | COLOR_STATUS);
     colorI2C.endTransmission();
     
+//    delay(5);
     uint8 bytesRx = colorI2C.requestFrom(COLOR_ADDR, 9);
     (void) bytesRx;
     uint16 bytes[4];
+//    SerialUSB.println("Color Periodic Read Done");
     if (colorI2C.receive() & COLOR_STATUS_VALID){
-      
+//      SerialUSB.println("Color Periodic Read Valid");      
       
       bytes[0] = colorI2C.receive() | colorI2C.receive() << 8;
       bytes[1] = colorI2C.receive() | colorI2C.receive() << 8;
@@ -116,6 +122,7 @@ void color_periodic() {
       
       if (_color_red > COLOR_RED_THRESHOLD && _color_red > _color_green && _color_red > _color_blue){
         //Red Ball Detected
+//        SerialUSB.println("Color Red");
         _color_redPresent = 1;
       } else {
         _color_redPresent = 0;        
@@ -129,6 +136,7 @@ void color_periodic() {
       
       if (_color_green > COLOR_GREEN_THRESHOLD && _color_green > _color_red && _color_green > _color_blue){
         //Green Ball Detected
+//        SerialUSB.println("Color Green");        
         _color_greenPresent = 1;
       } else {
         _color_greenPresent = 0;
@@ -140,7 +148,7 @@ void color_periodic() {
       bytes[3] = colorI2C.receive() | colorI2C.receive() << 8;
     }
     
-    
+//      delay(5);
     
     if (getDebug()) {
 //      SerialUSB.print("R: ");
@@ -149,7 +157,7 @@ void color_periodic() {
 //      SerialUSB.print(_color_green);
 //      SerialUSB.print(" B: ");
 //      SerialUSB.println(_color_blue);
-      
+//      
 //      if (_color_greenPresent) {
 //        SerialUSB.println("Green Ball Present");
 //      }

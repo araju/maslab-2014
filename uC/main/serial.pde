@@ -187,8 +187,8 @@ void serial_periodic() {
         _serial_inCmd = 0;
         uint8 i = 0;
         if (_serial_validateMessage() == 0 && queuePeek(&i) == 0) {
-          Serial1.print("Received Command:");
-          Serial1.println(i);
+//          Serial1.print("Received Command:");
+//          Serial1.println(i);
           pCmdCallback foo = cmd_getCallback(i);
           foo(&(_serial_charBuf[1]));
         }
@@ -227,7 +227,7 @@ int8 serial_tx(uint8 *buf, uint8 len) {
       checksum == SERIAL_ESCAPE) {
     SerialUSB.write(SERIAL_ESCAPE);
   }
-  SerialUSB.write(~checksum);
+  SerialUSB.write(checksum);
   
   SerialUSB.write(SERIAL_END_FLAG);
   

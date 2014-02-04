@@ -47,6 +47,7 @@ void servo_init() {
 
 void _servo_sort_periodic() {
   if (_servo_sortState == sortIdle) {
+
     digitalWrite(RED_PIN, LOW);
     digitalWrite(GREEN_PIN, LOW);
     sortServo.write(SERVO_SORT_DEFAULT);
